@@ -1,31 +1,226 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { Search, ExternalLink } from 'lucide-react'
 
-const companies = [
-  'TCS', 'Infosys', 'Wipro', 'Cognizant', 'L&T Infotech', 'Amazon', 'Microsoft',
-  'Capgemini', 'Accenture', 'Tech Mahindra', 'HCL Technologies', 'Oracle',
-  'Samsung', 'Deloitte', 'Goldman Sachs', 'JP Morgan', 'Persistent Systems',
-  'Mphasis', 'Mindtree', 'ZS Associates', 'DE Shaw', 'Byju\'s',
-  'PhonePe', 'Flipkart', 'Zomato', 'Paytm', 'Adobe', 'Qualcomm',
-  'Texas Instruments', 'Bosch', 'Siemens', 'ABB', 'Schneider Electric',
-  'Tata Motors', 'Mahindra & Mahindra', 'Reliance Industries',
+type Sector = 'All' | 'IT' | 'Core' | 'PSU' | 'Consulting' | 'Product' | 'Startup'
+
+interface Company {
+  name: string
+  sector: Sector
+  highlight?: boolean
+}
+
+const companies: Company[] = [
+  // IT
+  { name: 'TCS', sector: 'IT', highlight: true },
+  { name: 'Infosys', sector: 'IT', highlight: true },
+  { name: 'Wipro', sector: 'IT', highlight: true },
+  { name: 'Accenture', sector: 'IT', highlight: true },
+  { name: 'Cognizant', sector: 'IT' },
+  { name: 'HCL Technologies', sector: 'IT' },
+  { name: 'Tech Mahindra', sector: 'IT' },
+  { name: 'Capgemini', sector: 'IT' },
+  { name: 'Mphasis', sector: 'IT' },
+  { name: 'Hexaware', sector: 'IT' },
+  { name: 'Zensar Technologies', sector: 'IT' },
+  { name: 'Persistent Systems', sector: 'IT' },
+  // Product / FAANG
+  { name: 'Amazon', sector: 'Product', highlight: true },
+  { name: 'Microsoft', sector: 'Product', highlight: true },
+  { name: 'Google', sector: 'Product', highlight: true },
+  { name: 'Oracle', sector: 'Product' },
+  { name: 'SAP', sector: 'Product' },
+  { name: 'IBM', sector: 'Product' },
+  { name: 'Qualcomm', sector: 'Product' },
+  { name: 'Texas Instruments', sector: 'Product' },
+  // Core Engineering
+  { name: 'L&T', sector: 'Core', highlight: true },
+  { name: 'BHEL', sector: 'Core', highlight: true },
+  { name: 'Bosch', sector: 'Core' },
+  { name: 'Siemens', sector: 'Core' },
+  { name: 'ABB', sector: 'Core' },
+  { name: 'Honeywell', sector: 'Core' },
+  { name: 'Emerson', sector: 'Core' },
+  { name: 'Schneider Electric', sector: 'Core' },
+  { name: 'Mahindra & Mahindra', sector: 'Core' },
+  { name: 'Bajaj Auto', sector: 'Core' },
+  { name: 'Cummins India', sector: 'Core' },
+  { name: 'John Deere', sector: 'Core' },
+  // PSU
+  { name: 'NTPC', sector: 'PSU', highlight: true },
+  { name: 'ONGC', sector: 'PSU', highlight: true },
+  { name: 'ISRO', sector: 'PSU' },
+  { name: 'DRDO', sector: 'PSU' },
+  { name: 'BARC', sector: 'PSU' },
+  { name: 'HAL', sector: 'PSU' },
+  { name: 'BEL', sector: 'PSU' },
+  { name: 'GAIL', sector: 'PSU' },
+  { name: 'IOCL', sector: 'PSU' },
+  // Consulting
+  { name: 'Deloitte', sector: 'Consulting', highlight: true },
+  { name: 'KPMG', sector: 'Consulting', highlight: true },
+  { name: 'PwC', sector: 'Consulting' },
+  { name: 'EY', sector: 'Consulting' },
+  { name: 'ZS Associates', sector: 'Consulting' },
+  { name: 'Aon', sector: 'Consulting' },
+  // Startups
+  { name: 'PhonePe', sector: 'Startup' },
+  { name: 'Razorpay', sector: 'Startup' },
+  { name: 'Flipkart', sector: 'Startup' },
+  { name: 'Zomato', sector: 'Startup' },
+  { name: 'BrowserStack', sector: 'Startup' },
 ]
 
+const sectorConfig: Record<string, { color: string; bg: string; border: string; badge: string }> = {
+  IT:          { color: 'text-blue-700',   bg: 'bg-blue-50',   border: 'border-blue-200',   badge: 'bg-blue-100 text-blue-700' },
+  Product:     { color: 'text-purple-700', bg: 'bg-purple-50', border: 'border-purple-200', badge: 'bg-purple-100 text-purple-700' },
+  Core:        { color: 'text-orange-700', bg: 'bg-orange-50', border: 'border-orange-200', badge: 'bg-orange-100 text-orange-700' },
+  PSU:         { color: 'text-slate-700',  bg: 'bg-slate-50',  border: 'border-slate-300',  badge: 'bg-slate-200 text-slate-700' },
+  Consulting:  { color: 'text-green-700',  bg: 'bg-green-50',  border: 'border-green-200',  badge: 'bg-green-100 text-green-700' },
+  Startup:     { color: 'text-pink-700',   bg: 'bg-pink-50',   border: 'border-pink-200',   badge: 'bg-pink-100 text-pink-700' },
+}
+
+const SECTORS: Sector[] = ['All', 'IT', 'Product', 'Core', 'PSU', 'Consulting', 'Startup']
+
 const LeadingCompanies: React.FC = () => {
+  const [activeSector, setActiveSector] = useState<Sector>('All')
+  const [search, setSearch] = useState('')
+
+  const filtered = companies.filter(c => {
+    const matchSector = activeSector === 'All' || c.sector === activeSector
+    const matchSearch = c.name.toLowerCase().includes(search.toLowerCase())
+    return matchSector && matchSearch
+  })
+
   return (
     <div className="space-y-8">
-      <div className="border-b border-gray-200 pb-4">
-        <h2 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>Leading Recruiters</h2>
-        <p className="text-sm text-gray-500 mt-1">Top companies that recruit from SGSITS</p>
+      {/* Header */}
+      <div className="border-b border-slate-200 pb-6">
+        <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1.5">Placements</span>
+        <h2 className="text-3xl md:text-4xl font-display font-bold text-primary">Leading Recruiters</h2>
+        <div className="w-16 h-0.5 bg-accent mt-2 mb-3" />
+        <p className="text-sm text-slate-500 font-medium font-sans">
+          Top companies across IT, Core Engineering, PSU, Consulting, and Product sectors that recruit SGSITS graduates.
+        </p>
       </div>
-      <p className="text-gray-700 text-[15px] leading-relaxed">
-        Over <strong>150+ companies</strong> visit SGSITS campus every year for recruitment. Our students are placed in leading IT, core engineering, consulting, and finance companies across India and abroad.
-      </p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-        {companies.map((c) => (
-          <div key={c} className="bg-white rounded-xl p-4 text-center border border-slate-200 shadow-sm hover:shadow-md transition-shadow hover:border-gray-300">
-            <p className="text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>{c}</p>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { value: `${companies.length}+`, label: 'Recruiting Companies' },
+          { value: '6', label: 'Industry Sectors' },
+          { value: '₹48 LPA', label: 'Highest Package' },
+        ].map((s) => (
+          <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-5 text-center shadow-sm hover:shadow-md transition-all">
+            <p className="text-2xl font-display font-bold text-primary">{s.value}</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-sans mt-1">{s.label}</p>
           </div>
         ))}
+      </div>
+
+      {/* Intro */}
+      <div className="border-l-4 border-accent pl-5">
+        <p className="text-sm text-slate-700 leading-relaxed font-sans">
+          Over <strong>180+ companies</strong> visit SGSITS campus annually for on-campus placement drives and pre-placement offers (PPOs).
+          Our graduates are hired across IT, core engineering, consulting, PSU, and high-growth startups —
+          establishing SGSITS as one of central India's most sought-after engineering campuses.
+        </p>
+      </div>
+
+      {/* Filter Controls */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        {/* Search */}
+        <div className="relative flex-grow max-w-xs">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search company..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full pl-8 pr-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-accent/50 font-sans"
+          />
+        </div>
+
+        {/* Sector Filter */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {SECTORS.map(sector => (
+            <button
+              key={sector}
+              onClick={() => setActiveSector(sector)}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
+                activeSector === sector
+                  ? 'bg-primary text-white border-primary shadow-sm'
+                  : `border-slate-200 text-slate-600 hover:border-primary/40 hover:text-primary ${sector !== 'All' && sectorConfig[sector] ? 'hover:' + sectorConfig[sector].bg : ''}`
+              }`}
+            >
+              {sector}
+            </button>
+          ))}
+          <span className="text-[10px] text-slate-400 font-medium ml-1">{filtered.length} results</span>
+        </div>
+      </div>
+
+      {/* Company Grid */}
+      {filtered.length === 0 ? (
+        <div className="text-center py-12 text-slate-400">
+          <ExternalLink size={32} className="mx-auto mb-3 opacity-30" />
+          <p className="font-medium text-sm">No companies found matching your search.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          {filtered.map((company) => {
+            const cfg = sectorConfig[company.sector]
+            return (
+              <div
+                key={company.name}
+                className={`rounded-xl border p-4 text-center transition-all duration-200 hover:shadow-md cursor-pointer group ${
+                  company.highlight
+                    ? `${cfg.bg} ${cfg.border} shadow-sm`
+                    : 'bg-white border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                {/* Company Initial */}
+                <div className={`w-10 h-10 rounded-xl mx-auto mb-2.5 flex items-center justify-center font-display font-black text-sm ${
+                  company.highlight ? `bg-white ${cfg.color} shadow-sm` : 'bg-primary/5 text-primary'
+                }`}>
+                  {company.name.charAt(0)}
+                </div>
+                <p className={`text-[11px] font-bold font-sans leading-tight ${company.highlight ? cfg.color : 'text-slate-700'}`}>
+                  {company.name}
+                </p>
+                <span className={`inline-block mt-2 text-[9px] font-bold px-2 py-0.5 rounded-full ${cfg.badge}`}>
+                  {company.sector}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Sector Legend */}
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
+        <h4 className="font-display font-bold text-primary text-sm mb-3">Sector Legend</h4>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+          {Object.entries(sectorConfig).map(([sector, cfg]) => (
+            <div key={sector} className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${cfg.bg} border ${cfg.border}`} />
+              <span className="text-[11px] font-medium text-slate-600">{sector}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom CTA */}
+      <div className="bg-primary rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <h4 className="font-display font-bold text-white text-base">Is your company not listed?</h4>
+          <p className="text-slate-300 text-sm font-sans mt-1">Reach out to our T&P Cell to schedule your campus recruitment drive at SGSITS.</p>
+        </div>
+        <a
+          href="mailto:tpo@sgsits.ac.in"
+          className="inline-flex items-center gap-2 bg-accent text-primary px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-accent/90 transition-colors shrink-0"
+        >
+          Contact T&P Cell
+        </a>
       </div>
     </div>
   )

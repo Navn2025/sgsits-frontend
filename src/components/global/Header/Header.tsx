@@ -12,6 +12,7 @@ const Header: React.FC = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [expandedMobileItem, setExpandedMobileItem] = useState<string | null>(null)
 
   return (
     <header className="w-full z-50 relative">
@@ -190,11 +191,11 @@ const Header: React.FC = () => {
             {/* Nav list container scrollable */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {navItems.map((item) => {
-                const [expanded, setExpanded] = useState(false)
                 const isActive =
                   item.path === '/'
                     ? location.pathname === '/'
                     : location.pathname.startsWith(item.path || '$_')
+                const isExpanded = expandedMobileItem === item.label
 
                 return (
                   <div key={item.label} className="border-b border-slate-100 dark:border-slate-800/60 pb-2">
@@ -213,14 +214,14 @@ const Header: React.FC = () => {
                     ) : (
                       <div>
                         <button
-                          onClick={() => setExpanded(!expanded)}
+                          onClick={() => setExpandedMobileItem(isExpanded ? null : item.label)}
                           className="w-full flex items-center justify-between py-2 px-3 rounded-lg text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer focus:outline-none"
                         >
                           <span>{item.label}</span>
-                          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${expanded ? 'rotate-180 text-brand-burgundy dark:text-brand-gold' : ''}`} />
+                          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180 text-brand-burgundy dark:text-brand-gold' : ''}`} />
                         </button>
 
-                        {expanded && (
+                        {isExpanded && (
                           <div className="mt-1 ml-3 pl-3 border-l-2 border-slate-150 dark:border-slate-800 space-y-1 py-1">
                             {item.children?.map((child) => {
                               const isChildActive = location.pathname === child.path

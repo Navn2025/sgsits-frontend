@@ -1,86 +1,189 @@
-import React from 'react'
+import React, { useState, useMemo } from 'react'
+import { mockStore } from '../../data/mockStore'
+import { Download, Search, FileText, ChevronLeft, ChevronRight, Tag } from 'lucide-react'
+
+type CategoryFilter = 'all' | 'academic' | 'administrative' | 'exam' | 'tender' | 'general'
+
+const categoryLabels: Record<CategoryFilter, string> = {
+  all: 'All',
+  academic: 'Academic',
+  administrative: 'Administrative',
+  exam: 'Exam',
+  tender: 'Tender',
+  general: 'General',
+}
+
+const categoryColors: Record<string, string> = {
+  academic: 'bg-blue-100 text-blue-700 border-blue-200',
+  administrative: 'bg-purple-100 text-purple-700 border-purple-200',
+  exam: 'bg-orange-100 text-orange-700 border-orange-200',
+  tender: 'bg-amber-100 text-amber-700 border-amber-200',
+  general: 'bg-green-100 text-green-700 border-green-200',
+}
+
+const ITEMS_PER_PAGE = 10
 
 const NoticesPage: React.FC = () => {
+  const [notices] = useState(() => mockStore.getNotices())
+  const [activeTab, setActiveTab] = useState<CategoryFilter>('all')
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+
+  const filtered = useMemo(() => {
+    let result = notices
+    if (activeTab !== 'all') result = result.filter(n => n.category === activeTab)
+    if (search.trim()) result = result.filter(n => n.title.toLowerCase().includes(search.toLowerCase()))
+    return result
+  }, [notices, activeTab, search])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE))
+  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+
+  const handleTabChange = (tab: CategoryFilter) => { setActiveTab(tab); setPage(1) }
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => { setSearch(e.target.value); setPage(1) }
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+  }
+
   return (
-    <div className="space-y-8">
-      <div className="border-b border-gray-200 pb-4">
-        <h2 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>Notices</h2>
-        <p className="text-sm text-gray-500 mt-1">Official notices and circulars</p>
+    <div className="min-h-screen bg-white">
+      {/* Hero */}
+      <div className="bg-primary">
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="h-px w-8 bg-accent" />
+            <span className="text-[11px] uppercase font-bold tracking-widest text-accent font-sans">Official Communications</span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">Official Notices & Circulars</h1>
+          <p className="text-slate-300 text-sm font-sans">Stay updated with the latest official notices, academic circulars, and administrative orders from SGSITS Indore.</p>
+        </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="bg-white rounded-md p-4 border border-slate-200 shadow-sm hover:border-slate-400 hover:bg-slate-50/50 transition-all duration-200">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="font-semibold text-sm" style={{ color: 'var(--color-primary)' }}>End Semester Examination Schedule — Even Sem 2025-26</h3>
-              <p className="text-xs text-gray-500 mt-1 font-medium">Examination cell notice for all UG and PG students</p>
-            </div>
-            <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0 font-semibold">May 15, 2026</span>
+      <div className="max-w-6xl mx-auto px-6 py-10 space-y-6">
+        {/* Search + Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          {/* Search Box */}
+          <div className="relative flex-1 min-w-0">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={handleSearch}
+              placeholder="Search notices by title..."
+              className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
+            />
           </div>
+          {/* Result count */}
+          <span className="text-sm text-slate-500 font-medium shrink-0">
+            {filtered.length} notice{filtered.length !== 1 ? 's' : ''} found
+          </span>
         </div>
-        <div className="bg-white rounded-md p-4 border border-slate-200 shadow-sm hover:border-slate-400 hover:bg-slate-50/50 transition-all duration-200">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="font-semibold text-sm" style={{ color: 'var(--color-primary)' }}>Holiday on account of Republic Day</h3>
-              <p className="text-xs text-gray-500 mt-1 font-medium">Institute will remain closed on 26th January</p>
+
+        {/* Category Filter Tabs */}
+        <div className="flex flex-wrap gap-2">
+          {(Object.keys(categoryLabels) as CategoryFilter[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => handleTabChange(tab)}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all ${
+                activeTab === tab
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {categoryLabels[tab]}
+              {tab !== 'all' && (
+                <span className="ml-1.5 opacity-70">
+                  ({notices.filter(n => n.category === tab).length})
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Notices List */}
+        <div className="space-y-3">
+          {paginated.length === 0 ? (
+            <div className="text-center py-16 bg-slate-50 border border-slate-200 rounded-xl">
+              <FileText size={40} className="text-slate-300 mx-auto mb-3" />
+              <p className="text-slate-500 font-semibold">No notices found</p>
+              <p className="text-sm text-slate-400 mt-1">Try a different search term or filter</p>
             </div>
-            <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0 font-semibold">Jan 25, 2026</span>
-          </div>
+          ) : (
+            paginated.map((notice) => (
+              <div
+                key={notice.id}
+                className={`bg-white border rounded-xl p-5 hover:shadow-md transition-all hover:border-slate-400 ${
+                  notice.highlight ? 'border-l-4 border-l-accent border-slate-200' : 'border-slate-200'
+                }`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-primary/8 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                    <FileText size={18} className="text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                      {notice.highlight && (
+                        <span className="text-[10px] font-bold bg-accent text-primary px-2 py-0.5 rounded-full uppercase tracking-wide">New</span>
+                      )}
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${categoryColors[notice.category] || 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                        <Tag size={9} className="inline mr-0.5" />
+                        {notice.category.charAt(0).toUpperCase() + notice.category.slice(1)}
+                      </span>
+                    </div>
+                    <h3 className="font-semibold text-primary text-sm leading-snug">{notice.title}</h3>
+                    <p className="text-xs text-slate-500 mt-1.5 font-medium">{formatDate(notice.date)}</p>
+                  </div>
+                  <a
+                    href={notice.fileUrl || '#'}
+                    onClick={e => !notice.fileUrl && e.preventDefault()}
+                    className="flex items-center gap-1.5 shrink-0 text-xs font-bold text-primary border border-primary/20 px-3 py-1.5 rounded-lg hover:bg-primary hover:text-white transition-colors"
+                  >
+                    <Download size={12} /> Download
+                  </a>
+                </div>
+              </div>
+            ))
+          )}
         </div>
-        <div className="bg-white rounded-md p-4 border border-slate-200 shadow-sm hover:border-slate-400 hover:bg-slate-50/50 transition-all duration-200">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="font-semibold text-sm" style={{ color: 'var(--color-primary)' }}>Fee Payment Deadline Extended</h3>
-              <p className="text-xs text-gray-500 mt-1 font-medium">Last date for fee payment extended to 31st January</p>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-2">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft size={15} /> Previous
+            </button>
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`w-8 h-8 rounded-lg text-sm font-bold transition-colors ${
+                    p === page ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
             </div>
-            <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0 font-semibold">Jan 10, 2026</span>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Next <ChevronRight size={15} />
+            </button>
           </div>
-        </div>
-        <div className="bg-white rounded-md p-4 border border-slate-200 shadow-sm hover:border-slate-400 hover:bg-slate-50/50 transition-all duration-200">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="font-semibold text-sm" style={{ color: 'var(--color-primary)' }}>Workshop on AI/ML — Registration Open</h3>
-              <p className="text-xs text-gray-500 mt-1 font-medium">Computer Engineering department organizing 3-day workshop</p>
-            </div>
-            <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0 font-semibold">Dec 20, 2025</span>
-          </div>
-        </div>
-        <div className="bg-white rounded-md p-4 border border-slate-200 shadow-sm hover:border-slate-400 hover:bg-slate-50/50 transition-all duration-200">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="font-semibold text-sm" style={{ color: 'var(--color-primary)' }}>Anti-Ragging Awareness Program</h3>
-              <p className="text-xs text-gray-500 mt-1 font-medium">Mandatory attendance for all first-year students</p>
-            </div>
-            <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0 font-semibold">Dec 5, 2025</span>
-          </div>
-        </div>
-        <div className="bg-white rounded-md p-4 border border-slate-200 shadow-sm hover:border-slate-400 hover:bg-slate-50/50 transition-all duration-200">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="font-semibold text-sm" style={{ color: 'var(--color-primary)' }}>NPTEL Exam Registration</h3>
-              <p className="text-xs text-gray-500 mt-1 font-medium">Last date to register for NPTEL Jan 2026 certification exams</p>
-            </div>
-            <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0 font-semibold">Nov 28, 2025</span>
-          </div>
-        </div>
-        <div className="bg-white rounded-md p-4 border border-slate-200 shadow-sm hover:border-slate-400 hover:bg-slate-50/50 transition-all duration-200">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="font-semibold text-sm" style={{ color: 'var(--color-primary)' }}>Campus Placement Drive — TCS</h3>
-              <p className="text-xs text-gray-500 mt-1 font-medium">TCS pre-placement talk and registration details</p>
-            </div>
-            <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0 font-semibold">Nov 15, 2025</span>
-          </div>
-        </div>
-        <div className="bg-white rounded-md p-4 border border-slate-200 shadow-sm hover:border-slate-400 hover:bg-slate-50/50 transition-all duration-200">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="font-semibold text-sm" style={{ color: 'var(--color-primary)' }}>Mid-Semester Exam Timetable Published</h3>
-              <p className="text-xs text-gray-500 mt-1 font-medium">Download timetable from examination cell portal</p>
-            </div>
-            <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0 font-semibold">Oct 20, 2025</span>
-          </div>
-        </div>
+        )}
+        <p className="text-xs text-slate-400 text-center">
+          Showing {paginated.length} of {filtered.length} notices · Page {page} of {totalPages}
+        </p>
+
       </div>
     </div>
   )

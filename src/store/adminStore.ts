@@ -1,30 +1,30 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-
-export interface AdminUser {
-  id: string
-  name: string
-  email: string
-  role: string
-}
+import type { AuthUser } from '../types'
 
 export interface AdminState {
   token: string | null
-  user: AdminUser | null
-  setAuth: (token: string, user: AdminUser) => void
+  user: AuthUser | null
+  setAuth: (token: string, user: AuthUser) => void
   clearAuth: () => void
+  isAuthenticated: () => boolean
+  isAdmin: () => boolean
+  isFaculty: () => boolean
 }
 
 export const useAdminStore = create<AdminState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       token: null,
       user: null,
       setAuth: (token, user) => set({ token, user }),
       clearAuth: () => set({ token: null, user: null }),
+      isAuthenticated: () => !!get().token,
+      isAdmin: () => ['super_admin', 'editor'].includes(get().user?.role ?? ''),
+      isFaculty: () => get().user?.role === 'faculty',
     }),
     {
-      name: 'sgsits-admin-auth', // name of the item in storage
+      name: 'sgsits-admin-auth',
     }
   )
 )

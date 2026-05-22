@@ -133,6 +133,9 @@ const WebInfoManager = lazy(() => import('../pages/policy/WebInfoManager'))
 const HelpPage = lazy(() => import('../pages/policy/HelpPage'))
 const FeedbackPage = lazy(() => import('../pages/policy/FeedbackPage'))
 
+// Faculty Dashboard
+const FacultyDashboard = lazy(() => import('../pages/faculty/FacultyDashboard'))
+
 // ── Admin Pages ───────────────────────────────────────────────────────────
 const AdminLogin = lazy(() => import('../pages/admin/AdminLogin'))
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'))
@@ -372,6 +375,14 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <S><Login /></S>,
+  },
+
+  // ── FACULTY ROUTES ─────────────────────────────────────────
+  {
+    path: '/faculty',
+    children: [
+      { path: 'dashboard', element: <S><FacultyDashboard /></S> },
+    ]
   },
 
   // ── ADMIN ROUTES ───────────────────────────────────────────

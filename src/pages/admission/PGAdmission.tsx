@@ -1,176 +1,246 @@
-import React from 'react'
-import { Award, BookOpen, GraduationCap } from 'lucide-react'
+import { Link } from 'react-router-dom';
+import {
+  ChevronRight,
+  FileText,
+  CheckCircle,
+  Award,
+  Phone,
+  Mail,
+  BookOpen,
+  CreditCard,
+  ClipboardList,
+  GraduationCap,
+} from 'lucide-react';
 
-const PGAdmission: React.FC = () => {
+const programs = [
+  { name: 'M.Tech Computer Engineering', dept: 'Computer Engineering', seats: 18, eligibility: 'B.Tech CE/IT/CSE (min 60%)', basis: 'GATE CS / MPGET' },
+  { name: 'M.Tech VLSI Design', dept: 'Electronics & Telecom', seats: 18, eligibility: 'B.Tech ECE/ET/EI (min 60%)', basis: 'GATE EC / MPGET' },
+  { name: 'M.Tech Structural Engineering', dept: 'Civil Engineering', seats: 18, eligibility: 'B.Tech Civil (min 60%)', basis: 'GATE CE / MPGET' },
+  { name: 'M.Tech Thermal Engineering', dept: 'Mechanical Engineering', seats: 18, eligibility: 'B.Tech ME (min 60%)', basis: 'GATE ME / MPGET' },
+  { name: 'M.Tech Power Electronics', dept: 'Electrical Engineering', seats: 18, eligibility: 'B.Tech EE/EI (min 60%)', basis: 'GATE EE / MPGET' },
+  { name: 'M.Tech Instrumentation', dept: 'Electronics & Instrumentation', seats: 18, eligibility: 'B.Tech EI/EC (min 60%)', basis: 'GATE IN / MPGET' },
+  { name: 'M.E. Industrial Engineering', dept: 'Industrial & Production', seats: 18, eligibility: 'B.Tech IP/ME (min 60%)', basis: 'GATE ME / MPGET' },
+  { name: 'MBA', dept: 'Management Studies', seats: 60, eligibility: 'Any Graduate (min 50%) + CAT/MAT/CMAT', basis: 'CAT / MAT / CMAT / MPGET' },
+  { name: 'MCA', dept: 'Computer Applications', seats: 30, eligibility: 'B.Sc. (Math) or BCA (min 50%)', basis: 'NIMCET / MPGET' },
+];
+
+const steps = [
+  {
+    icon: <GraduationCap className="w-7 h-7" />,
+    title: 'GATE / MPGET Score',
+    desc: 'Appear for GATE (conducted by IITs/IISc) or MPGET (MP state exam). A valid score is mandatory.',
+  },
+  {
+    icon: <ClipboardList className="w-7 h-7" />,
+    title: 'Online Application',
+    desc: 'Fill the SGSITS PG application form online. Upload required documents and pay the application fee.',
+  },
+  {
+    icon: <FileText className="w-7 h-7" />,
+    title: 'Merit List',
+    desc: 'Merit list is prepared based on GATE/MPGET score. Shortlisted candidates are called for counselling.',
+  },
+  {
+    icon: <CheckCircle className="w-7 h-7" />,
+    title: 'Document Verification',
+    desc: 'Report to the institute with original documents for verification and final allotment.',
+  },
+  {
+    icon: <CreditCard className="w-7 h-7" />,
+    title: 'Fee Payment',
+    desc: 'Complete admission by paying the first-year fees online or at the accounts office.',
+  },
+];
+
+const fees = [
+  { program: 'M.Tech (All branches)', tuition: '₹42,000', other: '₹11,000', total: '₹53,000' },
+  { program: 'M.E. Industrial Engineering', tuition: '₹42,000', other: '₹11,000', total: '₹53,000' },
+  { program: 'MBA', tuition: '₹55,000', other: '₹13,000', total: '₹68,000' },
+  { program: 'MCA', tuition: '₹38,000', other: '₹10,500', total: '₹48,500' },
+];
+
+const scholarships = [
+  {
+    title: 'GATE Fellowship',
+    amount: '₹12,400/month',
+    desc: 'GATE qualified M.Tech students receive MHRD stipend for up to 2 years.',
+    eligibility: 'Valid GATE score required',
+  },
+  {
+    title: 'State Government Scholarship',
+    amount: 'Variable',
+    desc: 'SC/ST/OBC students from MP may avail state scholarship for PG programs.',
+    eligibility: 'MP domicile + category certificate',
+  },
+  {
+    title: 'Merit Scholarship (SGSITS)',
+    amount: '₹5,000/semester',
+    desc: 'Awarded to students who secure CGPA ≥ 8.5 in the previous semester.',
+    eligibility: 'CGPA ≥ 8.5',
+  },
+];
+
+const contacts = [
+  { role: 'Postgraduate Admission Coordinator', name: 'Dr. P.K. Sharma', dept: 'Academic Affairs', phone: '+91-731-2570-5718', email: 'pg.admission@sgsits.ac.in' },
+  { role: 'MBA Program Coordinator', name: 'Dr. Sunita Joshi', dept: 'Management Studies', phone: '+91-731-2570-5720', email: 'mba.admission@sgsits.ac.in' },
+  { role: 'MCA Program Coordinator', name: 'Dr. Anil Verma', dept: 'Computer Applications', phone: '+91-731-2570-5722', email: 'mca.admission@sgsits.ac.in' },
+];
+
+export default function PGAdmission() {
   return (
-    <div className="space-y-12 max-w-5xl mx-auto py-2">
-      {/* Page Header */}
-      <div className="border-b border-slate-200 pb-5">
-        <span className="text-[11px] uppercase font-serif tracking-widest text-accent font-semibold">Admissions</span>
-        <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-1 text-primary font-display">
-          PG Admissions
-        </h2>
-        <p className="text-sm text-slate-500 mt-2 font-sans font-medium">
-          Postgraduate entry pathways, qualification criteria, and program frameworks (M.Tech / MBA / MCA)
-        </p>
-      </div>
-
-      {/* Central Announcement */}
-      <div className="bg-white rounded-md p-6 border-l-4 border-l-accent border-y border-r border-slate-200 shadow-sm">
-        <div className="space-y-3">
-          <span className="bg-primary/5 text-primary border border-primary/10 px-2.5 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wider inline-block">
-            Entrance-Based Selections
-          </span>
-          <h3 className="text-xl font-medium text-primary font-display">
-            Comprehensive Eligibility & Counseling
-          </h3>
-          <p className="text-[14px] text-slate-650 leading-relaxed font-sans font-medium">
-            Admission to postgraduate programs at SGSITS Indore is strictly based on national/state-level qualifying entrance examinations and centralized counseling conducted by the <strong>Directorate of Technical Education (DTE), Madhya Pradesh</strong> and the institute.
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero */}
+      <div className="bg-primary text-white py-14 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-2 text-sm text-blue-200 mb-3">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <ChevronRight className="w-4 h-4" />
+            <span>Admissions</span>
+            <ChevronRight className="w-4 h-4" />
+            <span className="text-white font-medium">PG Admission</span>
+          </div>
+          <h1 className="text-4xl font-display font-bold mb-3">Postgraduate Admissions</h1>
+          <p className="text-blue-100 text-lg max-w-2xl">
+            Advance your career with M.Tech, M.E., MBA, or MCA programs at SGSITS. Admissions are based on GATE, MPGET, CAT, MAT, or NIMCET scores.
           </p>
+          <a
+            href="#"
+            className="mt-6 inline-flex items-center gap-2 bg-accent text-primary font-semibold px-6 py-3 rounded-lg hover:bg-yellow-400 transition-colors"
+          >
+            Apply Now <ChevronRight className="w-4 h-4" />
+          </a>
         </div>
       </div>
 
-      {/* PG Programs Matrix */}
-      <div className="space-y-6">
-        <div>
-          <span className="text-[11px] uppercase font-serif tracking-widest text-accent font-semibold">Program Categories</span>
-          <h3 className="text-2xl font-medium text-primary font-display mt-0.5">Postgraduate Offerings</h3>
-        </div>
+      <div className="max-w-5xl mx-auto px-4 py-12 space-y-14">
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* M.Tech */}
-          <div className="bg-white border border-slate-200 rounded-md p-6 shadow-sm flex flex-col justify-between hover:border-accent transition-colors duration-200">
-            <div className="space-y-4">
-              <div className="w-10 h-10 rounded bg-primary/5 flex items-center justify-center text-primary shrink-0">
-                <GraduationCap size={20} className="stroke-[1.5]" />
-              </div>
-              <h4 className="text-lg font-semibold text-primary font-display">Master of Technology (M.Tech)</h4>
-              <p className="text-xs text-slate-550 font-medium font-sans leading-relaxed">
-                Specialized technical streams designed for engineering professionals aiming for advanced R&D or corporate engineering careers.
-              </p>
-              <div className="border-t border-slate-100 pt-3 space-y-2">
-                <span className="text-[10px] text-slate-450 uppercase font-bold block">Selection Basis</span>
-                <span className="text-[13px] font-semibold text-slate-700 font-sans">GATE Score + DTE Counseling</span>
-              </div>
+        {/* Programs Table */}
+        <section>
+          <h2 className="text-2xl font-display font-bold text-primary mb-2">Programs Offered</h2>
+          <p className="text-gray-500 mb-6">All M.Tech and M.E. programs are 2-year full-time courses. MBA is 2-year and MCA is 3-year program.</p>
+          <div className="overflow-x-auto rounded-xl shadow-sm border border-gray-200">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-primary text-white">
+                  <th className="text-left px-4 py-3 font-semibold">Program</th>
+                  <th className="text-left px-4 py-3 font-semibold">Department</th>
+                  <th className="text-center px-4 py-3 font-semibold">Seats</th>
+                  <th className="text-left px-4 py-3 font-semibold">Eligibility</th>
+                  <th className="text-left px-4 py-3 font-semibold">Basis</th>
+                </tr>
+              </thead>
+              <tbody>
+                {programs.map((p, i) => (
+                  <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <td className="px-4 py-3 font-medium text-primary">{p.name}</td>
+                    <td className="px-4 py-3 text-gray-600">{p.dept}</td>
+                    <td className="px-4 py-3 text-center font-bold text-accent">{p.seats}</td>
+                    <td className="px-4 py-3 text-gray-600">{p.eligibility}</td>
+                    <td className="px-4 py-3 text-gray-600">{p.basis}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* Admission Process */}
+        <section>
+          <h2 className="text-2xl font-display font-bold text-primary mb-6">Admission Process</h2>
+          <div className="relative">
+            <div className="hidden md:block absolute top-10 left-[calc(10%+2rem)] right-[calc(10%+2rem)] h-0.5 bg-gray-200 z-0" />
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 relative z-10">
+              {steps.map((step, i) => (
+                <div key={i} className="flex flex-col items-center text-center">
+                  <div className="w-20 h-20 rounded-full bg-primary text-white flex items-center justify-center mb-4 shadow-lg">
+                    {step.icon}
+                  </div>
+                  <h3 className="font-semibold text-primary text-sm mb-2">{step.title}</h3>
+                  <p className="text-gray-500 text-xs leading-relaxed">{step.desc}</p>
+                </div>
+              ))}
             </div>
           </div>
+        </section>
 
-          {/* MBA */}
-          <div className="bg-white border border-slate-200 rounded-md p-6 shadow-sm flex flex-col justify-between hover:border-accent transition-colors duration-200">
-            <div className="space-y-4">
-              <div className="w-10 h-10 rounded bg-primary/5 flex items-center justify-center text-primary shrink-0">
-                <BookOpen size={20} className="stroke-[1.5]" />
-              </div>
-              <h4 className="text-lg font-semibold text-primary font-display">Master of Business Administration (MBA)</h4>
-              <p className="text-xs text-slate-550 font-medium font-sans leading-relaxed">
-                Strategic management tracks focusing on leadership, decision analysis, operational excellence, and enterprise innovation.
-              </p>
-              <div className="border-t border-slate-100 pt-3 space-y-2">
-                <span className="text-[10px] text-slate-450 uppercase font-bold block">Selection Basis</span>
-                <span className="text-[13px] font-semibold text-slate-700 font-sans">CMAT Score + GD/PI Selection</span>
-              </div>
-            </div>
+        {/* Fee Structure */}
+        <section>
+          <h2 className="text-2xl font-display font-bold text-primary mb-6">Fee Structure (Per Annum)</h2>
+          <div className="overflow-x-auto rounded-xl shadow-sm border border-gray-200">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-primary text-white">
+                  <th className="text-left px-4 py-3 font-semibold">Program</th>
+                  <th className="text-center px-4 py-3 font-semibold">Tuition Fee</th>
+                  <th className="text-center px-4 py-3 font-semibold">Other Fees</th>
+                  <th className="text-center px-4 py-3 font-semibold">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {fees.map((f, i) => (
+                  <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <td className="px-4 py-3 font-medium text-gray-700">{f.program}</td>
+                    <td className="px-4 py-3 text-center text-gray-600">{f.tuition}</td>
+                    <td className="px-4 py-3 text-center text-gray-600">{f.other}</td>
+                    <td className="px-4 py-3 text-center font-bold text-primary">{f.total}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+        </section>
 
-          {/* MCA */}
-          <div className="bg-white border border-slate-200 rounded-md p-6 shadow-sm flex flex-col justify-between hover:border-accent transition-colors duration-200">
-            <div className="space-y-4">
-              <div className="w-10 h-10 rounded bg-primary/5 flex items-center justify-center text-primary shrink-0">
-                <Award size={20} className="stroke-[1.5]" />
+        {/* Scholarships */}
+        <section>
+          <h2 className="text-2xl font-display font-bold text-primary mb-6">Scholarships & Fellowships</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {scholarships.map((s, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+                    <Award className="w-5 h-5 text-accent" />
+                  </div>
+                  <h3 className="font-bold text-primary">{s.title}</h3>
+                </div>
+                <p className="text-2xl font-bold text-accent mb-2">{s.amount}</p>
+                <p className="text-gray-600 text-sm mb-3">{s.desc}</p>
+                <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+                  <CheckCircle className="w-3 h-3 text-green-500" />
+                  {s.eligibility}
+                </div>
               </div>
-              <h4 className="text-lg font-semibold text-primary font-display">Master of Computer Applications (MCA)</h4>
-              <p className="text-xs text-slate-550 font-medium font-sans leading-relaxed">
-                Advanced software engineering, database systems, and application paradigms designed for modern IT landscapes.
-              </p>
-              <div className="border-t border-slate-100 pt-3 space-y-2">
-                <span className="text-[10px] text-slate-450 uppercase font-bold block">Selection Basis</span>
-                <span className="text-[13px] font-semibold text-slate-700 font-sans">MP Pre-MCA / NIMCET + Counseling</span>
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* Program Details Table (Printed Bulletin style) */}
-      <div className="space-y-6">
-        <div>
-          <span className="text-[11px] uppercase font-serif tracking-widest text-accent font-semibold">Technical Framework</span>
-          <h3 className="text-2xl font-medium text-primary font-display mt-0.5">Program Framework & Fees</h3>
-        </div>
+        {/* Key Contacts */}
+        <section>
+          <h2 className="text-2xl font-display font-bold text-primary mb-6">Key Contacts</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {contacts.map((c, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <BookOpen className="w-6 h-6 text-primary" />
+                </div>
+                <p className="text-xs text-accent font-semibold uppercase tracking-wide mb-1">{c.role}</p>
+                <h3 className="font-bold text-primary mb-1">{c.name}</h3>
+                <p className="text-gray-500 text-sm mb-3">{c.dept}</p>
+                <div className="space-y-1 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-3 h-3" />
+                    <span>{c.phone}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-3 h-3" />
+                    <span>{c.email}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-        <div className="bg-white rounded-md p-6 border border-slate-200 shadow-sm">
-          <table className="w-full text-left font-sans text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-slate-300">
-                <th className="py-2.5 font-bold uppercase tracking-wider text-slate-550 text-[10px] w-1/4">Program</th>
-                <th className="py-2.5 font-bold uppercase tracking-wider text-slate-550 text-[10px] w-1/3">Academic Eligibility</th>
-                <th className="py-2.5 font-bold uppercase tracking-wider text-slate-550 text-[10px] w-1/4">Approximate Fee</th>
-                <th className="py-2.5 text-right font-bold uppercase tracking-wider text-slate-550 text-[10px]">Financial Support</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-150">
-              <tr>
-                <td className="py-4">
-                  <span className="font-semibold text-slate-800 text-[13px] block">M.Tech</span>
-                  <span className="text-[10px] text-slate-450 font-semibold uppercase mt-0.5 block">Regular / Full-Time</span>
-                </td>
-                <td className="py-4">
-                  <span className="text-slate-650 leading-relaxed block text-xs">
-                    B.E. / B.Tech or equivalent degree in relevant branch with at least 50% marks (45% for SC/ST/OBC category candidates).
-                  </span>
-                </td>
-                <td className="py-4">
-                  <span className="font-semibold text-primary font-display text-[14.5px] block">₹30,000 - ₹40,000</span>
-                  <span className="text-[9px] text-slate-450 uppercase font-bold mt-0.5 block">per annum</span>
-                </td>
-                <td className="py-4 text-right">
-                  <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 inline-block font-sans">
-                    AICTE Stipend (GATE)
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td className="py-4">
-                  <span className="font-semibold text-slate-800 text-[13px] block">MBA</span>
-                  <span className="text-[10px] text-slate-450 font-semibold uppercase mt-0.5 block">Management Studies</span>
-                </td>
-                <td className="py-4">
-                  <span className="text-slate-650 leading-relaxed block text-xs">
-                    Bachelor's degree of minimum 3 years duration with at least 50% marks (45% for reserved category candidates).
-                  </span>
-                </td>
-                <td className="py-4">
-                  <span className="font-semibold text-primary font-display text-[14.5px] block">₹50,000 - ₹60,000</span>
-                  <span className="text-[9px] text-slate-450 uppercase font-bold mt-0.5 block">per annum</span>
-                </td>
-                <td className="py-4 text-right text-slate-400 italic">
-                  Not Applicable
-                </td>
-              </tr>
-              <tr>
-                <td className="py-4">
-                  <span className="font-semibold text-slate-800 text-[13px] block">MCA</span>
-                  <span className="text-[10px] text-slate-450 font-semibold uppercase mt-0.5 block">Computer Applications</span>
-                </td>
-                <td className="py-4">
-                  <span className="text-slate-650 leading-relaxed block text-xs">
-                    BCA / Bachelor Degree in Computer Science or B.Sc./B.Com./B.A. with Mathematics at 10+2 level or Graduate level, with at least 50% marks.
-                  </span>
-                </td>
-                <td className="py-4">
-                  <span className="font-semibold text-primary font-display text-[14.5px] block">₹50,000 - ₹60,000</span>
-                  <span className="text-[9px] text-slate-450 uppercase font-bold mt-0.5 block">per annum</span>
-                </td>
-                <td className="py-4 text-right text-slate-400 italic">
-                  Not Applicable
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
-  )
+  );
 }
-
-export default PGAdmission

@@ -1,56 +1,307 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { MapPin, Phone, Mail, Clock, Send, CheckCircle2, ChevronDown } from 'lucide-react'
+
+const infoCards = [
+  {
+    icon: MapPin,
+    title: 'Visit Us',
+    color: 'bg-blue-50 border-blue-200',
+    iconColor: 'text-blue-600 bg-blue-100',
+    items: [
+      'Shri Govindram Seksaria Institute of Technology and Science',
+      '23, Park Road, Indore',
+      'Madhya Pradesh — 452003, India',
+    ],
+  },
+  {
+    icon: Phone,
+    title: 'Call Us',
+    color: 'bg-green-50 border-green-200',
+    iconColor: 'text-green-600 bg-green-100',
+    items: [
+      '0731-2582100 — Director Office',
+      '0731-2582124 — Registrar',
+      '0731-2431234 — General Enquiry',
+      'Fax: 0731-2432540',
+    ],
+  },
+  {
+    icon: Mail,
+    title: 'Write to Us',
+    color: 'bg-amber-50 border-amber-200',
+    iconColor: 'text-amber-600 bg-amber-100',
+    items: [
+      'director@sgsits.ac.in',
+      'registrar@sgsits.ac.in',
+      'admissions@sgsits.ac.in',
+      'wadmin@sgsits.ac.in (Website)',
+    ],
+  },
+]
+
+const helplines = [
+  { dept: 'Admissions (UG/PG)', person: 'Admission Cell', phone: '0731-2431235', email: 'admissions@sgsits.ac.in' },
+  { dept: 'Academics & Results', person: 'Academic Office', phone: '0731-2431236', email: 'academics@sgsits.ac.in' },
+  { dept: 'Examinations', person: 'Examination Cell', phone: '0731-2431237', email: 'exam@sgsits.ac.in' },
+  { dept: 'Placement & Internships', person: 'T&P Cell', phone: '0731-2431238', email: 'placement@sgsits.ac.in' },
+  { dept: 'Hostel & Accommodation', person: 'Hostel Office', phone: '0731-2431239', email: 'hostel@sgsits.ac.in' },
+  { dept: 'Scholarships & Financial Aid', person: 'Finance Office', phone: '0731-2431240', email: 'finance@sgsits.ac.in' },
+  { dept: 'Research & PhD', person: 'Dean R&D', phone: '0731-2431241', email: 'research@sgsits.ac.in' },
+  { dept: 'Student Affairs & NSS', person: 'Dean Students', phone: '0731-2431242', email: 'students@sgsits.ac.in' },
+]
+
+type SubjectKey = 'Admissions' | 'Academics' | 'Faculty' | 'Admin' | 'Placement' | 'Other'
+const subjects: SubjectKey[] = ['Admissions', 'Academics', 'Faculty', 'Admin', 'Placement', 'Other']
+
+interface FormData {
+  name: string
+  email: string
+  phone: string
+  subject: SubjectKey | ''
+  message: string
+}
 
 const ContactUs: React.FC = () => {
+  const [form, setForm] = useState<FormData>({ name: '', email: '', phone: '', subject: '', message: '' })
+  const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setTimeout(() => {
+      setLoading(false)
+      setSubmitted(true)
+    }, 1200)
+  }
+
   return (
-    <div className="space-y-8">
-      <div className="border-b border-gray-200 pb-4">
-        <h2 className="text-2xl md:text-3xl font-display font-semibold text-slate-850">Contact Us</h2>
-        <p className="text-sm text-gray-500 mt-1">Get in touch with SGSITS Indore</p>
+    <div className="min-h-screen bg-white">
+      {/* Hero Banner */}
+      <div className="relative bg-primary overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-72 h-72 bg-accent rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent rounded-full translate-y-1/2 -translate-x-1/2" />
+        </div>
+        <div className="relative max-w-6xl mx-auto px-6 py-14 text-center">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <span className="h-px w-8 bg-accent" />
+            <span className="text-[11px] uppercase font-bold tracking-widest text-accent font-sans">Get in Touch</span>
+            <span className="h-px w-8 bg-accent" />
+          </div>
+          <h1 className="text-3xl md:text-5xl font-display font-bold text-white mb-3">Contact Us</h1>
+          <p className="text-slate-300 text-base font-sans max-w-xl mx-auto">
+            Reach out to SGSITS Indore — we're here to help with admissions, academics, placements, and more.
+          </p>
+        </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="space-y-6">
-          <div className="bg-white rounded-md p-6 border border-slate-200 shadow-sm">
-            <h3 className="font-display font-semibold text-lg mb-3" style={{ color: '#154273' }}>Address</h3>
-            <p className="text-gray-700 text-sm leading-relaxed">
-              Shri Govindram Seksaria Institute of Technology and Science<br/>
-              23, Park Road, Indore<br/>
-              Madhya Pradesh - 452003, India
-            </p>
+      <div className="max-w-6xl mx-auto px-6 py-12 space-y-14">
+
+        {/* Info Cards */}
+        <div className="grid sm:grid-cols-3 gap-6 -mt-8 relative z-10">
+          {infoCards.map((card) => (
+            <div key={card.title} className={`border-2 ${card.color} rounded-xl p-6 bg-white shadow-md`}>
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${card.iconColor} mb-4`}>
+                <card.icon size={18} />
+              </div>
+              <h3 className="font-display font-bold text-primary text-lg mb-3">{card.title}</h3>
+              <ul className="space-y-1.5">
+                {card.items.map((item, i) => (
+                  <li key={i} className="text-sm text-slate-700 font-sans leading-relaxed">{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Contact Form + Map */}
+        <div className="grid md:grid-cols-2 gap-10">
+          {/* Contact Form */}
+          <div>
+            <span className="text-[11px] uppercase font-bold tracking-widest text-accent block mb-2">Send a Message</span>
+            <h2 className="text-2xl font-display font-bold text-primary mb-6">We'd love to hear from you</h2>
+
+            {submitted ? (
+              <div className="bg-green-50 border-2 border-green-200 rounded-xl p-8 text-center">
+                <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 size={28} className="text-green-600" />
+                </div>
+                <h3 className="font-display font-bold text-green-800 text-xl mb-2">Message Sent Successfully!</h3>
+                <p className="text-green-700 text-sm font-sans leading-relaxed">
+                  Thank you for reaching out, <strong>{form.name}</strong>. Our team will get back to you at{' '}
+                  <strong>{form.email}</strong> within 1–2 working days.
+                </p>
+                <button
+                  onClick={() => { setSubmitted(false); setForm({ name: '', email: '', phone: '', subject: '', message: '' }) }}
+                  className="mt-5 text-sm font-bold text-green-700 underline hover:no-underline"
+                >
+                  Send another message
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Full Name *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      required
+                      value={form.name}
+                      onChange={handleChange}
+                      placeholder="Your full name"
+                      className="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Email Address *</label>
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      value={form.email}
+                      onChange={handleChange}
+                      placeholder="you@example.com"
+                      className="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
+                    />
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Phone Number</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={form.phone}
+                      onChange={handleChange}
+                      placeholder="+91 98765 43210"
+                      className="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Subject *</label>
+                    <div className="relative">
+                      <select
+                        name="subject"
+                        required
+                        value={form.subject}
+                        onChange={handleChange}
+                        className="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors bg-white"
+                      >
+                        <option value="">Select subject...</option>
+                        {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Message *</label>
+                  <textarea
+                    name="message"
+                    required
+                    rows={5}
+                    value={form.message}
+                    onChange={handleChange}
+                    placeholder="Write your message here..."
+                    className="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors resize-none"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-70"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send size={15} /> Send Message
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </div>
-          <div className="bg-white rounded-md p-6 border border-slate-200 shadow-sm">
-            <h3 className="font-display font-semibold text-lg mb-3" style={{ color: '#154273' }}>Phone</h3>
-            <p className="text-gray-700 text-sm">0731-2582100 (Director)</p>
-            <p className="text-gray-700 text-sm">0731-2582124 (Registrar)</p>
-            <p className="text-gray-700 text-sm">Fax: 0731-2432540</p>
-          </div>
-          <div className="bg-white rounded-md p-6 border border-slate-200 shadow-sm">
-            <h3 className="font-display font-semibold text-lg mb-3" style={{ color: '#154273' }}>Email</h3>
-            <p className="text-gray-700 text-sm">director@sgsits.ac.in</p>
-            <p className="text-gray-700 text-sm">registrar@sgsits.ac.in</p>
-            <p className="text-gray-700 text-sm">wadmin@sgsits.ac.in (Website)</p>
-          </div>
-          <div className="bg-white rounded-md p-6 border border-slate-200 shadow-sm">
-            <h3 className="font-display font-semibold text-lg mb-3" style={{ color: '#154273' }}>Office Hours</h3>
-            <p className="text-gray-700 text-sm">Monday – Friday: 9:30 AM – 5:30 PM</p>
-            <p className="text-gray-700 text-sm">Saturday: 9:30 AM – 1:00 PM</p>
-            <p className="text-gray-700 text-sm">Sunday & Public Holidays: Closed</p>
+
+          {/* Map */}
+          <div>
+            <span className="text-[11px] uppercase font-bold tracking-widest text-accent block mb-2">Find Us</span>
+            <h2 className="text-2xl font-display font-bold text-primary mb-5">SGSITS Campus, Indore</h2>
+            <div className="rounded-xl overflow-hidden border-2 border-slate-200 shadow-md mb-5" style={{ height: '320px' }}>
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3679.9!2d75.8577!3d22.7196!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3962fc9ce8e6a80f%3A0xd34e427dbec15f24!2sSGSITS%20Indore!5e0!3m2!1sen!2sin!4v1716000000000"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="SGSITS Location Map"
+              />
+            </div>
+            {/* Office Hours */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Clock size={16} className="text-accent" />
+                <h3 className="font-bold text-primary">Office Hours</h3>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { day: 'Monday – Friday', time: '9:30 AM – 5:30 PM', open: true },
+                  { day: 'Saturday', time: '9:30 AM – 1:00 PM', open: true },
+                  { day: 'Sunday & Public Holidays', time: 'Closed', open: false },
+                ].map((h) => (
+                  <div key={h.day} className="flex items-center justify-between text-sm">
+                    <span className="text-slate-600 font-medium">{h.day}</span>
+                    <span className={`font-semibold ${h.open ? 'text-primary' : 'text-red-500'}`}>{h.time}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Department Helpline Table */}
         <div>
-          <div className="rounded-md overflow-hidden border border-slate-200 h-full min-h-[400px]">
-            <iframe
-              src="https://maps.google.com/maps?q=SGSITS+Indore&t=&z=15&ie=UTF8&iwloc=&output=embed"
-              width="100%"
-              height="100%"
-              style={{ border: 0, minHeight: '400px' }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="SGSITS Location Map"
-            />
+          <span className="text-[11px] uppercase font-bold tracking-widest text-accent block mb-2">Quick Contacts</span>
+          <h2 className="text-2xl font-display font-bold text-primary mb-6">Department-wise Helplines</h2>
+          <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+            <table className="w-full text-sm font-sans">
+              <thead>
+                <tr className="bg-primary text-white">
+                  <th className="text-left px-5 py-3 font-bold text-xs uppercase tracking-wide">Department / Office</th>
+                  <th className="text-left px-5 py-3 font-bold text-xs uppercase tracking-wide">Contact Person</th>
+                  <th className="text-left px-5 py-3 font-bold text-xs uppercase tracking-wide">Phone</th>
+                  <th className="text-left px-5 py-3 font-bold text-xs uppercase tracking-wide">Email</th>
+                </tr>
+              </thead>
+              <tbody>
+                {helplines.map((h, i) => (
+                  <tr key={h.dept} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                    <td className="px-5 py-3.5 font-semibold text-primary">{h.dept}</td>
+                    <td className="px-5 py-3.5 text-slate-600">{h.person}</td>
+                    <td className="px-5 py-3.5">
+                      <a href={`tel:${h.phone.replace(/-/g, '')}`} className="text-accent-blue hover:underline font-medium">{h.phone}</a>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <a href={`mailto:${h.email}`} className="text-accent-blue hover:underline">{h.email}</a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
+
       </div>
     </div>
   )

@@ -300,6 +300,58 @@ const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose }) => {
   )
 }
 
+// --- COLOR REVEAL BANNER (above footer) ---
+const ColorRevealBanner: React.FC = () => {
+  const ref = useRef<HTMLDivElement>(null)
+  const [revealed, setRevealed] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setRevealed(true) },
+      { threshold: 0.35 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div
+      ref={ref}
+      className="w-full bg-white border-t border-slate-100 py-14 flex flex-col items-center justify-center gap-5 overflow-hidden"
+    >
+      <img
+        src="/assets/image.png"
+        alt="SGSITS Indore"
+        className="w-44 h-44 object-contain transition-all duration-[1200ms] ease-out select-none"
+        style={{
+          filter: revealed ? 'grayscale(0%) brightness(1)' : 'grayscale(100%) brightness(0.75)',
+          opacity: revealed ? 1 : 0.55,
+          transform: revealed ? 'scale(1)' : 'scale(0.94)',
+        }}
+        draggable={false}
+      />
+      <p
+        className="font-display text-base font-semibold tracking-widest uppercase transition-all duration-[1200ms] ease-out"
+        style={{
+          color: revealed ? '#0b2545' : '#94a3b8',
+          opacity: revealed ? 1 : 0.5,
+          letterSpacing: revealed ? '0.25em' : '0.15em',
+        }}
+      >
+        Shri G.S. Institute of Technology &amp; Science
+      </p>
+      <p
+        className="text-xs tracking-wider transition-all duration-[1400ms] ease-out"
+        style={{ color: revealed ? '#bfa15f' : '#cbd5e1', opacity: revealed ? 1 : 0 }}
+      >
+        Established 1952 &nbsp;·&nbsp; NAAC A++ &nbsp;·&nbsp; Indore, M.P.
+      </p>
+    </div>
+  )
+}
+
 // --- FOOTER COMPONENT ---
 const Footer: React.FC = () => {
   return (
@@ -458,6 +510,7 @@ const MainLayout: React.FC = () => {
         <Outlet />
       </main>
 
+      <ColorRevealBanner />
       <Footer />
       {!mobileOpen && <Chatbot />}
     </div>

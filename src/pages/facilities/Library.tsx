@@ -1,18 +1,197 @@
 import React from 'react'
+import { BookOpen, Monitor, Clock, Phone, Mail, ExternalLink, Users, CheckCircle2 } from 'lucide-react'
+
+const collections = [
+  { label: 'Books & Textbooks', value: '50,000+' },
+  { label: 'Bound Journals', value: '5,000+' },
+  { label: 'E-Journals (Online)', value: '10,000+' },
+  { label: 'CD/DVD Resources', value: '2,000+' },
+  { label: 'Theses & Dissertations', value: '800+' },
+  { label: 'Newspaper Subscriptions', value: '12' },
+]
+
+const eResources = [
+  { name: 'IEEE Xplore Digital Library', url: 'https://ieeexplore.ieee.org', desc: 'Technical papers, journals, and standards from IEEE' },
+  { name: 'Elsevier ScienceDirect', url: 'https://www.sciencedirect.com', desc: 'Science, technology and medicine full-text articles' },
+  { name: 'Springer Link', url: 'https://link.springer.com', desc: 'Research in science, humanities and social sciences' },
+  { name: 'ASCE Library', url: 'https://ascelibrary.org', desc: 'Civil engineering research and standards' },
+  { name: 'DELNET', url: 'https://delnet.in', desc: 'National network for library resource sharing' },
+  { name: 'NPTEL Lectures', url: 'https://nptel.ac.in', desc: 'IIT and IISc video lectures for all engineering branches' },
+]
+
+const borrowingRules = [
+  { category: 'B.Tech / B.Pharm Students', books: 4, period: '15 days' },
+  { category: 'M.Tech / M.Pharm / MBA Students', books: 6, period: '15 days' },
+  { category: 'Ph.D. Scholars', books: 8, period: '30 days' },
+  { category: 'Faculty Members', books: 10, period: '90 days' },
+  { category: 'Staff Members', books: 4, period: '30 days' },
+]
 
 const Library: React.FC = () => {
   return (
-    <div className="space-y-8">
-      <div className="border-b border-gray-200 pb-4">
-        <h2 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>Central Library</h2>
-        <p className="text-sm text-gray-500 mt-1">Knowledge resource center of SGSITS</p>
+    <div className="space-y-10">
+      {/* Page Header */}
+      <div className="border-b border-slate-200 pb-5">
+        <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Facilities</span>
+        <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">Central Library</h2>
+        <p className="text-sm text-slate-500 mt-1 font-medium">Knowledge Resource Centre — SGSITS Indore</p>
       </div>
 
-      <div className="space-y-4">
-      <p className="text-gray-700 text-[15px] leading-relaxed">The Central Library of SGSITS is a comprehensive knowledge resource center housing <strong>50,000+ books</strong>, 5,000+ bound journals, and extensive digital resources for students and faculty.</p>
-      <p className="text-gray-700 text-[15px] leading-relaxed"><strong>Digital Library:</strong> Access to IEEE Xplore, Springer, Elsevier ScienceDirect, ASCE Library, ASME Digital Collection, DELNET, and NPTEL video lectures. OPAC (Online Public Access Catalog) for easy book search.</p>
-      <p className="text-gray-700 text-[15px] leading-relaxed"><strong>Reading Hall:</strong> Spacious reading hall with capacity for 300 students. Separate sections for reference books, textbooks, periodicals, newspapers, and competitive exam preparation materials.</p>
-      <p className="text-gray-700 text-[15px] leading-relaxed"><strong>Timings:</strong> 8:00 AM to 10:00 PM on all working days. Extended hours during examination period. Book issue limit: 4 books for UG, 6 books for PG, 10 books for faculty.</p>
+      {/* Intro */}
+      <div className="border-l-2 border-accent pl-5">
+        <p className="text-sm text-slate-700 leading-relaxed font-sans">
+          The <strong>Central Library of SGSITS</strong> is a comprehensive knowledge resource centre spread over two floors
+          of the main academic building. With over 50,000 books, thousands of bound journals, and access to premium
+          international e-resources, the library supports the academic, research, and professional growth of all students and faculty.
+          The library is fully automated using the <strong>KOHA Library Management System</strong> with an Online Public Access Catalogue (OPAC)
+          for instant book search.
+        </p>
+      </div>
+
+      {/* Collection Stats */}
+      <div>
+        <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Collection</span>
+        <h3 className="text-xl font-display font-bold text-slate-900 mb-4">Library Holdings</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {collections.map((item) => (
+            <div key={item.label} className="bg-white border border-slate-200 rounded p-4 text-center shadow-sm">
+              <p className="text-2xl font-display font-bold text-primary">{item.value}</p>
+              <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider font-sans mt-1">{item.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* E-Resources */}
+      <div>
+        <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Digital Access</span>
+        <h3 className="text-xl font-display font-bold text-slate-900 mb-4">E-Resources & Digital Library</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {eResources.map((res) => (
+            <a
+              key={res.name}
+              href={res.url}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-start gap-3 p-4 bg-white border border-slate-200 rounded hover:border-accent-blue hover:shadow-sm transition-all duration-200 group"
+            >
+              <Monitor size={16} className="text-accent-blue shrink-0 mt-0.5" strokeWidth={1.75} />
+              <div>
+                <p className="text-sm font-bold text-slate-800 group-hover:text-primary transition-colors flex items-center gap-1">
+                  {res.name} <ExternalLink size={11} className="text-slate-400" />
+                </p>
+                <p className="text-[11px] text-slate-500 mt-0.5 font-medium font-sans">{res.desc}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* Borrowing Rules */}
+      <div>
+        <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Borrowing Policy</span>
+        <h3 className="text-xl font-display font-bold text-slate-900 mb-4">Book Issue Rules</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr style={{ backgroundColor: 'var(--color-primary)' }}>
+                <th className="text-left text-white px-4 py-3 font-semibold">Category</th>
+                <th className="text-center text-white px-4 py-3 font-semibold">Books Allowed</th>
+                <th className="text-center text-white px-4 py-3 font-semibold">Loan Period</th>
+              </tr>
+            </thead>
+            <tbody>
+              {borrowingRules.map((row, i) => (
+                <tr key={i} className="bg-white hover:bg-slate-50 transition-colors">
+                  <td className="px-4 py-3 border-b border-slate-100 font-medium text-slate-800">{row.category}</td>
+                  <td className="px-4 py-3 border-b border-slate-100 text-center font-bold text-primary">{row.books}</td>
+                  <td className="px-4 py-3 border-b border-slate-100 text-center text-slate-600">{row.period}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-[11px] text-slate-400 mt-2 font-sans">Fine for overdue books: ₹1 per book per day</p>
+      </div>
+
+      {/* Facilities & Rules */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-slate-50 border border-slate-200 rounded p-5 space-y-3">
+          <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+            <Clock size={16} className="text-accent" />
+            <h4 className="font-bold text-sm text-primary uppercase tracking-wider">Working Hours</h4>
+          </div>
+          <div className="text-sm space-y-2 font-sans">
+            <div className="flex justify-between">
+              <span className="text-slate-600">Monday – Friday</span>
+              <span className="font-semibold text-slate-800">8:00 AM – 10:00 PM</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-600">Saturday</span>
+              <span className="font-semibold text-slate-800">8:00 AM – 5:00 PM</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-600">During Examinations</span>
+              <span className="font-semibold text-slate-800">8:00 AM – 11:00 PM</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-600">Sunday & Holidays</span>
+              <span className="font-semibold text-slate-800">Closed</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded p-5 space-y-3">
+          <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+            <Users size={16} className="text-accent" />
+            <h4 className="font-bold text-sm text-primary uppercase tracking-wider">Reading Hall</h4>
+          </div>
+          <div className="space-y-2 text-sm font-sans">
+            {[
+              'Seating capacity for 300+ students simultaneously',
+              'Separate section for reference books and periodicals',
+              'Competitive exam preparation corner (GATE, UPSC, SSC)',
+              'Newspaper reading area with 12 daily subscriptions',
+              'Air-conditioned environment with Wi-Fi access',
+            ].map((point, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <CheckCircle2 size={14} className="text-slate-600 shrink-0 mt-0.5" />
+                <span className="text-slate-600 font-medium">{point}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* OPAC & Downloads */}
+      <div className="bg-primary text-white rounded p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h4 className="font-bold font-display text-base">OPAC — Online Book Search</h4>
+          <p className="text-sm text-slate-300 mt-1 font-sans">Search the library catalogue, check availability, and place holds online</p>
+        </div>
+        <a
+          href="https://sgsits.ac.in"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-2 bg-accent text-primary px-4 py-2 rounded text-xs font-bold hover:bg-accent/90 transition-colors shrink-0"
+        >
+          <BookOpen size={14} /> Open OPAC
+        </a>
+      </div>
+
+      {/* Contact */}
+      <div className="bg-slate-50 border border-slate-200 rounded p-5 space-y-3">
+        <h4 className="font-bold text-sm text-primary uppercase tracking-wider border-b border-slate-200 pb-2">Library Administration</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm font-sans">
+          <div className="flex items-center gap-2">
+            <Phone size={14} className="text-accent shrink-0" />
+            <span className="text-slate-600">0731-2582270 (Librarian)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Mail size={14} className="text-accent shrink-0" />
+            <a href="mailto:library@sgsits.ac.in" className="text-accent-blue hover:underline">library@sgsits.ac.in</a>
+          </div>
+        </div>
       </div>
     </div>
   )

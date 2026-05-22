@@ -1,31 +1,106 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { ChevronRight, Users } from 'lucide-react'
 import { departmentsList } from '../../constants/departmentsList'
+
+const engineeringDepts = departmentsList.filter(d =>
+  ['computer-engineering', 'information-technology', 'civil-engineering', 'mechanical-engineering',
+   'electrical-engineering', 'electronics-instrumentation', 'electronics-telecommunication',
+   'industrial-production', 'biomedical-engineering'].includes(d.slug)
+)
+const scienceDepts = departmentsList.filter(d =>
+  ['applied-chemistry', 'applied-mathematics', 'applied-physics', 'humanities'].includes(d.slug)
+)
+const otherDepts = departmentsList.filter(d =>
+  ['management-studies', 'pharmacy', 'computer-technology', 'coebg'].includes(d.slug)
+)
+
+const programBadgeColor = (prog: string) => {
+  if (prog === 'UG') return 'bg-blue-50 text-blue-700 border-blue-200'
+  if (prog === 'PG') return 'bg-purple-50 text-purple-700 border-purple-200'
+  if (prog === 'PhD') return 'bg-green-50 text-green-700 border-green-200'
+  if (prog === 'PTDC') return 'bg-orange-50 text-orange-700 border-orange-200'
+  return 'bg-slate-50 text-slate-600 border-slate-200'
+}
+
+interface DeptGridProps {
+  title: string
+  depts: typeof departmentsList
+}
+
+const DeptGrid: React.FC<DeptGridProps> = ({ title, depts }) => (
+  <div>
+    <div className="flex items-center gap-3 mb-4">
+      <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest">{title}</h3>
+      <div className="flex-grow h-px bg-slate-200"></div>
+    </div>
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {depts.map((dept) => (
+        <Link
+          key={dept.slug}
+          to={`/departments/${dept.slug}`}
+          className="bg-white rounded border border-slate-200 p-5 hover:border-accent/40 hover:shadow-md transition-all duration-200 group flex flex-col"
+        >
+          <div className="flex items-start justify-between gap-2 mb-3">
+            <h4 className="font-bold text-sm text-primary group-hover:text-accent-blue transition-colors leading-snug flex-grow">
+              {dept.name}
+            </h4>
+            <ChevronRight size={16} className="text-slate-400 group-hover:text-accent transition-colors shrink-0 mt-0.5" />
+          </div>
+          <p className="text-xs text-slate-500 font-medium mb-3">
+            <span className="font-semibold text-slate-600">HOD:</span> {dept.hodName}
+          </p>
+          <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100">
+            <div className="flex flex-wrap gap-1">
+              {dept.programsOffered.slice(0, 3).map((prog) => (
+                <span key={prog} className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${programBadgeColor(prog)}`}>
+                  {prog}
+                </span>
+              ))}
+            </div>
+            <div className="flex items-center gap-1 text-xs text-slate-400">
+              <Users size={12} />
+              <span>{dept.facultyCount} Faculty</span>
+            </div>
+          </div>
+        </Link>
+      ))}
+    </div>
+  </div>
+)
 
 const DepartmentLanding: React.FC = () => {
   return (
     <div className="max-w-[1400px] mx-auto px-4 lg:px-12 py-8">
-      <div className="border-b border-gray-200 pb-4 mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>Departments</h2>
-        <p className="text-sm text-gray-500 mt-1">17 departments offering diverse programs in engineering, science, and management</p>
+      {/* Header */}
+      <div className="border-b border-slate-200 pb-6 mb-8">
+        <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Academic Departments</span>
+        <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">Departments at SGSITS</h2>
+        <p className="text-sm text-slate-500 mt-1.5 font-medium">
+          17 departments offering UG, PG, PhD and PTDC programs in engineering, science, management, and pharmacy
+        </p>
       </div>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {departmentsList.map((dept) => (
-          <Link
-            key={dept.slug}
-            to={`/departments/${dept.slug}`}
-            className="rounded-md border border-slate-200 p-5 hover:border-slate-400 transition-colors group bg-white"
-          >
-            <h3 className="font-bold text-sm group-hover:underline" style={{ color: 'var(--color-primary)' }}>{dept.name}</h3>
-            <p className="text-sm text-gray-500 mt-2">HOD: {dept.hodName}</p>
-            <div className="flex items-center gap-4 mt-3">
-              <span className="text-xs font-medium px-2 py-0.5 rounded bg-slate-50 text-slate-700 border border-slate-200">
-                {dept.programsOffered.join(' · ')}
-              </span>
-              <span className="text-xs text-gray-400">{dept.facultyCount} Faculty</span>
-            </div>
-          </Link>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+        {[
+          { value: '17', label: 'Departments' },
+          { value: '200+', label: 'Faculty Members' },
+          { value: '3,000+', label: 'Students' },
+          { value: '70+ Years', label: 'of Excellence' },
+        ].map((s) => (
+          <div key={s.label} className="bg-white border border-slate-200 rounded p-4 text-center shadow-sm">
+            <p className="text-2xl font-display font-bold text-primary">{s.value}</p>
+            <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider font-sans mt-1">{s.label}</p>
+          </div>
         ))}
+      </div>
+
+      {/* Department Grids */}
+      <div className="space-y-10">
+        <DeptGrid title="Engineering Departments" depts={engineeringDepts} />
+        <DeptGrid title="Science Departments" depts={scienceDepts} />
+        <DeptGrid title="Management, Pharmacy & Other" depts={otherDepts} />
       </div>
     </div>
   )

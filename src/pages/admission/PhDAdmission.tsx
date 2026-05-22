@@ -1,142 +1,258 @@
-import React from 'react'
-import { ClipboardList, GraduationCap, Calendar } from 'lucide-react'
+import { Link } from 'react-router-dom';
+import {
+  ChevronRight,
+  BookOpen,
+  Award,
+  CheckCircle,
+  Phone,
+  Mail,
+  Users,
+  FlaskConical,
+  Cpu,
+  Building2,
+  Zap,
+  Wrench,
+  Pill,
+  BarChart3,
+} from 'lucide-react';
 
-const PhDAdmission: React.FC = () => {
+const researchAreas = [
+  {
+    dept: 'Computer Engineering',
+    icon: <Cpu className="w-5 h-5" />,
+    areas: ['Machine Learning & AI', 'Cybersecurity', 'IoT & Embedded Systems', 'Cloud Computing', 'Natural Language Processing', 'Computer Vision'],
+  },
+  {
+    dept: 'Electronics & Telecommunication',
+    icon: <Zap className="w-5 h-5" />,
+    areas: ['VLSI Design', 'Signal Processing', '5G/6G Communication', 'Antenna Design', 'Embedded Systems', 'RF & Microwave Engineering'],
+  },
+  {
+    dept: 'Civil Engineering',
+    icon: <Building2 className="w-5 h-5" />,
+    areas: ['Structural Engineering', 'Geotechnical Engineering', 'Transportation Engineering', 'Water Resources', 'Environmental Engineering', 'Smart Materials'],
+  },
+  {
+    dept: 'Mechanical Engineering',
+    icon: <Wrench className="w-5 h-5" />,
+    areas: ['Thermal & Fluid Systems', 'Manufacturing Processes', 'Robotics & Automation', 'Renewable Energy', 'CFD Simulation', 'Composite Materials'],
+  },
+  {
+    dept: 'Electrical Engineering',
+    icon: <Zap className="w-5 h-5" />,
+    areas: ['Power Systems', 'Electric Vehicles', 'Smart Grid', 'Power Electronics', 'Control Systems', 'Energy Harvesting'],
+  },
+  {
+    dept: 'Pharmacy',
+    icon: <Pill className="w-5 h-5" />,
+    areas: ['Drug Delivery Systems', 'Pharmaceutical Chemistry', 'Pharmacognosy', 'Biotechnology', 'Clinical Pharmacy', 'Nanotechnology in Pharmacy'],
+  },
+  {
+    dept: 'Management Studies',
+    icon: <BarChart3 className="w-5 h-5" />,
+    areas: ['Business Analytics', 'Strategic Management', 'Supply Chain Management', 'Financial Markets', 'Human Resource Management', 'Digital Marketing'],
+  },
+];
+
+const vacancies = [
+  { dept: 'Computer Engineering', vacancies: 4, supervisors: 'Dr. R.K. Gupta, Dr. A. Sharma', area: 'Machine Learning, Cloud Computing' },
+  { dept: 'Electronics & Telecom', vacancies: 3, supervisors: 'Dr. S. Patel, Dr. M. Jain', area: 'VLSI Design, 5G Communication' },
+  { dept: 'Mechanical Engineering', vacancies: 5, supervisors: 'Dr. P. Verma, Dr. H. Singh', area: 'Thermal Engineering, Robotics' },
+  { dept: 'Civil Engineering', vacancies: 3, supervisors: 'Dr. K. Tiwari, Dr. N. Mishra', area: 'Structural Engineering, Geotechnics' },
+  { dept: 'Electrical Engineering', vacancies: 2, supervisors: 'Dr. A. Dubey', area: 'Power Systems, Smart Grid' },
+  { dept: 'Pharmacy', vacancies: 3, supervisors: 'Dr. S. Agrawal, Dr. R. Chouhan', area: 'Drug Delivery, Pharmaceutical Chemistry' },
+  { dept: 'Management Studies', vacancies: 2, supervisors: 'Dr. P. Saxena', area: 'Business Analytics, Strategic Mgmt.' },
+];
+
+const facilities = [
+  { name: 'High Performance Computing Lab', desc: 'Cluster with 128-core processing for simulation and AI research.' },
+  { name: 'VLSI & Embedded Lab', desc: 'FPGA boards, oscilloscopes, spectrum analyzers for electronics research.' },
+  { name: 'Materials Testing Lab', desc: 'UTM, fatigue testing, SEM, and XRD for material characterization.' },
+  { name: 'Structural Research Lab', desc: 'Loading frames, shake table, and data acquisition systems.' },
+  { name: 'Central Instrumentation Facility', desc: 'Shared facility with advanced analytical instruments for all departments.' },
+  { name: 'Digital Library & e-Resources', desc: 'Access to IEEE Xplore, Springer, Elsevier, and 50+ journals.' },
+];
+
+const selectionSteps = [
+  { title: 'Apply Online', desc: 'Submit PhD application form with research proposal and SOP.' },
+  { title: 'Written Examination', desc: 'Subject-specific written test conducted by SGSITS (waived for GATE qualified candidates).' },
+  { title: 'Research Presentation', desc: 'Present your proposed research area to the departmental committee.' },
+  { title: 'Interview', desc: 'Personal interview with the supervisor and PhD committee members.' },
+  { title: 'Merit & Admission', desc: 'Final merit list published; selected candidates complete enrollment formalities.' },
+];
+
+export default function PhDAdmission() {
   return (
-    <div className="space-y-12 max-w-5xl mx-auto py-2">
-      {/* Page Header */}
-      <div className="border-b border-slate-200 pb-5">
-        <span className="text-[11px] uppercase font-serif tracking-widest text-accent font-semibold">Admissions</span>
-        <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mt-1 text-primary font-display">
-          Ph.D. Admissions
-        </h2>
-        <p className="text-sm text-slate-500 mt-2 font-sans font-medium">
-          Doctoral research pathways, enrollment schedules, and selection frameworks
-        </p>
-      </div>
-
-      {/* Central Notification */}
-      <div className="bg-white rounded-md p-6 border-l-4 border-l-accent border-y border-r border-slate-200 shadow-sm">
-        <div className="space-y-3">
-          <span className="bg-primary/5 text-primary border border-primary/10 px-2.5 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wider inline-block">
-            Research Admissions
-          </span>
-          <h3 className="text-xl font-medium text-primary font-display">
-            Bi-Annual Doctoral Intake
-          </h3>
-          <p className="text-[14px] text-slate-650 leading-relaxed font-sans font-medium">
-            Ph.D. admissions at SGSITS Indore are conducted twice a year for the <strong>January and July academic terms</strong>. Selections are determined through a comprehensive departmental entrance test followed by an interview before the research committee.
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero */}
+      <div className="bg-primary text-white py-14 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-2 text-sm text-blue-200 mb-3">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <ChevronRight className="w-4 h-4" />
+            <span>Admissions</span>
+            <ChevronRight className="w-4 h-4" />
+            <span className="text-white font-medium">PhD Admission</span>
+          </div>
+          <h1 className="text-4xl font-display font-bold mb-3">PhD Admissions</h1>
+          <p className="text-blue-100 text-lg max-w-2xl">
+            Pursue doctoral research at SGSITS under experienced faculty. We offer research opportunities across 7 departments with excellent infrastructure and GATE fellowships.
           </p>
+          <a
+            href="#"
+            className="mt-6 inline-flex items-center gap-2 bg-accent text-primary font-semibold px-6 py-3 rounded-lg hover:bg-yellow-400 transition-colors"
+          >
+            Apply for PhD <ChevronRight className="w-4 h-4" />
+          </a>
         </div>
       </div>
 
-      {/* Doctoral Framework Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Intake Schedule */}
-        <div className="bg-white border border-slate-200 rounded-md p-6 shadow-sm flex flex-col justify-between hover:border-accent transition-colors duration-200">
-          <div className="space-y-4">
-            <div className="w-10 h-10 rounded bg-primary/5 flex items-center justify-center text-primary shrink-0">
-              <Calendar size={20} className="stroke-[1.5]" />
+      <div className="max-w-5xl mx-auto px-4 py-12 space-y-14">
+
+        {/* Eligibility */}
+        <section>
+          <h2 className="text-2xl font-display font-bold text-primary mb-6">Eligibility Criteria</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+              <h3 className="font-bold text-primary mb-4 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-accent" /> Academic Qualification
+              </h3>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> M.Tech / M.E. / M.Sc. (Engg.) with minimum 60% marks or 6.5 CGPA</li>
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> MBA (for Management PhD) with minimum 60% marks</li>
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> M.Pharm / M.Sc. Pharmacy (for Pharmacy PhD) with minimum 60%</li>
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> SC/ST candidates: 55% or 6.0 CGPA</li>
+              </ul>
             </div>
-            <h4 className="text-lg font-semibold text-primary font-display">Doctoral Cycles</h4>
-            <p className="text-xs text-slate-550 font-medium font-sans leading-relaxed">
-              Applications are invited bi-annually. The selection cycles operate systematically to onboard dedicated scholars.
-            </p>
-            <div className="border-t border-slate-100 pt-3 space-y-2">
-              <span className="text-[10px] text-slate-450 uppercase font-bold block">Admissions Cycle</span>
-              <span className="text-[13px] font-semibold text-slate-700 font-sans">January & July Cohorts</span>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+              <h3 className="font-bold text-primary mb-4 flex items-center gap-2">
+                <Award className="w-5 h-5 text-accent" /> Fellowship (JRF/SRF)
+              </h3>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> GATE qualified candidates are eligible for MHRD fellowship</li>
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> JRF: ₹37,000/month (first 2 years)</li>
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> SRF: ₹42,000/month (subsequent years)</li>
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> HRA and medical allowance as per MHRD norms</li>
+              </ul>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Evaluation Pattern */}
-        <div className="bg-white border border-slate-200 rounded-md p-6 shadow-sm flex flex-col justify-between hover:border-accent transition-colors duration-200">
+        {/* Research Areas */}
+        <section>
+          <h2 className="text-2xl font-display font-bold text-primary mb-2">Research Areas by Department</h2>
+          <p className="text-gray-500 mb-6">SGSITS offers research opportunities in cutting-edge areas across all engineering and science disciplines.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {researchAreas.map((dept, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                    {dept.icon}
+                  </div>
+                  <h3 className="font-bold text-primary">{dept.dept}</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {dept.areas.map((area, j) => (
+                    <span key={j} className="bg-blue-50 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">
+                      {area}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Selection Process */}
+        <section>
+          <h2 className="text-2xl font-display font-bold text-primary mb-6">Selection Process</h2>
           <div className="space-y-4">
-            <div className="w-10 h-10 rounded bg-primary/5 flex items-center justify-center text-primary shrink-0">
-              <ClipboardList size={20} className="stroke-[1.5]" />
+            {selectionSteps.map((step, i) => (
+              <div key={i} className="flex gap-4 items-start bg-white rounded-xl border border-gray-100 shadow-sm px-6 py-4 hover:shadow-md transition-shadow">
+                <div className="w-9 h-9 rounded-full bg-primary text-white font-bold flex items-center justify-center shrink-0 text-sm">
+                  {i + 1}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-primary">{step.title}</h3>
+                  <p className="text-gray-500 text-sm">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Current Vacancies */}
+        <section>
+          <h2 className="text-2xl font-display font-bold text-primary mb-2">Current PhD Vacancies</h2>
+          <p className="text-gray-500 mb-6">Available positions for the academic year 2025–26. Contact respective supervisor for research proposals.</p>
+          <div className="overflow-x-auto rounded-xl shadow-sm border border-gray-200">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-primary text-white">
+                  <th className="text-left px-4 py-3 font-semibold">Department</th>
+                  <th className="text-center px-4 py-3 font-semibold">Vacancies</th>
+                  <th className="text-left px-4 py-3 font-semibold">Supervisors</th>
+                  <th className="text-left px-4 py-3 font-semibold">Research Areas</th>
+                </tr>
+              </thead>
+              <tbody>
+                {vacancies.map((v, i) => (
+                  <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <td className="px-4 py-3 font-medium text-primary">{v.dept}</td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="bg-green-100 text-green-800 font-bold px-3 py-1 rounded-full text-xs">
+                        {v.vacancies} open
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{v.supervisors}</td>
+                    <td className="px-4 py-3 text-gray-600">{v.area}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* Research Facilities */}
+        <section>
+          <h2 className="text-2xl font-display font-bold text-primary mb-6">Research Facilities</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            {facilities.map((f, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow">
+                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center mb-3">
+                  <FlaskConical className="w-5 h-5 text-accent" />
+                </div>
+                <h3 className="font-semibold text-primary text-sm mb-2">{f.name}</h3>
+                <p className="text-gray-500 text-xs leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Contact CTA */}
+        <section>
+          <div className="bg-primary rounded-xl p-8 text-white flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+              <h2 className="text-xl font-display font-bold mb-2">Research & Development Cell</h2>
+              <p className="text-blue-100 text-sm mb-4">For PhD admission queries, contact the R&D office or the respective department supervisor.</p>
+              <div className="space-y-1 text-sm text-blue-100">
+                <div className="flex items-center gap-2"><Phone className="w-4 h-4" /><span>+91-731-2570-5725</span></div>
+                <div className="flex items-center gap-2"><Mail className="w-4 h-4" /><span>phd.admission@sgsits.ac.in</span></div>
+                <div className="flex items-center gap-2"><Users className="w-4 h-4" /><span>Dean (R&D), SGSITS, Indore – 452003</span></div>
+              </div>
             </div>
-            <h4 className="text-lg font-semibold text-primary font-display">Evaluation Framework</h4>
-            <p className="text-xs text-slate-550 font-medium font-sans leading-relaxed">
-              Comprises a screening of academic credentials, a written department test, and a detailed research presentation.
-            </p>
-            <div className="border-t border-slate-100 pt-3 space-y-2">
-              <span className="text-[10px] text-slate-450 uppercase font-bold block">Exemption Rule</span>
-              <span className="text-[13px] font-semibold text-slate-700 font-sans">GATE/NET Scholars Exempted</span>
+            <div className="flex flex-col gap-3 shrink-0">
+              <a href="#" className="bg-accent text-primary font-semibold px-6 py-3 rounded-lg text-center hover:bg-yellow-400 transition-colors text-sm">
+                Download PhD Brochure
+              </a>
+              <a href="#" className="border border-white text-white font-semibold px-6 py-3 rounded-lg text-center hover:bg-white/10 transition-colors text-sm">
+                Research Proposal Guidelines
+              </a>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Financial Support */}
-        <div className="bg-white border border-slate-200 rounded-md p-6 shadow-sm flex flex-col justify-between hover:border-accent transition-colors duration-200">
-          <div className="space-y-4">
-            <div className="w-10 h-10 rounded bg-primary/5 flex items-center justify-center text-primary shrink-0">
-              <GraduationCap size={20} className="stroke-[1.5]" />
-            </div>
-            <h4 className="text-lg font-semibold text-primary font-display">Research Fellowship</h4>
-            <p className="text-xs text-slate-550 font-medium font-sans leading-relaxed">
-              Full-time GATE or UGC/CSIR-NET qualified scholars are eligible to receive monthly stipends and institutional fellowships.
-            </p>
-            <div className="border-t border-slate-100 pt-3 space-y-2">
-              <span className="text-[10px] text-slate-450 uppercase font-bold block">Fellowship Guidelines</span>
-              <span className="text-[13px] font-semibold text-slate-700 font-sans">Per AICTE / UGC Norms</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Program Details Table (Printed Bulletin style) */}
-      <div className="space-y-6">
-        <div>
-          <span className="text-[11px] uppercase font-serif tracking-widest text-accent font-semibold">Technical Framework</span>
-          <h3 className="text-2xl font-medium text-primary font-display mt-0.5">Eligibility & Selection Framework</h3>
-        </div>
-
-        <div className="bg-white rounded-md p-6 border border-slate-200 shadow-sm">
-          <table className="w-full text-left font-sans text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-slate-300">
-                <th className="py-2.5 font-bold uppercase tracking-wider text-slate-550 text-[10px] w-1/4">Metric</th>
-                <th className="py-2.5 font-bold uppercase tracking-wider text-slate-550 text-[10px] w-3/4">Institutional Guidelines & Norms</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-150">
-              <tr>
-                <td className="py-4">
-                  <span className="font-semibold text-slate-800 text-[13px] block">Academic Eligibility</span>
-                </td>
-                <td className="py-4">
-                  <span className="text-slate-650 leading-relaxed block text-xs">
-                    M.Tech / M.E. / M.Pharm / M.Sc. / MBA or equivalent post-graduate degree in a relevant discipline with at least 55% aggregate marks (50% aggregate marks for SC/ST/OBC category candidates).
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td className="py-4">
-                  <span className="font-semibold text-slate-800 text-[13px] block">Selection Pipeline</span>
-                </td>
-                <td className="py-4">
-                  <span className="text-slate-650 leading-relaxed block text-xs">
-                    Application Screening & Verification &rarr; Departmental Written Entrance Test &rarr; Presentation of Research Proposal &rarr; Interview before the Departmental Research Committee (DRC).
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td className="py-4">
-                  <span className="font-semibold text-slate-800 text-[13px] block">Research Modes</span>
-                </td>
-                <td className="py-4">
-                  <span className="text-slate-650 leading-relaxed block text-xs font-sans">
-                    <strong>Full-time Scholars:</strong> Actively engage in departmental laboratories and receive institutional fellowships. <br />
-                    <strong>Part-time Scholars:</strong> Available for working professionals or faculty members, subject to submitting a valid No Objection Certificate (NOC) from their employer.
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
-  )
+  );
 }
-
-export default PhDAdmission
