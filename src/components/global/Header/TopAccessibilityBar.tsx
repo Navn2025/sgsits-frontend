@@ -1,6 +1,9 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useUIStore } from '../../../store/uiStore'
 import { Sun, Moon, Eye, EyeOff, Type } from 'lucide-react'
+// ─── Service layer ────────────────────────────────────────────────────────────
+import { settingsService, topBarDefaults } from '../../../services/settingsService'
+import type { TopBarData } from '../../../mock/settings/settingsData'
 
 const TopAccessibilityBar: React.FC = () => {
   const {
@@ -9,6 +12,13 @@ const TopAccessibilityBar: React.FC = () => {
     setFontSize,
     toggleContrast
   } = useUIStore()
+
+  // ── Top bar data — loaded through service layer ───────────────────────────
+  const [barData, setBarData] = useState<TopBarData>(topBarDefaults)
+
+  useEffect(() => {
+    settingsService.getTopBarData().then(setBarData)
+  }, [])
 
   // Apply Font Scale to <html> element
   useEffect(() => {
@@ -59,13 +69,13 @@ const TopAccessibilityBar: React.FC = () => {
         {/* Quick Helpline Info */}
         <div className="flex items-center gap-4">
           <span className="hidden sm:inline">
-            <strong className="text-brand-gold">Helpline:</strong> +91-731-2582100
+            <strong className="text-brand-gold">Helpline:</strong> {barData.helpline}
           </span>
           <span className="hidden md:inline">
-            <strong className="text-brand-gold">Email:</strong> registrar@sgsits.ac.in
+            <strong className="text-brand-gold">Email:</strong> {barData.email}
           </span>
           <span>
-            <strong className="text-brand-gold">Code:</strong> SGSITS (0801)
+            <strong className="text-brand-gold">Code:</strong> {barData.instituteCode}
           </span>
         </div>
 

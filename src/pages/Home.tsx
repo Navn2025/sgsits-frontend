@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Calendar,
@@ -14,6 +14,20 @@ import {
   Newspaper,
   Landmark,
 } from 'lucide-react'
+
+// ─── Services — the ONLY way components access data ─────────────────────────
+import { homePageDefaults, contentService }      from '../services/contentService'
+import { noticesService }                         from '../services/noticesService'
+import { newsService }                            from '../services/newsService'
+import { mediaService }                           from '../services/mediaService'
+import type {
+  HomePageData,
+  HeroTileData,
+  AnnouncementItem,
+  FaqItem as FaqItemData,
+} from '../mock/home/homeData'
+import type { HomeNewsCard, FeaturedNewsCard }    from '../services/newsService'
+import type { GalleryThumbnail }                  from '../services/mediaService'
 
 // ─── Palette constants — only these three colours are used anywhere in this file ───
 const C = {
@@ -34,6 +48,26 @@ const C = {
   white60:     'rgba(255,255,255,0.60)',
   white70:     'rgba(255,255,255,0.70)',
   white80:     'rgba(255,255,255,0.80)',
+}
+
+// ─── Icon registry — maps icon name strings (from CMS data) to Lucide components ──
+// Only the component knows about React icons; the data layer just stores string names.
+const ICON_MAP: Record<string, React.ComponentType<{ size?: number; style?: React.CSSProperties; strokeWidth?: number; className?: string }>> = {
+  FlaskConical,
+  Rocket,
+  Newspaper,
+  Landmark,
+  BookOpen,
+  GraduationCap,
+  Microscope,
+  Users,
+  Building,
+  FileText,
+}
+
+// ─── HeroTile with resolved icon ─────────────────────────────────────────────
+interface HeroTile extends HeroTileData {
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties; strokeWidth?: number; className?: string }>
 }
 
 // ─── FAQ Accordion ───────────────────────────────────────────────────────────
@@ -88,58 +122,71 @@ const FaqItem: React.FC<FaqItemProps> = ({ question, answer, contact, defaultOpe
   )
 }
 
-// ─── Hero tile config ────────────────────────────────────────────────────────
-interface HeroTile {
-  title: string
-  subtitle: string
-  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties; strokeWidth?: number; className?: string }>
-  dark: boolean
-  path: string
-}
-
 // ─── Home ────────────────────────────────────────────────────────────────────
 const Home: React.FC = () => {
-  const heroTiles: HeroTile[] = [
-    { title: 'Research',        subtitle: 'Mapping the Innovations',              icon: FlaskConical, dark: false, path: '/about/iqac' },
-    { title: 'Startups',        subtitle: 'Success stories of researchers',       icon: Rocket,       dark: true,  path: '/startup-cell' },
-    { title: 'News',            subtitle: 'Panorama of Events',                   icon: Newspaper,    dark: false, path: '/news' },
-    { title: 'SGSITS Outreach', subtitle: 'Innovate. Inspire. Transform.',        icon: Landmark,     dark: true,  path: '/about/institute' },
-  ]
 
-  // Announcement items — all link to /notices
-  const announcements = [
-    { title: 'Information Bulletin regarding B.Tech Admissions 2025-26', date: 'New', isNew: true },
-    { title: 'Result of MBA (Financial Administration) II Sem Examination', date: 'May 10, 2025' },
-    { title: 'Revised Academic Calendar for UG & PG classes 2024-25', date: 'May 08, 2025' },
-    { title: 'Schedule of Internal Assessment Tests (Even Semester)', date: 'May 02, 2025' },
-    { title: 'Instruction for students regarding uniform and general discipline', date: 'Apr 28, 2025' },
-    { title: 'Tender notice for laboratory equipment procurement', date: 'Apr 20, 2025' },
-    { title: 'Notice regarding hostel fee payment deadlines for current students', date: 'Apr 15, 2025' },
-  ]
+  // ── State — initialized with synchronous defaults so there is zero loading flash ──
+  const [pageData, setPageData]             = useState<HomePageData>(homePageDefaults)
+  const [heroTiles, setHeroTiles]           = useState<HeroTile[]>([])
+  const [announcements, setAnnouncements]   = useState<AnnouncementItem[]>(homePageDefaults.announcements)
+  const [newsCards, setNewsCards]           = useState<HomeNewsCard[]>([])
+  const [featuredCards, setFeaturedCards]   = useState<FeaturedNewsCard[]>([])
+  const [thumbnails, setThumbnails]         = useState<GalleryThumbnail[]>([])
 
-  // News cards — all link to /news
-  const newsCards = [
-    {
-      seed: 'sgsitsai',   cat: 'Artificial Intelligence',
-      title: "AI's Big Productivity Boost: Transforming Classroom Operations",
-      desc:  'Adaptive machine learning models simplify administrative tasks and personalise study paths.',
-    },
-    {
-      seed: 'sgsitshealth', cat: 'Biomedical & Pharmacy',
-      title: 'Pharmacy develops novel drug carrier mechanisms',
-      desc:  'A bio-compatibility breakthrough paves new avenues for target-specific oncology treatments.',
-    },
-    {
-      seed: 'sgsitsbiz', cat: 'Industry Outreach',
-      title: 'Annual Industry-Academia Conclave sets record collaborations',
-      desc:  'Leading tech giants and PSUs sign MOUs for strategic student training partnerships.',
-    },
-    {
-      seed: 'sgsitsacad', cat: 'Applied Sciences',
-      title: 'Interdisciplinary courses blend technical coding with music theory',
-      desc:  'Students build synthesisers and algorithmic audio programs to understand Fourier series practically.',
-    },
-  ]
+  // ── Resolve icon names → React components from the raw tile data ─────────
+  const resolveIcons = (tiles: HeroTileData[]): HeroTile[] =>
+    tiles.map(t => ({ ...t, icon: ICON_MAP[t.iconName] ?? FlaskConical }))
+
+  // ── Load all data through the service layer on mount ─────────────────────
+  useEffect(() => {
+    const load = async () => {
+      const [
+        home,
+        rawTiles,
+        homeAnnouncements,
+        cards,
+        featured,
+        thumbs,
+      ] = await Promise.all([
+        contentService.getHomePage(),
+        contentService.getHeroTiles(),
+        noticesService.getHomeAnnouncements(),
+        newsService.getHomeNewsCards(),
+        newsService.getFeaturedNewsCards(),
+        mediaService.getHomeGalleryThumbnails(),
+      ])
+
+      setPageData(home)
+      setHeroTiles(resolveIcons(rawTiles))
+      setAnnouncements(homeAnnouncements)
+      setNewsCards(cards)
+      setFeaturedCards(featured)
+      setThumbnails(thumbs)
+    }
+
+    load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Pre-resolve icons for default data on first render
+  useEffect(() => {
+    setHeroTiles(resolveIcons(homePageDefaults.heroTiles))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // ── Derive section-specific data from pageData ───────────────────────────
+  const {
+    hero,
+    about,
+    director,
+    newsSection,
+    academicsSection,
+    departmentsSection,
+    statsSection,
+    campusLifeSection,
+    faqsSection,
+    gallerySection,
+  } = pageData
 
   return (
     <div className="flex flex-col bg-white">
@@ -149,8 +196,8 @@ const Home: React.FC = () => {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: 'var(--hero-img-url)',
-            backgroundPosition: 'center 28%',
+            backgroundImage: hero.imageUrl,
+            backgroundPosition: hero.imagePosition,
             filter: 'brightness(0.9) contrast(1.02) saturate(0.95)',
           }}
         />
@@ -162,11 +209,11 @@ const Home: React.FC = () => {
               className="uppercase tracking-[0.18em] text-[10px] sm:text-xs mb-3 font-semibold font-sans"
               style={{ color: C.white80 }}
             >
-              Shri G. S. Institute of Technology & Science
+              {hero.instituteName}
             </p>
             <h1 className="text-white uppercase font-display font-semibold text-2xl sm:text-4xl md:text-5xl leading-[1.1] tracking-[0.04em] drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)]">
-              Welcome To SGSITS<br />
-              <span className="font-display font-bold italic" style={{ color: C.gold }}>Indore</span>
+              {hero.welcomeText}<br />
+              <span className="font-display font-bold italic" style={{ color: C.gold }}>{hero.accentText}</span>
             </h1>
           </div>
         </div>
@@ -225,15 +272,15 @@ const Home: React.FC = () => {
                 className="text-[10px] uppercase font-bold tracking-widest block mb-1"
                 style={{ color: C.gold }}
               >
-                Introduction
+                {about.label}
               </span>
               <h2
                 className="text-lg md:text-xl font-display font-bold tracking-tight uppercase mb-2"
                 style={{ color: C.navy }}
               >
-                ABOUT{' '}
+                {about.heading}{' '}
                 <span className="font-serif italic font-semibold" style={{ color: C.navy }}>
-                  SGSITS INDORE
+                  {about.accentText}
                 </span>
               </h2>
               <div className="w-12 h-[2px] mb-5" style={{ backgroundColor: C.gold }} />
@@ -242,28 +289,23 @@ const Home: React.FC = () => {
                 className="leading-relaxed text-sm mb-6 text-justify font-sans"
                 style={{ color: C.navy70 }}
               >
-                Shri G. S. Institute of Technology & Science (SGSITS) is one of the
-                premier technical institutions created to be Centres of Excellence for training,
-                research and development in science, engineering and technology in India. Established
-                as College of Engineering in 1952, the Institute was later declared an autonomous
-                Institution of National standing, with powers to decide its own academic policy,
-                conduct its own examinations, and award its own degrees.
+                {about.body}
               </p>
 
               <div className="flex flex-wrap gap-3">
                 <Link
-                  to="/about/institute"
+                  to={about.primaryButton.to}
                   className="px-4 py-2 text-xs font-semibold border rounded transition-colors hover:opacity-80"
                   style={{ borderColor: C.navy15, color: C.navy, backgroundColor: C.white }}
                 >
-                  Read More
+                  {about.primaryButton.label}
                 </Link>
                 <Link
-                  to="/notices"
+                  to={about.secondaryButton.to}
                   className="px-4 py-2 text-xs font-semibold rounded shadow-sm transition-opacity hover:opacity-90"
                   style={{ backgroundColor: C.navy, color: C.white }}
                 >
-                  Notices
+                  {about.secondaryButton.label}
                 </Link>
               </div>
             </div>
@@ -277,15 +319,15 @@ const Home: React.FC = () => {
                 className="text-[10px] uppercase font-bold tracking-widest block mb-1"
                 style={{ color: C.gold }}
               >
-                Leadership Message
+                {director.label}
               </span>
               <h2
                 className="text-lg md:text-xl font-display font-bold tracking-tight uppercase mb-2"
                 style={{ color: C.navy }}
               >
-                DIRECTOR'S{' '}
+                {director.heading}{' '}
                 <span className="font-serif italic font-semibold" style={{ color: C.navy }}>
-                  CORNER
+                  {director.accentText}
                 </span>
               </h2>
               <div className="w-12 h-[2px] mb-5" style={{ backgroundColor: C.gold }} />
@@ -296,27 +338,24 @@ const Home: React.FC = () => {
                   style={{ borderColor: C.navy15 }}
                 >
                   <img
-                    src="/director.jpeg"
-                    alt="Director Prof. Neetesh Purohit"
+                    src={director.photo}
+                    alt={`Director ${director.name}`}
                     className="w-full h-full object-cover object-center"
                   />
                 </div>
                 <div className="text-sm leading-relaxed font-serif" style={{ color: C.navy70 }}>
                   <h3 className="font-sans font-bold text-base mb-1.5" style={{ color: C.navy }}>
-                    Prof. Neetesh Purohit
+                    {director.name}
                   </h3>
                   <p className="mb-4 text-justify leading-relaxed">
-                    Prof. Neetesh Purohit has taken over charge as Director, SGSITS Indore with
-                    effect from the forenoon of 15th February, 2024. Under his leadership the
-                    institute continues to scale new heights in research, placements and academic
-                    excellence.
+                    {director.bio}
                   </p>
                   <Link
-                    to="/about/director-message"
+                    to={director.readMoreTo}
                     className="px-3.5 py-1.5 border rounded inline-block text-xs font-semibold font-sans transition-colors hover:opacity-80"
                     style={{ borderColor: C.navy15, color: C.navy, backgroundColor: C.white }}
                   >
-                    Read Message
+                    {director.readMoreLabel}
                   </Link>
                 </div>
               </div>
@@ -350,13 +389,13 @@ const Home: React.FC = () => {
                 </span>
               </div>
 
-              {/* List — every item links to /notices */}
+              {/* List — every item links to the notice's target */}
               <div className="p-0 flex-1 overflow-y-auto max-h-[500px]">
                 <ul className="divide-y" style={{ borderColor: C.navy10 }}>
-                  {announcements.map((item, i) => (
-                    <li key={i} style={{ borderColor: C.navy10 }}>
+                  {announcements.map((item) => (
+                    <li key={item.id} style={{ borderColor: C.navy10 }}>
                       <Link
-                        to="/notices"
+                        to={item.to}
                         className="flex p-4 transition-colors group hover:opacity-90"
                         style={{ borderLeft: `2px solid transparent` }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderLeftColor = C.gold }}
@@ -436,74 +475,75 @@ const Home: React.FC = () => {
               className="text-[10px] uppercase font-bold tracking-widest block mb-1"
               style={{ color: C.gold }}
             >
-              Campus Journalism
+              {newsSection.label}
             </span>
             <h2
               className="text-2xl md:text-3xl font-display font-bold tracking-tight uppercase mb-2"
               style={{ color: C.navy }}
             >
-              CAMPUS{' '}
+              {newsSection.heading}{' '}
               <span className="font-serif italic font-semibold" style={{ color: C.navy }}>
-                NEWS
+                {newsSection.accentText}
               </span>
             </h2>
             <div className="w-12 h-[2px] mx-auto mb-4" style={{ backgroundColor: C.gold }} />
             <p className="text-sm max-w-xl mx-auto font-sans" style={{ color: C.navy60 }}>
-              Stories of research breakthroughs, student achievements, and academic excellence.
+              {newsSection.description}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-            {/* Featured card */}
-            <Link
-              to="/news"
-              className="md:col-span-2 relative overflow-hidden rounded flex flex-col justify-end min-h-[380px] group border"
-              style={{ borderColor: C.navy15, backgroundColor: C.white }}
-            >
-              <img
-                src="https://picsum.photos/seed/sgsitsmain/800/800"
-                alt="Research at SGSITS"
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                style={{ filter: 'saturate(0.85) contrast(1.02)' }}
-              />
-              {/* Gradient using palette navy */}
-              <div
-                className="absolute inset-0"
-                style={{ background: `linear-gradient(to top, ${C.navy} 0%, rgba(11,37,69,0.4) 60%, transparent 100%)` }}
-              />
-              <div className="relative p-6 md:p-8 z-10">
-                <span
-                  className="text-[10px] font-bold tracking-widest uppercase mb-2 block"
-                  style={{ color: C.gold }}
-                >
-                  In The Spotlight
-                </span>
-                <h3 className="text-white text-2xl md:text-3xl font-display font-bold leading-tight">
-                  Pioneering Research in Renewable Energy: A Clean Future
-                </h3>
-                <p
-                  className="text-xs mt-3 font-sans font-medium max-w-xl"
-                  style={{ color: C.white80 }}
-                >
-                  SGSITS faculty and research scholars secure major grants to build intelligent power
-                  distribution grids for rural communities.
-                </p>
-              </div>
-            </Link>
+            {/* First featured card */}
+            {featuredCards[0] && (
+              <Link
+                to={featuredCards[0].to}
+                className="md:col-span-2 relative overflow-hidden rounded flex flex-col justify-end min-h-[380px] group border"
+                style={{ borderColor: C.navy15, backgroundColor: C.white }}
+              >
+                <img
+                  src={featuredCards[0].imageUrl}
+                  alt="Research at SGSITS"
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  style={{ filter: 'saturate(0.85) contrast(1.02)' }}
+                />
+                {/* Gradient using palette navy */}
+                <div
+                  className="absolute inset-0"
+                  style={{ background: `linear-gradient(to top, ${C.navy} 0%, rgba(11,37,69,0.4) 60%, transparent 100%)` }}
+                />
+                <div className="relative p-6 md:p-8 z-10">
+                  <span
+                    className="text-[10px] font-bold tracking-widest uppercase mb-2 block"
+                    style={{ color: C.gold }}
+                  >
+                    {featuredCards[0].label}
+                  </span>
+                  <h3 className="text-white text-2xl md:text-3xl font-display font-bold leading-tight">
+                    {featuredCards[0].title}
+                  </h3>
+                  <p
+                    className="text-xs mt-3 font-sans font-medium max-w-xl"
+                    style={{ color: C.white80 }}
+                  >
+                    {featuredCards[0].description}
+                  </p>
+                </div>
+              </Link>
+            )}
 
             {/* Regular news cards */}
-            {newsCards.map((card, idx) => (
+            {newsCards.map((card) => (
               <Link
-                key={idx}
-                to="/news"
+                key={card.id}
+                to={card.to}
                 className="bg-white rounded flex flex-col min-h-[380px] group hover:shadow-md transition-all duration-200 border"
                 style={{ borderColor: C.navy15 }}
               >
                 <div className="h-44 overflow-hidden shrink-0 border-b" style={{ borderColor: C.navy10 }}>
                   <img
-                    src={`https://picsum.photos/seed/${card.seed}/400/300`}
-                    alt={card.cat}
+                    src={card.imageUrl}
+                    alt={card.category}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
@@ -512,7 +552,7 @@ const Home: React.FC = () => {
                     className="text-[9px] font-bold tracking-widest uppercase mb-1.5"
                     style={{ color: C.gold }}
                   >
-                    {card.cat}
+                    {card.category}
                   </span>
                   <h3
                     className="font-display font-bold text-base leading-snug group-hover:underline"
@@ -524,47 +564,48 @@ const Home: React.FC = () => {
                     className="text-xs mt-2 line-clamp-3 font-sans font-medium"
                     style={{ color: C.navy60 }}
                   >
-                    {card.desc}
+                    {card.description}
                   </p>
                 </div>
               </Link>
             ))}
 
             {/* Second featured card */}
-            <Link
-              to="/news"
-              className="md:col-span-2 relative overflow-hidden rounded flex flex-col justify-end min-h-[380px] group border"
-              style={{ borderColor: C.navy15, backgroundColor: C.white }}
-            >
-              <img
-                src="https://picsum.photos/seed/sgsitsengg/800/400"
-                alt="Engineering Laboratory"
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                style={{ filter: 'saturate(0.85) contrast(1.02)' }}
-              />
-              <div
-                className="absolute inset-0"
-                style={{ background: `linear-gradient(to top, ${C.navy} 0%, rgba(11,37,69,0.4) 60%, transparent 100%)` }}
-              />
-              <div className="relative p-6 md:p-8 z-10">
-                <span
-                  className="text-[10px] font-bold tracking-widest uppercase mb-2 block"
-                  style={{ color: C.gold }}
-                >
-                  Societal Impact
-                </span>
-                <h3 className="text-white text-2xl md:text-3xl font-display font-bold leading-tight">
-                  Design for Accessibility: Engineering Robotics for Welfare
-                </h3>
-                <p
-                  className="text-xs mt-3 font-sans font-medium max-w-xl"
-                  style={{ color: C.white80 }}
-                >
-                  SGSITS students design low-cost assistive robotic limbs for local rehabilitation
-                  centres.
-                </p>
-              </div>
-            </Link>
+            {featuredCards[1] && (
+              <Link
+                to={featuredCards[1].to}
+                className="md:col-span-2 relative overflow-hidden rounded flex flex-col justify-end min-h-[380px] group border"
+                style={{ borderColor: C.navy15, backgroundColor: C.white }}
+              >
+                <img
+                  src={featuredCards[1].imageUrl}
+                  alt="Engineering Laboratory"
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  style={{ filter: 'saturate(0.85) contrast(1.02)' }}
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{ background: `linear-gradient(to top, ${C.navy} 0%, rgba(11,37,69,0.4) 60%, transparent 100%)` }}
+                />
+                <div className="relative p-6 md:p-8 z-10">
+                  <span
+                    className="text-[10px] font-bold tracking-widest uppercase mb-2 block"
+                    style={{ color: C.gold }}
+                  >
+                    {featuredCards[1].label}
+                  </span>
+                  <h3 className="text-white text-2xl md:text-3xl font-display font-bold leading-tight">
+                    {featuredCards[1].title}
+                  </h3>
+                  <p
+                    className="text-xs mt-3 font-sans font-medium max-w-xl"
+                    style={{ color: C.white80 }}
+                  >
+                    {featuredCards[1].description}
+                  </p>
+                </div>
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -580,90 +621,70 @@ const Home: React.FC = () => {
               className="text-[10px] uppercase font-bold tracking-widest block mb-1"
               style={{ color: C.gold }}
             >
-              Academics
+              {academicsSection.label}
             </span>
             <h2
               className="text-2xl md:text-3xl font-display font-bold tracking-tight uppercase mb-2"
               style={{ color: C.navy }}
             >
-              ACADEMIC{' '}
+              {academicsSection.heading}{' '}
               <span className="font-serif italic font-semibold" style={{ color: C.navy }}>
-                PROGRAMS
+                {academicsSection.accentText}
               </span>
             </h2>
             <div className="w-12 h-[2px] mx-auto mb-4" style={{ backgroundColor: C.gold }} />
             <p className="text-sm max-w-xl mx-auto font-sans" style={{ color: C.navy60 }}>
-              Rigorous, comprehensive, and outcome-oriented educational journeys designed to cultivate
-              leaders.
+              {academicsSection.description}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                Icon: BookOpen,
-                title: 'Undergraduate Programs',
-                desc: 'Four-year B.Tech and B.Pharm degrees built on core engineering principles, practical lab exposure, and direct industry research.',
-                to: '/academics/courses/ug',
-                cta: 'Explore UG Degrees',
-              },
-              {
-                Icon: GraduationCap,
-                title: 'Postgraduate Programs',
-                desc: 'M.Tech, M.E., MBA, and MCA programs designed for deeper industrial expertise, technical leadership, and practical analytical mastery.',
-                to: '/academics/courses/pg',
-                cta: 'Explore PG Degrees',
-              },
-              {
-                Icon: Microscope,
-                title: 'Doctoral & Research',
-                desc: 'Rigorous Ph.D. programs across technical sciences supported by advanced laboratories, instrumentation centres, and government grants.',
-                to: '/academics/courses/phd',
-                cta: 'Explore Research Paths',
-              },
-            ].map(({ Icon, title, desc, to, cta }) => (
-              <div
-                key={title}
-                className="p-6 bg-white rounded flex flex-col group hover:shadow-md transition-all duration-200 border"
-                style={{ borderColor: C.navy15 }}
-              >
-                {/* Icon box — navy bg on hover */}
+            {academicsSection.programs.map((prog) => {
+              const Icon = ICON_MAP[prog.iconName] ?? BookOpen
+              return (
                 <div
-                  className="w-10 h-10 flex items-center justify-center rounded mb-6 transition-colors duration-200 border"
-                  style={{ backgroundColor: C.white, borderColor: C.navy15, color: C.navy }}
-                  onMouseEnter={e => {
-                    const el = e.currentTarget as HTMLElement
-                    el.style.backgroundColor = C.navy
-                    el.style.borderColor = C.navy
-                    el.style.color = C.white
-                  }}
-                  onMouseLeave={e => {
-                    const el = e.currentTarget as HTMLElement
-                    el.style.backgroundColor = C.white
-                    el.style.borderColor = C.navy15
-                    el.style.color = C.navy
-                  }}
+                  key={prog.id}
+                  className="p-6 bg-white rounded flex flex-col group hover:shadow-md transition-all duration-200 border"
+                  style={{ borderColor: C.navy15 }}
                 >
-                  <Icon size={20} strokeWidth={1.5} />
+                  {/* Icon box — navy bg on hover */}
+                  <div
+                    className="w-10 h-10 flex items-center justify-center rounded mb-6 transition-colors duration-200 border"
+                    style={{ backgroundColor: C.white, borderColor: C.navy15, color: C.navy }}
+                    onMouseEnter={e => {
+                      const el = e.currentTarget as HTMLElement
+                      el.style.backgroundColor = C.navy
+                      el.style.borderColor = C.navy
+                      el.style.color = C.white
+                    }}
+                    onMouseLeave={e => {
+                      const el = e.currentTarget as HTMLElement
+                      el.style.backgroundColor = C.white
+                      el.style.borderColor = C.navy15
+                      el.style.color = C.navy
+                    }}
+                  >
+                    <Icon size={20} strokeWidth={1.5} />
+                  </div>
+                  <h3
+                    className="text-lg font-display font-bold mb-3 group-hover:underline"
+                    style={{ color: C.navy }}
+                  >
+                    {prog.title}
+                  </h3>
+                  <p className="text-xs leading-relaxed mb-6 font-sans font-medium" style={{ color: C.navy60 }}>
+                    {prog.description}
+                  </p>
+                  <Link
+                    to={prog.to}
+                    className="font-bold text-[11px] uppercase tracking-wider mt-auto flex items-center hover:underline"
+                    style={{ color: C.navy }}
+                  >
+                    {prog.ctaLabel} <ChevronRight size={12} className="ml-1" />
+                  </Link>
                 </div>
-                <h3
-                  className="text-lg font-display font-bold mb-3 group-hover:underline"
-                  style={{ color: C.navy }}
-                >
-                  {title}
-                </h3>
-                <p className="text-xs leading-relaxed mb-6 font-sans font-medium" style={{ color: C.navy60 }}>
-                  {desc}
-                </p>
-                <Link
-                  to={to}
-                  className="font-bold text-[11px] uppercase tracking-wider mt-auto flex items-center hover:underline"
-                  style={{ color: C.navy }}
-                >
-                  {cta} <ChevronRight size={12} className="ml-1" />
-                </Link>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -683,20 +704,20 @@ const Home: React.FC = () => {
                 className="text-[10px] uppercase font-bold tracking-widest block mb-1"
                 style={{ color: C.gold }}
               >
-                Departments & Schools
+                {departmentsSection.label}
               </span>
               <h2
                 className="text-xl md:text-2xl font-display font-bold tracking-tight uppercase"
                 style={{ color: C.navy }}
               >
-                ACADEMIC{' '}
+                {departmentsSection.heading}{' '}
                 <span className="font-serif italic font-semibold" style={{ color: C.navy }}>
-                  DEPARTMENTS
+                  {departmentsSection.accentText}
                 </span>
               </h2>
             </div>
             <Link
-              to="/departments"
+              to={departmentsSection.showAllLink}
               className="font-semibold hover:underline text-xs tracking-wider uppercase hidden md:block"
               style={{ color: C.navy }}
             >
@@ -705,20 +726,7 @@ const Home: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[
-              { name: 'Computer Engineering',          slug: 'computer-engineering' },
-              { name: 'Information Technology',        slug: 'information-technology' },
-              { name: 'Civil Engineering',             slug: 'civil-engineering' },
-              { name: 'Mechanical Engineering',        slug: 'mechanical-engineering' },
-              { name: 'Electrical Engineering',        slug: 'electrical-engineering' },
-              { name: 'Electronics & Instrumentation', slug: 'electronics-instrumentation' },
-              { name: 'Electronics & Telecomm.',       slug: 'electronics-telecommunication' },
-              { name: 'Industrial & Production',       slug: 'industrial-production' },
-              { name: 'Applied Physics',               slug: 'applied-physics' },
-              { name: 'Applied Chemistry',             slug: 'applied-chemistry' },
-              { name: 'Applied Mathematics',           slug: 'applied-mathematics' },
-              { name: 'Pharmacy',                      slug: 'pharmacy' },
-            ].map((dept, idx) => (
+            {departmentsSection.items.map((dept, idx) => (
               <Link
                 key={idx}
                 to={`/departments/${dept.slug}`}
@@ -766,7 +774,7 @@ const Home: React.FC = () => {
         <div
           className="absolute inset-0 w-full h-full"
           style={{
-            backgroundImage: 'url(/assets/campus.jpg), url(https://picsum.photos/seed/sgsitscampus/1600/600)',
+            backgroundImage: `url(${statsSection.backgroundImage}), url(${statsSection.fallbackImage})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center 40%',
             backgroundAttachment: 'fixed',
@@ -779,12 +787,7 @@ const Home: React.FC = () => {
         <div className="relative z-10 h-full flex items-center justify-center">
           <div className="max-w-[1400px] w-full mx-auto px-4 lg:px-12">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-0 text-center">
-              {[
-                { val: '10,000+', label: 'Students' },
-                { val: '600+',    label: 'Faculty' },
-                { val: '700+',    label: 'Staff' },
-                { val: '70+',     label: 'Years of Excellence' },
-              ].map((s, i, arr) => (
+              {statsSection.items.map((s, i, arr) => (
                 <div
                   key={s.label}
                   className="px-4 py-4"
@@ -817,74 +820,69 @@ const Home: React.FC = () => {
               className="text-[10px] uppercase font-bold tracking-widest block mb-1"
               style={{ color: C.gold }}
             >
-              Student Experience
+              {campusLifeSection.label}
             </span>
             <h2
               className="text-2xl md:text-3xl font-display font-bold tracking-tight uppercase mb-2"
               style={{ color: C.navy }}
             >
-              CAMPUS{' '}
+              {campusLifeSection.heading}{' '}
               <span className="font-serif italic font-semibold" style={{ color: C.navy }}>
-                LIFE
+                {campusLifeSection.accentText}
               </span>
             </h2>
             <div className="w-12 h-[2px] mx-auto mb-4" style={{ backgroundColor: C.gold }} />
             <p className="text-sm max-w-xl mx-auto font-sans" style={{ color: C.navy60 }}>
-              A vibrant community balancing rigorous technical education with diverse cultural and
-              athletic pursuits.
+              {campusLifeSection.description}
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { title: 'Central Library',    desc: 'Over 50,000 volumes, e-journals, and digital resources. Access to IEEE, Elsevier, Springer, DELNET.', icon: BookOpen, img: 'https://picsum.photos/seed/sgslib/600/400',    to: '/facilities/library' },
-              { title: 'Computer Center',    desc: 'High-speed internet, 500+ computers, servers, 24×7 network access for students and faculty.',           icon: Microscope, img: 'https://picsum.photos/seed/sgslab/600/400', to: '/facilities/computer-center' },
-              { title: 'Sports Complex',     desc: 'Cricket, football, basketball, badminton, table tennis, and a fully equipped gymnasium.',                icon: Users,    img: 'https://picsum.photos/seed/sgssports/600/400',  to: '/facilities/sports' },
-              { title: 'Student Activities', desc: 'IEEE, Coding Club, Robotics, and literary clubs nurturing talent beyond academics.',                     icon: Users,    img: 'https://picsum.photos/seed/sgsclubs/600/400',   to: '/students/activities' },
-              { title: 'Hostel Facilities',  desc: 'Separate Boys and Girls hostels with Wi-Fi, mess, laundry, common rooms — a home away from home.',       icon: Building, img: 'https://picsum.photos/seed/sgshostel/600/400',  to: '/facilities/hostel/boys' },
-              { title: 'AICTE IDEA Lab',     desc: '3D printers, laser cutters, AR/VR headsets, IoT kits and electronics prototyping — fostering maker culture.', icon: FileText, img: 'https://picsum.photos/seed/sgsaudi/600/400', to: '/facilities/idea-lab' },
-            ].map((facility) => (
-              <Link
-                key={facility.title}
-                to={facility.to}
-                className="bg-white rounded overflow-hidden group hover:shadow-md transition-all duration-200 flex flex-col border"
-                style={{ borderColor: C.navy15 }}
-              >
-                <div
-                  className="h-48 overflow-hidden relative border-b"
-                  style={{ borderColor: C.navy10 }}
+            {campusLifeSection.facilities.map((facility) => {
+              const FacIcon = ICON_MAP[facility.iconName] ?? Building
+              return (
+                <Link
+                  key={facility.id}
+                  to={facility.to}
+                  className="bg-white rounded overflow-hidden group hover:shadow-md transition-all duration-200 flex flex-col border"
+                  style={{ borderColor: C.navy15 }}
                 >
-                  <img
-                    src={facility.img}
-                    alt={facility.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  {/* Subtle navy overlay that fades on hover */}
                   <div
-                    className="absolute inset-0 transition-all duration-300 group-hover:opacity-0"
-                    style={{ backgroundColor: C.navy15 }}
-                  />
-                </div>
-                <div className="p-5 flex flex-col grow">
-                  <h3
-                    className="text-base font-display font-bold mb-2 flex items-center group-hover:underline"
-                    style={{ color: C.navy }}
+                    className="h-48 overflow-hidden relative border-b"
+                    style={{ borderColor: C.navy10 }}
                   >
-                    {/* Icon uses gold accent */}
-                    <facility.icon
-                      size={16}
-                      className="mr-2 shrink-0"
-                      style={{ color: C.gold }}
-                      strokeWidth={1.75}
+                    <img
+                      src={facility.imageUrl}
+                      alt={facility.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    {facility.title}
-                  </h3>
-                  <p className="text-xs leading-relaxed font-sans font-medium" style={{ color: C.navy60 }}>
-                    {facility.desc}
-                  </p>
-                </div>
-              </Link>
-            ))}
+                    {/* Subtle navy overlay that fades on hover */}
+                    <div
+                      className="absolute inset-0 transition-all duration-300 group-hover:opacity-0"
+                      style={{ backgroundColor: C.navy15 }}
+                    />
+                  </div>
+                  <div className="p-5 flex flex-col grow">
+                    <h3
+                      className="text-base font-display font-bold mb-2 flex items-center group-hover:underline"
+                      style={{ color: C.navy }}
+                    >
+                      {/* Icon uses gold accent */}
+                      <FacIcon
+                        size={16}
+                        className="mr-2 shrink-0"
+                        style={{ color: C.gold }}
+                        strokeWidth={1.75}
+                      />
+                      {facility.title}
+                    </h3>
+                    <p className="text-xs leading-relaxed font-sans font-medium" style={{ color: C.navy60 }}>
+                      {facility.description}
+                    </p>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -904,11 +902,11 @@ const Home: React.FC = () => {
                   className="text-xl md:text-2xl font-display font-bold uppercase tracking-tight"
                   style={{ color: C.navy }}
                 >
-                  FAQs
+                  {faqsSection.heading}
                 </h2>
                 {/* "View all" — now a real link */}
                 <Link
-                  to="/policy/help"
+                  to={faqsSection.viewAllLink}
                   className="text-xs font-bold border rounded px-2 py-0.5 hover:opacity-80 transition-opacity"
                   style={{ borderColor: C.navy, color: C.navy }}
                 >
@@ -919,49 +917,18 @@ const Home: React.FC = () => {
                 className="text-[10px] uppercase font-bold tracking-widest mb-1"
                 style={{ color: C.gold }}
               >
-                Frequently Asked Questions
+                {faqsSection.subLabel}
               </p>
               <div className="w-8 h-[2px] mb-6" style={{ backgroundColor: C.gold }} />
 
               <div>
-                {[
-                  {
-                    q: 'What are the eligibility criteria for B.Tech admissions?',
-                    a: 'Admissions are via JEE Main counselling (MP State). Candidates must have passed 10+2 with PCM and a minimum of 45% marks (40% for SC/ST).',
-                    contact: null,
-                  },
-                  {
-                    q: 'Whom to contact for Postgraduate admissions?',
-                    a: null,
-                    contact: { name: 'Office of Academics (PG)', phone: '+91-731-2431234', email: 'pg@sgsits.ac.in' },
-                  },
-                  {
-                    q: 'Whom to contact for Undergraduate admissions?',
-                    a: 'Contact the Admission Cell at admissions@sgsits.ac.in or call +91-731-2582100.',
-                    contact: null,
-                  },
-                  {
-                    q: 'Whom to contact for queries related to GATE?',
-                    a: 'PG Admission queries related to GATE scores are handled by the PG Admission Cell. Email pg@sgsits.ac.in.',
-                    contact: null,
-                  },
-                  {
-                    q: 'How to pay fees online?',
-                    a: 'Fees can be paid via the institute ERP portal using net banking, debit/credit card or UPI. Visit the Student Login portal for instructions.',
-                    contact: null,
-                  },
-                  {
-                    q: 'Whom to contact for Faculty Recruitment?',
-                    a: 'Faculty recruitment queries should be addressed to the Registrar\'s office at registrar@sgsits.ac.in.',
-                    contact: null,
-                  },
-                ].map((faq, i) => (
+                {faqsSection.items.map((faq: FaqItemData) => (
                   <FaqItem
-                    key={i}
-                    question={faq.q}
-                    answer={faq.a}
+                    key={faq.id}
+                    question={faq.question}
+                    answer={faq.answer}
                     contact={faq.contact}
-                    defaultOpen={i === 1}
+                    defaultOpen={faq.defaultOpen}
                   />
                 ))}
               </div>
@@ -975,12 +942,12 @@ const Home: React.FC = () => {
                     className="text-xl md:text-2xl font-display font-bold uppercase tracking-tight"
                     style={{ color: C.navy }}
                   >
-                    Photo{' '}
-                    <span style={{ color: C.gold }}>Gallery</span>
+                    {gallerySection.heading}{' '}
+                    <span style={{ color: C.gold }}>{gallerySection.accentText}</span>
                   </h2>
                 </div>
                 <Link
-                  to="/explore/gallery"
+                  to={gallerySection.viewAllLink}
                   className="text-xs font-bold border rounded px-2 py-0.5 hover:opacity-80 transition-opacity"
                   style={{ borderColor: C.navy, color: C.navy }}
                 >
@@ -991,26 +958,22 @@ const Home: React.FC = () => {
                 className="text-[10px] uppercase font-bold tracking-widest mb-1"
                 style={{ color: C.gold }}
               >
-                Multi-Hued Reflections
+                {gallerySection.subLabel}
               </p>
               <div className="w-8 h-[2px] mb-6" style={{ backgroundColor: C.gold }} />
 
               <div className="grid grid-cols-4 gap-1.5">
-                {[
-                  'sgscamp1','sgscamp2','sgscamp3','sgscamp4',
-                  'sgscamp5','sgscamp6','sgscamp7','sgscamp8',
-                  'sgscamp9','sgscamp10','sgscamp11','sgscamp12',
-                ].map((seed, idx) => (
+                {thumbnails.map((thumb, idx) => (
                   // Each thumbnail is now a real Link
                   <Link
                     key={idx}
-                    to="/explore/gallery"
+                    to={thumb.to}
                     className="aspect-square overflow-hidden rounded-sm group block"
                     style={{ border: `1px solid ${C.navy10}` }}
                   >
                     <img
-                      src={`https://picsum.photos/seed/${seed}/200/200`}
-                      alt={`Campus ${idx + 1}`}
+                      src={thumb.imageUrl}
+                      alt={thumb.alt}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </Link>

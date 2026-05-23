@@ -1,7 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useUIStore } from '../../../store/uiStore'
-import { navItems } from '../../../constants/navItems'
+// ─── Service layer — the ONLY data source ────────────────────────────────────
+import { navService, navItemsDefault } from '../../../services/navService'
+import type { NavItem } from '../../../services/navService'
 import TopAccessibilityBar from './TopAccessibilityBar'
 import Logo from './Logo'
 import { Menu, X, ChevronDown, Search, ArrowRight } from 'lucide-react'
@@ -13,6 +15,26 @@ const Header: React.FC = () => {
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedMobileItem, setExpandedMobileItem] = useState<string | null>(null)
+
+  // ── Navigation items — loaded through the service layer ───────────────────
+  const [navItems, setNavItems] = useState<NavItem[]>(navItemsDefault)
+
+  useEffect(() => {
+    navService.getNavItems().then(setNavItems)
+  }, [])
+
+  // ── ERP Portal link — loaded through top-bar settings ────────────────────
+  const [erpUrl, setErpUrl] = useState<string>('https://www.sgsits.ac.in')
+  const [erpLabel, setErpLabel] = useState<string>('ERP Portal')
+
+  useEffect(() => {
+    import('../../../services/settingsService').then(({ settingsService: svc }) => {
+      svc.getTopBarData().then(d => {
+        setErpUrl(d.erpPortalUrl)
+        setErpLabel(d.erpPortalLabel)
+      })
+    })
+  }, [])
 
   return (
     <header className="w-full z-50 relative">
@@ -109,12 +131,12 @@ const Header: React.FC = () => {
 
             {/* Quick Portal Access button */}
             <a
-              href="https://www.sgsits.ac.in"
+              href={erpUrl}
               target="_blank"
               rel="noreferrer"
               className="ml-2 px-3.5 py-1.5 text-xs font-semibold text-white bg-brand-burgundy hover:bg-brand-burgundy/90 active:scale-98 border border-brand-burgundy rounded-md shadow-sm transition-all duration-150"
             >
-              ERP Portal
+              {erpLabel}
             </a>
           </nav>
 

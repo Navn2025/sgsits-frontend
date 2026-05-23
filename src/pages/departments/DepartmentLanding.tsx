@@ -1,31 +1,30 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronRight, Users } from 'lucide-react'
-import { departmentsList } from '../../constants/departmentsList'
 
-const engineeringDepts = departmentsList.filter(d =>
-  ['computer-engineering', 'information-technology', 'civil-engineering', 'mechanical-engineering',
-   'electrical-engineering', 'electronics-instrumentation', 'electronics-telecommunication',
-   'industrial-production', 'biomedical-engineering'].includes(d.slug)
-)
-const scienceDepts = departmentsList.filter(d =>
-  ['applied-chemistry', 'applied-mathematics', 'applied-physics', 'humanities'].includes(d.slug)
-)
-const otherDepts = departmentsList.filter(d =>
-  ['management-studies', 'pharmacy', 'computer-technology', 'coebg'].includes(d.slug)
-)
+// ─── Service layer — the ONLY data source ────────────────────────────────────
+import { departmentService, departmentsDefault } from '../../services/departmentService'
+import type { DepartmentSummary } from '../../services/departmentService'
+
+const ENGINEERING_SLUGS = [
+  'computer-engineering', 'information-technology', 'civil-engineering', 'mechanical-engineering',
+  'electrical-engineering', 'electronics-instrumentation', 'electronics-telecommunication',
+  'industrial-production', 'biomedical-engineering',
+]
+const SCIENCE_SLUGS = ['applied-chemistry', 'applied-mathematics', 'applied-physics', 'humanities']
+const OTHER_SLUGS   = ['management-studies', 'pharmacy', 'computer-technology', 'coebg']
 
 const programBadgeColor = (prog: string) => {
-  if (prog === 'UG') return 'bg-[#0b2545]/5 text-[#0b2545] border-[#0b2545]/20'
-  if (prog === 'PG') return 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25'
-  if (prog === 'PhD') return 'bg-[#bfa15f]/10 text-[#bfa15f] border-[#bfa15f]/30'
+  if (prog === 'UG')   return 'bg-[#0b2545]/5 text-[#0b2545] border-[#0b2545]/20'
+  if (prog === 'PG')   return 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25'
+  if (prog === 'PhD')  return 'bg-[#bfa15f]/10 text-[#bfa15f] border-[#bfa15f]/30'
   if (prog === 'PTDC') return 'bg-[#bfa15f]/15 text-[#bfa15f] border-[#bfa15f]/40'
   return 'bg-slate-50 text-slate-600 border-slate-200'
 }
 
 interface DeptGridProps {
   title: string
-  depts: typeof departmentsList
+  depts: DepartmentSummary[]
 }
 
 const DeptGrid: React.FC<DeptGridProps> = ({ title, depts }) => (
@@ -70,6 +69,17 @@ const DeptGrid: React.FC<DeptGridProps> = ({ title, depts }) => (
 )
 
 const DepartmentLanding: React.FC = () => {
+  // Initialize with synchronous defaults to avoid flash
+  const [allDepts, setAllDepts] = useState<DepartmentSummary[]>(departmentsDefault)
+
+  useEffect(() => {
+    departmentService.getDepartments().then(setAllDepts)
+  }, [])
+
+  const engineeringDepts = allDepts.filter(d => ENGINEERING_SLUGS.includes(d.slug))
+  const scienceDepts     = allDepts.filter(d => SCIENCE_SLUGS.includes(d.slug))
+  const otherDepts       = allDepts.filter(d => OTHER_SLUGS.includes(d.slug))
+
   return (
     <div className="max-w-[1400px] mx-auto px-4 lg:px-12 py-8">
       {/* Header */}
@@ -84,8 +94,8 @@ const DepartmentLanding: React.FC = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
         {[
-          { value: '17', label: 'Departments' },
-          { value: '200+', label: 'Faculty Members' },
+          { value: '17',     label: 'Departments' },
+          { value: '200+',   label: 'Faculty Members' },
           { value: '3,000+', label: 'Students' },
           { value: '70+ Years', label: 'of Excellence' },
         ].map((s) => (
@@ -98,9 +108,9 @@ const DepartmentLanding: React.FC = () => {
 
       {/* Department Grids */}
       <div className="space-y-10">
-        <DeptGrid title="Engineering Departments" depts={engineeringDepts} />
-        <DeptGrid title="Science Departments" depts={scienceDepts} />
-        <DeptGrid title="Management, Pharmacy & Other" depts={otherDepts} />
+        <DeptGrid title="Engineering Departments"        depts={engineeringDepts} />
+        <DeptGrid title="Science Departments"            depts={scienceDepts} />
+        <DeptGrid title="Management, Pharmacy & Other"   depts={otherDepts} />
       </div>
     </div>
   )

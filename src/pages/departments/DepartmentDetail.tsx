@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, Link, Navigate } from 'react-router-dom'
-import { departmentsList } from '../../constants/departmentsList'
+// ─── Service layer — the ONLY data source ────────────────────────────────────
+import { departmentService } from '../../services/departmentService'
+import type { DepartmentSummary } from '../../services/departmentService'
 import {
   BookOpen,
   Award,
@@ -44,14 +46,23 @@ const DepartmentDetail: React.FC = () => {
     url: '',
     title: ''
   })
+  // Department data loaded through the service layer
+  const [dept, setDept] = useState<DepartmentSummary | null | undefined>(undefined)
 
   // Reset faculty page to 1 on department changes
-  React.useEffect(() => {
+  useEffect(() => {
     setFacultyPage(1)
   }, [slug])
 
-  // Find department metadata
-  const dept = departmentsList.find((d) => d.slug === slug)
+  // Load department via service on slug change
+  useEffect(() => {
+    if (!slug) { setDept(null); return }
+    departmentService.getDepartmentBySlug(slug).then(setDept)
+    // REAL: departmentService.getDepartmentBySlug(slug).then(setDept)
+  }, [slug])
+
+  // Loading state — show nothing until service resolves
+  if (dept === undefined) return null
 
   if (!dept) {
     return <Navigate to="/departments" replace />
