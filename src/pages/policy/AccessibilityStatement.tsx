@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
+import PageSeo from '../../components/global/PageSeo'
 import { ChevronRight, Eye, CheckCircle } from 'lucide-react';
 
 const features = [
@@ -42,6 +43,7 @@ Contact the SGSITS Accessibility Coordinator: accessibility@sgsits.ac.in | Phone
 export default function AccessibilityStatement() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <PageSeo pageKey="policy/accessibility" />
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-2 text-sm text-white/70 mb-3">

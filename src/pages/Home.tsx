@@ -15,11 +15,15 @@ import {
   Landmark,
 } from 'lucide-react'
 
+// ─── SEO ─────────────────────────────────────────────────────────────────────
+import PageSeo from '../components/global/PageSeo'
+
 // ─── Services — the ONLY way components access data ─────────────────────────
 import { homePageDefaults, contentService }      from '../services/contentService'
 import { noticesService }                         from '../services/noticesService'
 import { newsService }                            from '../services/newsService'
 import { mediaService }                           from '../services/mediaService'
+import { uiLabelsService, uiLabelsDefaults }      from '../services/uiLabelsService'
 import type {
   HomePageData,
   HeroTileData,
@@ -28,6 +32,7 @@ import type {
 } from '../mock/home/homeData'
 import type { HomeNewsCard, FeaturedNewsCard }    from '../services/newsService'
 import type { GalleryThumbnail }                  from '../services/mediaService'
+import type { UiLabelsConfig }                    from '../services/uiLabelsService'
 
 // ─── Palette constants — only these three colours are used anywhere in this file ───
 const C = {
@@ -132,6 +137,8 @@ const Home: React.FC = () => {
   const [newsCards, setNewsCards]           = useState<HomeNewsCard[]>([])
   const [featuredCards, setFeaturedCards]   = useState<FeaturedNewsCard[]>([])
   const [thumbnails, setThumbnails]         = useState<GalleryThumbnail[]>([])
+  // ── UI labels — small strings all backend-controllable ───────────────────
+  const [labels, setLabels]                 = useState<UiLabelsConfig>(uiLabelsDefaults)
 
   // ── Resolve icon names → React components from the raw tile data ─────────
   const resolveIcons = (tiles: HeroTileData[]): HeroTile[] =>
@@ -147,6 +154,7 @@ const Home: React.FC = () => {
         cards,
         featured,
         thumbs,
+        loadedLabels,
       ] = await Promise.all([
         contentService.getHomePage(),
         contentService.getHeroTiles(),
@@ -154,6 +162,7 @@ const Home: React.FC = () => {
         newsService.getHomeNewsCards(),
         newsService.getFeaturedNewsCards(),
         mediaService.getHomeGalleryThumbnails(),
+        uiLabelsService.getUiLabels(),
       ])
 
       setPageData(home)
@@ -162,6 +171,7 @@ const Home: React.FC = () => {
       setNewsCards(cards)
       setFeaturedCards(featured)
       setThumbnails(thumbs)
+      setLabels(loadedLabels)
     }
 
     load()
@@ -188,39 +198,61 @@ const Home: React.FC = () => {
     gallerySection,
   } = pageData
 
+  // ── Section Config Rendering Engine ──────────────────────────────────────
+  // pageData.sections[] drives which sections appear and in which order.
+  // Admin can enable/disable any section from the CMS without code changes.
+  //
+  // NOTE: 'hero' renders both the hero banner AND hero tiles (visually coupled).
+  //       'faqs_gallery' renders FAQs + Gallery in a 2-col grid (same <section>).
+  //
+  // Full dynamic reordering would require each section to be a named render
+  // function fed into a SECTION_RENDERERS map — currently ordered sections are
+  // rendered inline below in the JSX. The ordering engine is preserved in the
+  // sections data ready for a future render-function refactor.
+  //
+  // Future API: PUT /api/content/home/sections/reorder
+
+  /** Returns true if this section type is enabled in the CMS config */
+  const isSectionEnabled = (type: string): boolean =>
+    pageData.sections.some(s => s.type === type && s.enabled)
+
   return (
     <div className="flex flex-col bg-white">
+      {/* SEO — page title, meta tags, OG, canonical (from seoService) */}
+      <PageSeo pageKey="home" />
 
-      {/* ══════ HERO ══════ */}
-      <div className="sticky top-0 w-full h-[320px] sm:h-[400px] md:h-[500px] z-0">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: hero.imageUrl,
-            backgroundPosition: hero.imagePosition,
-            filter: 'brightness(0.9) contrast(1.02) saturate(0.95)',
-          }}
-        />
-        {/* Navy overlay — uses palette colour */}
-        <div className="absolute inset-0" style={{ backgroundColor: C.navy45 }} />
-        <div className="relative z-10 h-full flex items-center justify-center px-4 text-center">
-          <div className="max-w-5xl">
-            <p
-              className="uppercase tracking-[0.18em] text-[10px] sm:text-xs mb-3 font-semibold font-sans"
-              style={{ color: C.white80 }}
-            >
-              {hero.instituteName}
-            </p>
-            <h1 className="text-white uppercase font-display font-semibold text-2xl sm:text-4xl md:text-5xl leading-[1.1] tracking-[0.04em] drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)]">
-              {hero.welcomeText}<br />
-              <span className="font-display font-bold italic" style={{ color: C.gold }}>{hero.accentText}</span>
-            </h1>
+      {/* ══════ HERO + HERO TILES ══════ — enabled/disabled as one unit (visually coupled) */}
+      {isSectionEnabled('hero') && (
+        <>
+          <div className="sticky top-0 w-full h-[320px] sm:h-[400px] md:h-[500px] z-0">
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage: hero.imageUrl,
+                backgroundPosition: hero.imagePosition,
+                filter: 'brightness(0.9) contrast(1.02) saturate(0.95)',
+              }}
+            />
+            {/* Navy overlay — uses palette colour */}
+            <div className="absolute inset-0" style={{ backgroundColor: C.navy45 }} />
+            <div className="relative z-10 h-full flex items-center justify-center px-4 text-center">
+              <div className="max-w-5xl">
+                <p
+                  className="uppercase tracking-[0.18em] text-[10px] sm:text-xs mb-3 font-semibold font-sans"
+                  style={{ color: C.white80 }}
+                >
+                  {hero.instituteName}
+                </p>
+                <h1 className="text-white uppercase font-display font-semibold text-2xl sm:text-4xl md:text-5xl leading-[1.1] tracking-[0.04em] drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)]">
+                  {hero.welcomeText}<br />
+                  <span className="font-display font-bold italic" style={{ color: C.gold }}>{hero.accentText}</span>
+                </h1>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* ══════ HERO TILES — all clickable ══════ */}
-      <div className="relative z-10 mt-[-48px] sm:mt-[-80px] md:mt-[-100px] pb-0 bg-transparent">
+          {/* ══════ HERO TILES — all clickable ══════ */}
+          <div className="relative z-10 mt-[-48px] sm:mt-[-80px] md:mt-[-100px] pb-0 bg-transparent">
         <div className="relative mx-auto max-w-[1400px] px-4 lg:px-12">
           <div
             className="grid grid-cols-2 lg:grid-cols-4 shadow-sm rounded overflow-hidden divide-x"
@@ -255,9 +287,11 @@ const Home: React.FC = () => {
           </div>
         </div>
       </div>
+        </>
+      )}
 
       {/* ══════ ABOUT + DIRECTOR + ANNOUNCEMENTS ══════ */}
-      <section
+      {isSectionEnabled('about') && <section
         className="bg-white py-10 md:py-14 relative z-10"
         style={{ borderBottom: `1px solid ${C.navy10}` }}
       >
@@ -375,7 +409,8 @@ const Home: React.FC = () => {
               >
                 <h3 className="font-sans font-bold text-sm tracking-widest uppercase flex items-center text-white">
                   <Calendar size={16} className="mr-2" style={{ color: C.gold }} />
-                  Announcements
+                  {/* Heading — from uiLabelsService (homepage.announcementsHeading) */}
+                  {labels.homepage.announcementsHeading}
                 </h3>
                 <span
                   className="text-[9px] uppercase font-bold px-2 py-0.5 rounded tracking-wider"
@@ -385,7 +420,8 @@ const Home: React.FC = () => {
                     border: `1px solid ${C.gold20}`,
                   }}
                 >
-                  Live
+                  {/* Badge — from uiLabelsService (homepage.announcementsBadge) */}
+                  {labels.homepage.announcementsBadge}
                 </span>
               </div>
 
@@ -451,21 +487,23 @@ const Home: React.FC = () => {
                 className="p-4 bg-white flex justify-center mt-auto border-t"
                 style={{ borderColor: C.navy10 }}
               >
+                {/* "View All Notices" — from uiLabelsService (homepage.viewAllNoticesLabel) */}
                 <Link
                   to="/notices"
                   className="text-xs font-semibold hover:underline flex items-center tracking-wider uppercase"
                   style={{ color: C.navy }}
                 >
-                  View All Notices <ChevronRight size={12} className="ml-1" />
+                  {labels.homepage.viewAllNoticesLabel} <ChevronRight size={12} className="ml-1" />
                 </Link>
               </div>
             </div>
           </div>
         </div>
       </section>
+      }
 
       {/* ══════ CAMPUS NEWS ══════ */}
-      <section
+      {isSectionEnabled('news') && <section
         className="bg-white py-16 relative z-10"
         style={{ borderBottom: `1px solid ${C.navy10}` }}
       >
@@ -609,9 +647,10 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+      }
 
       {/* ══════ ACADEMIC PROGRAMS ══════ */}
-      <section
+      {isSectionEnabled('academics') && <section
         className="bg-white py-14 relative z-10"
         style={{ borderBottom: `1px solid ${C.navy10}` }}
       >
@@ -688,9 +727,10 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+      }
 
       {/* ══════ DEPARTMENTS ══════ */}
-      <section
+      {isSectionEnabled('departments') && <section
         className="py-16 bg-white relative z-10"
         style={{ borderBottom: `1px solid ${C.navy10}` }}
       >
@@ -716,12 +756,13 @@ const Home: React.FC = () => {
                 </span>
               </h2>
             </div>
+            {/* "View All Departments →" — from uiLabelsService (homepage.viewAllDepartmentsLabel) */}
             <Link
               to={departmentsSection.showAllLink}
               className="font-semibold hover:underline text-xs tracking-wider uppercase hidden md:block"
               style={{ color: C.navy }}
             >
-              View All Departments &rarr;
+              {labels.homepage.viewAllDepartmentsLabel}
             </Link>
           </div>
 
@@ -768,9 +809,10 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+      }
 
       {/* ══════ STATS BANNER (parallax) ══════ */}
-      <section className="relative z-10 overflow-hidden" style={{ height: '280px' }}>
+      {isSectionEnabled('stats') && <section className="relative z-10 overflow-hidden" style={{ height: '280px' }}>
         <div
           className="absolute inset-0 w-full h-full"
           style={{
@@ -811,9 +853,10 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+      }
 
       {/* ══════ CAMPUS LIFE ══════ */}
-      <section className="py-16 bg-white relative z-10">
+      {isSectionEnabled('campus_life') && <section className="py-16 bg-white relative z-10">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-12">
           <div className="text-center mb-12">
             <span
@@ -886,9 +929,10 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+      }
 
       {/* ══════ FAQs + GALLERY ══════ */}
-      <section
+      {isSectionEnabled('faqs_gallery') && <section
         className="relative z-10"
         style={{ backgroundColor: C.white, borderTop: `1px solid ${C.navy10}` }}
       >
@@ -904,13 +948,13 @@ const Home: React.FC = () => {
                 >
                   {faqsSection.heading}
                 </h2>
-                {/* "View all" — now a real link */}
+                {/* "View all" FAQs — from uiLabelsService (homepage.viewAllFaqsLabel) */}
                 <Link
                   to={faqsSection.viewAllLink}
                   className="text-xs font-bold border rounded px-2 py-0.5 hover:opacity-80 transition-opacity"
                   style={{ borderColor: C.navy, color: C.navy }}
                 >
-                  View all
+                  {labels.homepage.viewAllFaqsLabel}
                 </Link>
               </div>
               <p
@@ -946,12 +990,13 @@ const Home: React.FC = () => {
                     <span style={{ color: C.gold }}>{gallerySection.accentText}</span>
                   </h2>
                 </div>
+                {/* "View All" Gallery — from uiLabelsService (homepage.viewAllGalleryLabel) */}
                 <Link
                   to={gallerySection.viewAllLink}
                   className="text-xs font-bold border rounded px-2 py-0.5 hover:opacity-80 transition-opacity"
                   style={{ borderColor: C.navy, color: C.navy }}
                 >
-                  View All
+                  {labels.homepage.viewAllGalleryLabel}
                 </Link>
               </div>
               <p
@@ -984,6 +1029,7 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+      }
     </div>
   )
 }

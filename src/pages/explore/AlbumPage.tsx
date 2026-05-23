@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, ZoomIn, X, ChevronLeft, ChevronRight, Calendar, Camera, Share2 } from 'lucide-react'
 import { mockStore } from '../../data/mockStore'
@@ -43,6 +44,7 @@ const AlbumPage: React.FC = () => {
   if (!album) {
     return (
       <div className="space-y-6">
+      <PageSeo pageKey="gallery/album" />
         <Link
           to="/explore/gallery"
           className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary transition-colors font-sans"

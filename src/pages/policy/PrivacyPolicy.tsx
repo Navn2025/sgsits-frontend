@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
+import PageSeo from '../../components/global/PageSeo'
 import { ChevronRight, Shield } from 'lucide-react';
 
 const sections = [
@@ -43,6 +44,7 @@ This Privacy Policy may be updated from time to time. Changes will be published 
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <PageSeo pageKey="policy/privacy" />
       {/* Hero */}
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-4xl mx-auto">

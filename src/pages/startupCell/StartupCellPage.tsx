@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import {
   Rocket, Phone, Mail, Award, Users, TrendingUp,
   FlaskConical, Scale, Shield, BookOpen, CheckCircle2,
@@ -88,6 +89,7 @@ const StartupCellPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <PageSeo pageKey="startup-cell" />
       {/* Hero Banner */}
       <div className="relative bg-primary overflow-hidden">
         <div className="absolute inset-0 opacity-10">

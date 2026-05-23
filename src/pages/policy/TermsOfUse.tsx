@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
+import PageSeo from '../../components/global/PageSeo'
 import { ChevronRight, FileText } from 'lucide-react';
 
 const sections = [
@@ -43,6 +44,7 @@ For any concerns related to website content or services, users are encouraged to
 export default function TermsOfUse() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <PageSeo pageKey="policy/terms" />
       {/* Hero */}
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-4xl mx-auto">

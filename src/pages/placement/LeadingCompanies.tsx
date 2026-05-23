@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Search, ExternalLink } from 'lucide-react'
 import {
   placementService,
@@ -37,6 +38,7 @@ const LeadingCompanies: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      <PageSeo pageKey="placement/leading-companies" />
       {/* Header */}
       <div className="border-b border-slate-200 pb-6">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1.5">Placements</span>

@@ -1,61 +1,35 @@
+/**
+ * Chatbot — Floating virtual assistant widget.
+ *
+ * ALL configuration loaded from chatbotService (never hardcoded):
+ *  - Bot name, avatar URL           → config.botName, config.avatarUrl
+ *  - Welcome message                → config.welcomeMessage
+ *  - Input placeholder              → config.inputPlaceholder
+ *  - Fallback reply                 → config.fallbackMessage
+ *  - Quick prompt suggestions       → config.quickPrompts[]
+ *  - Keyword → reply response map   → config.responses[]
+ *
+ * Admin panel can: edit all text, add/remove response categories,
+ * update stale data (fees, packages, contact info) without code changes.
+ *
+ * Replace chatbotService mock with: GET /api/chatbot/config
+ */
+
 import React, { useState, useEffect, useRef } from 'react'
+import { chatbotService, chatbotDefaults } from '../../services/chatbotService'
+import type { ChatbotConfig, ChatbotResponseItem } from '../../services/chatbotService'
 
-const BOT_NAME = 'SGSITS Assistant'
-const BOT_AVATAR = '/assets/image.png'
+// ─── Utility — match user message against response keywords ──────────────────
 
-interface ResponseItem {
-  keywords: string[]
-  reply: string
-}
-
-const RESPONSES: ResponseItem[] = [
-  {
-    keywords: ['admission', 'apply', 'application', 'eligibility', 'jee', 'entrance'],
-    reply: `🎓 **Admissions at SGSITS** are conducted through JEE Main (for B.Tech) and state-level counseling (MPDTE). Key points:\n• B.Tech: JEE Main + MPDTE counseling\n• M.Tech / MBA / MCA: MAT / GATE / MP PET\n• Ph.D: Departmental entrance test\n\nVisit sgsits.ac.in/admissions for the latest schedule!`,
-  },
-  {
-    keywords: ['fee', 'fees', 'tuition', 'cost', 'scholarship'],
-    reply: `💰 **Fee Structure (approx.)**:\n• B.Tech (General): ₹45,000–₹55,000/year\n• M.Tech: ₹30,000–₹40,000/year\n\nScholarships available:\n• Government post-matric scholarships\n• Institute merit scholarships\n• SC/ST fee waivers`,
-  },
-  {
-    keywords: ['department', 'branch', 'courses', 'program', 'cse', 'it', 'civil', 'mechanical', 'electrical'],
-    reply: `🏛️ **Departments at SGSITS**:\n• Computer Engineering\n• Information Technology\n• Civil Engineering\n• Mechanical Engineering\n• Electrical Engineering\n• Electronics & Instrumentation\n• Electronics & Telecommunication\n• Industrial & Production Engineering\n\nWhich department would you like to know more about?`,
-  },
-  {
-    keywords: ['placement', 'job', 'recruit', 'package', 'company', 'campus'],
-    reply: `💼 **Placements at SGSITS**:\n• Highest Package: **50 LPA**\n• Average Package: **12+ LPA**\n• 350+ Recruiters visit annually\n• 95%+ placement rate\n\nTop Recruiters: TCS, Infosys, Wipro, L&T, Amazon, Microsoft & more!`,
-  },
-  {
-    keywords: ['hostel', 'accommodation', 'stay', 'pg', 'room'],
-    reply: `🏠 **Hostel Facilities**:\n• Separate hostels for boys and girls\n• 24/7 security and Wi-Fi connectivity\n• Mess with nutritious meals\n• Recreation rooms and sports facilities`,
-  },
-  {
-    keywords: ['contact', 'phone', 'email', 'address', 'location'],
-    reply: `📍 **Contact SGSITS**:\n• Address: Park Road, Indore, MP 452003\n• Phone: 0731-2563980\n• Email: director@sgsits.ac.in\n• Website: www.sgsits.ac.in`,
-  },
-  {
-    keywords: ['naac', 'rank', 'rating', 'accreditation', 'nirf'],
-    reply: `🏆 **Rankings & Accreditation**:\n• NAAC Accredited: Grade **A**\n• NBA Accredited programs\n• Recognized as an Institute of National Standing\n• Consistent presence in NIRF rankings`,
-  },
-  {
-    keywords: ['hello', 'hi', 'hey', 'namaste'],
-    reply: `👋 Hello! I'm the **SGSITS Virtual Assistant**.\n\nI can help you with:\n• Admissions & Eligibility\n• Courses & Departments\n• Fee Structure & Scholarships\n• Placements & Recruiters\n• Hostel & Campus Life\n• Contact & Location\n\nWhat would you like to know?`,
-  },
-  {
-    keywords: ['thank', 'thanks', 'bye', 'goodbye'],
-    reply: `😊 You're welcome! Feel free to ask anything else about SGSITS. Have a great day! 🎓`,
-  },
-]
-
-const FALLBACK = `🤔 I'm not sure about that. I can help with:\n• Admissions & Eligibility\n• Fee Structure\n• Departments & Courses\n• Placements\n• Hostel & Campus Life\n• Contact Information\n\nTry asking about any of these topics!`
-
-function getBotReply(message: string): string {
+function getBotReply(message: string, responses: ChatbotResponseItem[], fallback: string): string {
   const lowerMsg = message.toLowerCase()
-  for (const item of RESPONSES) {
+  for (const item of responses) {
     if (item.keywords.some((kw) => lowerMsg.includes(kw))) return item.reply
   }
-  return FALLBACK
+  return fallback
 }
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Message {
   id: number
@@ -63,16 +37,24 @@ interface Message {
   text: string
 }
 
-const MessageBubble: React.FC<{ msg: Message }> = ({ msg }) => {
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+const MessageBubble: React.FC<{ msg: Message; avatarUrl: string; botName: string }> = ({ msg, avatarUrl, botName }) => {
   const isBot = msg.sender === 'bot'
   return (
     <div className={`flex items-end gap-2 mb-3 ${isBot ? 'justify-start' : 'justify-end'}`}>
       {isBot && (
-        <img src={BOT_AVATAR} alt="Bot" className="w-7 h-7 rounded-full object-contain bg-white border border-gray-200 shrink-0 mb-0.5" />
+        <img
+          src={avatarUrl}
+          alt={botName}
+          className="w-7 h-7 rounded-full object-contain bg-white border border-gray-200 shrink-0 mb-0.5"
+        />
       )}
       <div
         className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed whitespace-pre-line shadow-sm ${
-          isBot ? 'bg-white text-gray-800 rounded-tl-sm border border-gray-100' : 'rounded-tr-sm text-white'
+          isBot
+            ? 'bg-white text-gray-800 rounded-tl-sm border border-gray-100'
+            : 'rounded-tr-sm text-white'
         }`}
         style={!isBot ? { backgroundColor: 'var(--color-primary)' } : {}}
       >
@@ -82,31 +64,46 @@ const MessageBubble: React.FC<{ msg: Message }> = ({ msg }) => {
   )
 }
 
-const TypingIndicator: React.FC = () => {
-  return (
-    <div className="flex items-end gap-2 mb-3 justify-start">
-      <img src={BOT_AVATAR} alt="Bot" className="w-7 h-7 rounded-full object-contain bg-white border border-gray-200 shrink-0" />
-      <div className="bg-white border border-gray-100 px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm flex items-center gap-1">
-        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-      </div>
+const TypingIndicator: React.FC<{ avatarUrl: string; botName: string }> = ({ avatarUrl, botName }) => (
+  <div className="flex items-end gap-2 mb-3 justify-start">
+    <img
+      src={avatarUrl}
+      alt={botName}
+      className="w-7 h-7 rounded-full object-contain bg-white border border-gray-200 shrink-0"
+    />
+    <div className="bg-white border border-gray-100 px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm flex items-center gap-1">
+      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
     </div>
-  )
-}
+  </div>
+)
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 const Chatbot: React.FC = () => {
+  // ── Config — loaded through chatbotService ────────────────────────────────
+  const [config, setConfig] = useState<ChatbotConfig>(chatbotDefaults)
+
+  useEffect(() => {
+    chatbotService.getChatbotConfig().then(setConfig)
+  }, [])
+
+  // ── Chat state ────────────────────────────────────────────────────────────
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([
-    { id: 1, sender: 'bot', text: `👋 Hello! I'm your SGSITS Virtual Assistant.\n\nAsk me anything about admissions, departments, placements, fees, hostel, or campus life!` },
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [nearFooter, setNearFooter] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Detect footer proximity
+  // Initialize welcome message once config is loaded
+  useEffect(() => {
+    setMessages([{ id: 1, sender: 'bot', text: config.welcomeMessage }])
+  }, [config.welcomeMessage])
+
+  // Detect footer proximity (changes button color so it stays visible)
   useEffect(() => {
     const footer = document.querySelector('footer')
     if (!footer) return
@@ -134,17 +131,18 @@ const Chatbot: React.FC = () => {
     setIsTyping(true)
     setTimeout(() => {
       setIsTyping(false)
-      setMessages((prev) => [...prev, { id: Date.now() + 1, sender: 'bot', text: getBotReply(trimmed) }])
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now() + 1, sender: 'bot', text: getBotReply(trimmed, config.responses, config.fallbackMessage) },
+      ])
     }, 900 + Math.random() * 700)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
   }
 
-  const QUICK_QUESTIONS = ['Admissions', 'Placements', 'Fee Structure', 'Departments']
-
-  // Button colors: change when near footer so it's visible against the dark footer
+  // Button colors: shift to gold when near footer so it's visible against the dark background
   const btnBg = nearFooter ? '#bfa15f' : 'var(--color-primary)'
   const btnShadow = nearFooter
     ? '0 8px 30px rgba(191,161,95,0.5)'
@@ -159,17 +157,26 @@ const Chatbot: React.FC = () => {
         }`}
         style={{ maxWidth: 'calc(100vw - 20px)' }}
       >
-        {/* Header */}
+        {/* Header — bot name from config */}
         <div className="flex items-center gap-3 px-4 py-3.5 rounded-t-2xl shrink-0" style={{ background: 'var(--color-primary)' }}>
           <div className="relative shrink-0">
-            <img src={BOT_AVATAR} alt="Bot" className="w-10 h-10 rounded-full object-contain bg-white p-0.5 border-2 border-white/30" />
+            {/* Avatar — from chatbotService config.avatarUrl */}
+            <img
+              src={config.avatarUrl}
+              alt={config.botName}
+              className="w-10 h-10 rounded-full object-contain bg-white p-0.5 border-2 border-white/30"
+            />
             <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#bfa15f] rounded-full border-2 border-white" />
           </div>
           <div className="flex-1">
-            <p className="text-white font-bold text-sm leading-tight">{BOT_NAME}</p>
+            {/* Bot name — from chatbotService config.botName */}
+            <p className="text-white font-bold text-sm leading-tight">{config.botName}</p>
             <p className="text-white/70 text-[11px]">Online · SGSITS Institute Portal</p>
           </div>
-          <button onClick={() => setIsOpen(false)} className="text-white/70 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10">
+          <button
+            onClick={() => setIsOpen(false)}
+            className="text-white/70 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
+          >
             <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -178,22 +185,27 @@ const Chatbot: React.FC = () => {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4 py-3 min-h-0" style={{ maxHeight: '340px' }}>
-          {messages.map((msg) => <MessageBubble key={msg.id} msg={msg} />)}
-          {isTyping && <TypingIndicator />}
+          {messages.map((msg) => (
+            <MessageBubble key={msg.id} msg={msg} avatarUrl={config.avatarUrl} botName={config.botName} />
+          ))}
+          {isTyping && <TypingIndicator avatarUrl={config.avatarUrl} botName={config.botName} />}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Quick chips */}
+        {/* Quick prompts — from chatbotService config.quickPrompts[] */}
         <div className="px-4 py-2 flex gap-2 flex-wrap shrink-0 border-t border-gray-200 bg-white/60">
-          {QUICK_QUESTIONS.map((q) => (
-            <button key={q} onClick={() => sendMessage(q)}
-              className="text-[11px] font-semibold px-3 py-1 rounded-full border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 transition-colors shadow-sm">
+          {config.quickPrompts.map((q) => (
+            <button
+              key={q}
+              onClick={() => sendMessage(q)}
+              className="text-[11px] font-semibold px-3 py-1 rounded-full border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 transition-colors shadow-sm"
+            >
               {q}
             </button>
           ))}
         </div>
 
-        {/* Input */}
+        {/* Input — placeholder from chatbotService config.inputPlaceholder */}
         <div className="px-3 py-3 flex items-center gap-2 bg-white rounded-b-2xl border-t border-gray-100 shrink-0">
           <input
             ref={inputRef}
@@ -201,12 +213,15 @@ const Chatbot: React.FC = () => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask about SGSITS..."
+            placeholder={config.inputPlaceholder}
             className="flex-1 text-sm px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none bg-white transition-all focus:border-[var(--color-primary)]"
           />
-          <button onClick={() => sendMessage()} disabled={!inputValue.trim()}
+          <button
+            onClick={() => sendMessage()}
+            disabled={!inputValue.trim()}
             className="w-10 h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-40 hover:opacity-90 active:scale-95 shrink-0"
-            style={{ background: 'var(--color-primary)' }}>
+            style={{ background: 'var(--color-primary)' }}
+          >
             <svg width="18" height="18" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" />
             </svg>
@@ -214,7 +229,7 @@ const Chatbot: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Toggle Button — changes color near footer */}
+      {/* Floating Toggle Button */}
       <button
         onClick={() => setIsOpen((o) => !o)}
         className="fixed bottom-5 right-5 z-[200] w-14 h-14 rounded-full flex items-center justify-center transition-all duration-500 hover:scale-110 active:scale-95"
@@ -231,7 +246,10 @@ const Chatbot: React.FC = () => {
           </svg>
         )}
         {!isOpen && (
-          <span className="absolute inset-0 rounded-full animate-ping opacity-25" style={{ background: btnBg }} />
+          <span
+            className="absolute inset-0 rounded-full animate-ping opacity-25"
+            style={{ background: btnBg }}
+          />
         )}
       </button>
     </>

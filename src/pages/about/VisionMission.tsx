@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Eye, Target, Quote } from 'lucide-react'
 import { aboutService, visionMissionDefault, type VisionMissionData } from '../../services/aboutService'
+import PageSeo from '../../components/global/PageSeo'
 
 const VisionMission: React.FC = () => {
   const [data, setData] = useState<VisionMissionData>(visionMissionDefault)
@@ -11,6 +12,7 @@ const VisionMission: React.FC = () => {
 
   return (
     <div className="space-y-10">
+      <PageSeo pageKey="about/vision-mission" />
       {/* Page Header */}
       <div className="border-b border-gray-100 pb-5">
         <span className="text-xs uppercase font-extrabold tracking-widest text-accent">Core Values</span>

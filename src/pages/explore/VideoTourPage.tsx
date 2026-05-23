@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Play, Video, Monitor, Dumbbell, FlaskConical, ExternalLink } from 'lucide-react'
 
 const MAIN_VIDEO_ID = 'dQw4w9WgXcQ'
@@ -59,6 +60,7 @@ const VideoTourPage: React.FC = () => {
 
   return (
     <div className="space-y-10">
+      <PageSeo pageKey="explore/video-tour" />
       {/* Header */}
       <div className="border-b border-slate-200 pb-6">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1.5">Explore SGSITS</span>

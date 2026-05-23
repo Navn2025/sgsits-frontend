@@ -1,4 +1,5 @@
-import React from 'react'
+﻿import React from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import {
   MapPin, Phone, Mail, Building2, Library, Cpu, Home, Users, Dumbbell, Navigation, Bus, Train, Plane, Shield
 } from 'lucide-react'
@@ -83,6 +84,7 @@ const howToReach = [
 const CampusMapPage: React.FC = () => {
   return (
     <div className="space-y-10">
+      <PageSeo pageKey="explore/campus-map" />
       {/* Page Header */}
       <div className="border-b border-slate-200 pb-6">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1.5">Explore SGSITS</span>

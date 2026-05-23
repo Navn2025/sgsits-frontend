@@ -1,10 +1,15 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as Icons from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
+// â”€â”€ Service layer: ONLY interface to CMS data â€” no direct mockStore access â”€â”€
+import { adminContentService as cms } from '../../services/adminContentService'
 import PlacementCms from '../placementOfficer/PlacementCms'
+import { brandingService, brandingDefaults, type BrandingConfig } from '../../services/brandingService'
+import { chatbotService, chatbotDefaults, type ChatbotConfig, type ChatbotResponseItem } from '../../services/chatbotService'
+import { seoService, allSeoDefaults, type SeoMeta } from '../../services/seoService'
+import { uiLabelsService, uiLabelsDefaults, type UiLabelsConfig } from '../../services/uiLabelsService'
 
-type TabType = 'home' | 'about_inst' | 'vision_mission' | 'governance' | 'directory' | 'iqac' | 'accreditation_infra' | 'academics' | 'director_message' | 'committees' | 'navigation' | 'custom_pages' | 'admissions' | 'placements' | 'campus_life'
+type TabType = 'home' | 'about_inst' | 'vision_mission' | 'governance' | 'directory' | 'iqac' | 'accreditation_infra' | 'academics' | 'director_message' | 'committees' | 'navigation' | 'custom_pages' | 'admissions' | 'placements' | 'campus_life' | 'facilities' | 'branding' | 'chatbot' | 'seo' | 'ui_labels'
 
 function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   useEffect(() => {
@@ -26,7 +31,7 @@ export default function AdminStaticPages() {
   const [admSubTab, setAdmSubTab] = useState<'ug' | 'pg' | 'phd' | 'prospectus'>('ug')
   const [toast, setToast] = useState('')
 
-  // ─── Data States ────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Data States â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [homepage, setHomepage] = useState<any>(null)
   const [aboutInst, setAboutInst] = useState<any>(null)
   const [visionMission, setVisionMission] = useState<any>(null)
@@ -60,7 +65,31 @@ export default function AdminStaticPages() {
   const [clSSS, setClSSS] = useState<any>(null)
   const [clSubTab, setClSubTab] = useState<'activities'|'ncc'|'nss'|'sch_govt'|'sch_inst'|'sss'>('activities')
 
-  // ─── Custom Dynamic Pages States ───
+  // Facilities States
+  const [facLibrary, setFacLibrary] = useState<any>(null)
+  const [facBoysHostel, setFacBoysHostel] = useState<any>(null)
+  const [facGirlsHostel, setFacGirlsHostel] = useState<any>(null)
+  const [facComputerCenter, setFacComputerCenter] = useState<any>(null)
+  const [facGamesSports, setFacGamesSports] = useState<any>(null)
+  const [facDispensary, setFacDispensary] = useState<any>(null)
+  const [facIDEALab, setFacIDEALab] = useState<any>(null)
+  const [facGymnasium, setFacGymnasium] = useState<any>(null)
+  const [facWorkshop, setFacWorkshop] = useState<any>(null)
+  const [facCIDI, setFacCIDI] = useState<any>(null)
+  const [facTransitHostel, setFacTransitHostel] = useState<any>(null)
+  const [facStaffQuarters, setFacStaffQuarters] = useState<any>(null)
+  const [facSubTab, setFacSubTab] = useState<'library'|'boys_hostel'|'girls_hostel'|'computer_center'|'sports'|'dispensary'|'idea_lab'|'gymnasium'|'workshop'|'cidi'|'transit_hostel'|'staff_quarters'>('library')
+
+  // ─── Branding / Chatbot / SEO / UI-Labels States ─────────────────────────
+  const [branding, setBranding] = useState<BrandingConfig>(brandingDefaults)
+  const [chatbot, setChatbot] = useState<ChatbotConfig>(chatbotDefaults)
+  const [allSeo, setAllSeo] = useState<Record<string, SeoMeta>>(allSeoDefaults)
+  const [activeSeoKey, setActiveSeoKey] = useState<string>(Object.keys(allSeoDefaults)[0] ?? 'home')
+  const [uiLabels, setUiLabels] = useState<UiLabelsConfig>(uiLabelsDefaults)
+  // Chatbot response editor state
+  const [editingResponseIdx, setEditingResponseIdx] = useState<number | null>(null)
+
+  // ─── Custom Dynamic Pages States ─────────────────────────────────────────
   const [customPages, setCustomPages] = useState<any[]>([])
   const [activeEditPage, setActiveEditPage] = useState<any | null>(null)
   const [showAddPageModal, setShowAddPageModal] = useState(false)
@@ -78,38 +107,56 @@ export default function AdminStaticPages() {
     menu: 'about' as 'about' | 'admission' | 'placement' | 'campus-life'
   })
 
-  // ─── Fetch CMS Data ─────────────────────────────────────────────────────────
+  // â”€â”€â”€ Fetch CMS Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const refreshAll = () => {
-    setHomepage(JSON.parse(JSON.stringify(mockStore.getHomePageData())))
-    setAboutInst(JSON.parse(JSON.stringify(mockStore.getAboutInstitute())))
-    setVisionMission(JSON.parse(JSON.stringify(mockStore.getVisionMission())))
-    setGoverningBody(JSON.parse(JSON.stringify(mockStore.getGoverningBody())))
-    setAcademicCouncil(JSON.parse(JSON.stringify(mockStore.getAcademicCouncil())))
-    setAdministration(JSON.parse(JSON.stringify(mockStore.getAdministration())))
-    setTelephoneDirectory(JSON.parse(JSON.stringify(mockStore.getTelephoneDirectory())))
-    setIqac(JSON.parse(JSON.stringify(mockStore.getIQAC())))
-    setInfrastructure(JSON.parse(JSON.stringify(mockStore.getInfrastructure())))
-    setAccreditation(JSON.parse(JSON.stringify(mockStore.getAccreditation())))
-    setAcademicsUg(JSON.parse(JSON.stringify(mockStore.getUGCourses())))
-    setAcademicsPg(JSON.parse(JSON.stringify(mockStore.getPGCourses())))
-    setAcademicsPhd(JSON.parse(JSON.stringify(mockStore.getPhDCourses())))
-    setAcademicsPtdc(JSON.parse(JSON.stringify(mockStore.getPTDCCourses())))
-    setAcademicsCalendar(JSON.parse(JSON.stringify(mockStore.getAcademicCalendar())))
-    setAcademicsOnline(JSON.parse(JSON.stringify(mockStore.getOnlineCourses())))
-    setDirectorMessage(JSON.parse(JSON.stringify(mockStore.getDirectorMessage())))
-    setCommitteesList(JSON.parse(JSON.stringify(mockStore.getCommittees())))
-    setNavigationItems(JSON.parse(JSON.stringify(mockStore.getNavItems())))
-    setCustomPages(JSON.parse(JSON.stringify(mockStore.getCustomPages())))
-    setAdmissionUg(JSON.parse(JSON.stringify(mockStore.getUGAdmission())))
-    setAdmissionPg(JSON.parse(JSON.stringify(mockStore.getPGAdmission())))
-    setAdmissionPhd(JSON.parse(JSON.stringify(mockStore.getPhDAdmission())))
-    setAdmissionProspectus(JSON.parse(JSON.stringify(mockStore.getProspectus())))
-    setClActivities(JSON.parse(JSON.stringify(mockStore.getActivities())))
-    setClNCC(JSON.parse(JSON.stringify(mockStore.getNCC())))
-    setClNSS(JSON.parse(JSON.stringify(mockStore.getNSS())))
-    setClSchGovt(JSON.parse(JSON.stringify(mockStore.getScholarshipGovt())))
-    setClSchInst(JSON.parse(JSON.stringify(mockStore.getScholarshipInstitute())))
-    setClSSS(JSON.parse(JSON.stringify(mockStore.getSSS())))
+    setHomepage(JSON.parse(JSON.stringify(cms.getHomePageData())))
+    setAboutInst(JSON.parse(JSON.stringify(cms.getAboutInstitute())))
+    setVisionMission(JSON.parse(JSON.stringify(cms.getVisionMission())))
+    setGoverningBody(JSON.parse(JSON.stringify(cms.getGoverningBody())))
+    setAcademicCouncil(JSON.parse(JSON.stringify(cms.getAcademicCouncil())))
+    setAdministration(JSON.parse(JSON.stringify(cms.getAdministration())))
+    setTelephoneDirectory(JSON.parse(JSON.stringify(cms.getTelephoneDirectory())))
+    setIqac(JSON.parse(JSON.stringify(cms.getIQAC())))
+    setInfrastructure(JSON.parse(JSON.stringify(cms.getInfrastructure())))
+    setAccreditation(JSON.parse(JSON.stringify(cms.getAccreditation())))
+    setAcademicsUg(JSON.parse(JSON.stringify(cms.getUGCourses())))
+    setAcademicsPg(JSON.parse(JSON.stringify(cms.getPGCourses())))
+    setAcademicsPhd(JSON.parse(JSON.stringify(cms.getPhDCourses())))
+    setAcademicsPtdc(JSON.parse(JSON.stringify(cms.getPTDCCourses())))
+    setAcademicsCalendar(JSON.parse(JSON.stringify(cms.getAcademicCalendar())))
+    setAcademicsOnline(JSON.parse(JSON.stringify(cms.getOnlineCourses())))
+    setDirectorMessage(JSON.parse(JSON.stringify(cms.getDirectorMessage())))
+    setCommitteesList(JSON.parse(JSON.stringify(cms.getCommittees())))
+    setNavigationItems(JSON.parse(JSON.stringify(cms.getNavItems())))
+    setCustomPages(JSON.parse(JSON.stringify(cms.getCustomPages())))
+    setAdmissionUg(JSON.parse(JSON.stringify(cms.getUGAdmission())))
+    setAdmissionPg(JSON.parse(JSON.stringify(cms.getPGAdmission())))
+    setAdmissionPhd(JSON.parse(JSON.stringify(cms.getPhDAdmission())))
+    setAdmissionProspectus(JSON.parse(JSON.stringify(cms.getProspectus())))
+    setClActivities(JSON.parse(JSON.stringify(cms.getActivities())))
+    setClNCC(JSON.parse(JSON.stringify(cms.getNCC())))
+    setClNSS(JSON.parse(JSON.stringify(cms.getNSS())))
+    setClSchGovt(JSON.parse(JSON.stringify(cms.getScholarshipGovt())))
+    setClSchInst(JSON.parse(JSON.stringify(cms.getScholarshipInstitute())))
+    setClSSS(JSON.parse(JSON.stringify(cms.getSSS())))
+
+    setFacLibrary(JSON.parse(JSON.stringify(cms.getLibrary())))
+    setFacBoysHostel(JSON.parse(JSON.stringify(cms.getBoysHostel())))
+    setFacGirlsHostel(JSON.parse(JSON.stringify(cms.getGirlsHostel())))
+    setFacComputerCenter(JSON.parse(JSON.stringify(cms.getComputerCenter())))
+    setFacGamesSports(JSON.parse(JSON.stringify(cms.getGamesSports())))
+    setFacDispensary(JSON.parse(JSON.stringify(cms.getDispensary())))
+    setFacIDEALab(JSON.parse(JSON.stringify(cms.getIDEALab())))
+    setFacGymnasium(JSON.parse(JSON.stringify(cms.getGymnasium())))
+    setFacWorkshop(JSON.parse(JSON.stringify(cms.getWorkshop())))
+    setFacCIDI(JSON.parse(JSON.stringify(cms.getCIDI())))
+    setFacTransitHostel(JSON.parse(JSON.stringify(cms.getTransitHostel())))
+    setFacStaffQuarters(JSON.parse(JSON.stringify(cms.getStaffQuarters())))
+    // Load 4 new CMS domains
+    brandingService.getBranding().then(b => setBranding(JSON.parse(JSON.stringify(b))))
+    chatbotService.getChatbotConfig().then(c => setChatbot(JSON.parse(JSON.stringify(c))))
+    seoService.getAllPageSeo().then(s => setAllSeo(JSON.parse(JSON.stringify(s))))
+    uiLabelsService.getUiLabels().then(u => setUiLabels(JSON.parse(JSON.stringify(u))))
   }
 
   useEffect(() => {
@@ -119,98 +166,134 @@ export default function AdminStaticPages() {
   const triggerSave = (key: string, data: any, msg = 'Section updated successfully!') => {
     switch (key) {
       case 'home':
-        mockStore.saveHomePageData(data)
+        cms.saveHomePageData(data)
         break
       case 'about_institute':
-        mockStore.saveAboutInstitute(data)
+        cms.saveAboutInstitute(data)
         break
       case 'vision_mission':
-        mockStore.saveVisionMission(data)
+        cms.saveVisionMission(data)
         break
       case 'governing_body':
-        mockStore.saveGoverningBody(data)
+        cms.saveGoverningBody(data)
         break
       case 'academic_council':
-        mockStore.saveAcademicCouncil(data)
+        cms.saveAcademicCouncil(data)
         break
       case 'administration':
-        mockStore.saveAdministration(data)
+        cms.saveAdministration(data)
         break
       case 'telephone':
-        mockStore.saveTelephoneDirectory(data)
+        cms.saveTelephoneDirectory(data)
         break
       case 'iqac':
-        mockStore.saveIQAC(data)
+        cms.saveIQAC(data)
         break
       case 'infrastructure':
-        mockStore.saveInfrastructure(data)
+        cms.saveInfrastructure(data)
         break
       case 'accreditation':
-        mockStore.saveAccreditation(data)
+        cms.saveAccreditation(data)
         break
       case 'ug':
-        mockStore.saveUGCourses(data)
+        cms.saveUGCourses(data)
         break
       case 'pg':
-        mockStore.savePGCourses(data)
+        cms.savePGCourses(data)
         break
       case 'phd':
-        mockStore.savePhDCourses(data)
+        cms.savePhDCourses(data)
         break
       case 'ptdc':
-        mockStore.savePTDCCourses(data)
+        cms.savePTDCCourses(data)
         break
       case 'calendar':
-        mockStore.saveAcademicCalendar(data)
+        cms.saveAcademicCalendar(data)
         break
       case 'online':
-        mockStore.saveOnlineCourses(data)
+        cms.saveOnlineCourses(data)
         break
       case 'director_message':
-        mockStore.saveDirectorMessage(data)
+        cms.saveDirectorMessage(data)
         break
       case 'committees':
-        mockStore.saveCommittees(data)
+        cms.saveCommittees(data)
         break
       case 'navigation':
-        mockStore.saveNavItems(data)
+        cms.saveNavItems(data)
         break
       case 'admission_ug':
-        mockStore.saveUGAdmission(data)
+        cms.saveUGAdmission(data)
         break
       case 'admission_pg':
-        mockStore.savePGAdmission(data)
+        cms.savePGAdmission(data)
         break
       case 'admission_phd':
-        mockStore.savePhDAdmission(data)
+        cms.savePhDAdmission(data)
         break
       case 'admission_prospectus':
-        mockStore.saveProspectus(data)
+        cms.saveProspectus(data)
         break
       case 'campus_activities':
-        mockStore.saveActivities(data)
+        cms.saveActivities(data)
         break
       case 'campus_ncc':
-        mockStore.saveNCC(data)
+        cms.saveNCC(data)
         break
       case 'campus_nss':
-        mockStore.saveNSS(data)
+        cms.saveNSS(data)
         break
       case 'campus_sch_govt':
-        mockStore.saveScholarshipGovt(data)
+        cms.saveScholarshipGovt(data)
         break
       case 'campus_sch_inst':
-        mockStore.saveScholarshipInstitute(data)
+        cms.saveScholarshipInstitute(data)
         break
       case 'campus_sss':
-        mockStore.saveSSS(data)
+        cms.saveSSS(data)
+        break
+      case 'fac_library':
+        cms.saveLibrary(data)
+        break
+      case 'fac_boys_hostel':
+        cms.saveBoysHostel(data)
+        break
+      case 'fac_girls_hostel':
+        cms.saveGirlsHostel(data)
+        break
+      case 'fac_computer_center':
+        cms.saveComputerCenter(data)
+        break
+      case 'fac_games_sports':
+        cms.saveGamesSports(data)
+        break
+      case 'fac_dispensary':
+        cms.saveDispensary(data)
+        break
+      case 'fac_idea_lab':
+        cms.saveIDEALab(data)
+        break
+      case 'fac_gymnasium':
+        cms.saveGymnasium(data)
+        break
+      case 'fac_workshop':
+        cms.saveWorkshop(data)
+        break
+      case 'fac_cidi':
+        cms.saveCIDI(data)
+        break
+      case 'fac_transit_hostel':
+        cms.saveTransitHostel(data)
+        break
+      case 'fac_staff_quarters':
+        cms.saveStaffQuarters(data)
         break
     }
     setToast(msg)
     refreshAll()
   }
 
-  if (!homepage || !aboutInst || !visionMission || !governingBody || !academicCouncil || !administration || !telephoneDirectory || !iqac || !infrastructure || !accreditation || !academicsUg || !academicsPg || !academicsPhd || !academicsPtdc || !academicsCalendar || !academicsOnline || !directorMessage || !committeesList || !navigationItems || !admissionUg || !admissionPg || !admissionPhd || !admissionProspectus) {
+  if (!homepage || !aboutInst || !visionMission || !governingBody || !academicCouncil || !administration || !telephoneDirectory || !iqac || !infrastructure || !accreditation || !academicsUg || !academicsPg || !academicsPhd || !academicsPtdc || !academicsCalendar || !academicsOnline || !directorMessage || !committeesList || !navigationItems || !admissionUg || !admissionPg || !admissionPhd || !admissionProspectus || !facLibrary || !facBoysHostel || !facGirlsHostel || !facComputerCenter || !facGamesSports || !facDispensary || !facIDEALab || !facGymnasium || !facWorkshop || !facCIDI || !facTransitHostel || !facStaffQuarters) {
     return (
       <div className="flex items-center justify-center min-h-[500px]">
         <div className="flex flex-col items-center gap-3">
@@ -235,8 +318,13 @@ export default function AdminStaticPages() {
     { id: 'admissions', label: 'Admissions CMS', icon: Icons.Sparkles },
     { id: 'placements', label: 'Placements CMS', icon: Icons.Briefcase },
     { id: 'campus_life', label: 'Campus Life CMS', icon: Icons.Users },
+    { id: 'facilities', label: 'Facilities CMS', icon: Icons.Building },
     { id: 'navigation', label: 'Navigation Menus', icon: Icons.Menu },
     { id: 'custom_pages', label: 'Dynamic Pages Builder', icon: Icons.FilePlus },
+    { id: 'branding', label: 'Branding & Identity', icon: Icons.Palette },
+    { id: 'chatbot', label: 'Chatbot Config', icon: Icons.Bot },
+    { id: 'seo', label: 'SEO Manager', icon: Icons.Search },
+    { id: 'ui_labels', label: 'UI Labels', icon: Icons.Type },
   ]
 
   return (
@@ -272,7 +360,7 @@ export default function AdminStaticPages() {
       {/* Tab Panel Context */}
       <div className="bg-white border border-slate-200 rounded-b-lg shadow-sm p-6 space-y-8">
 
-        {/* ─── HOME TAB ──────────────────────────────────────────────────────── */}
+        {/* â”€â”€â”€ HOME TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'home' && (
           <div className="space-y-8 divide-y divide-slate-100">
             {/* --- SEO METADATA --- */}
@@ -432,7 +520,7 @@ export default function AdminStaticPages() {
             <div className="space-y-4 pt-6">
               <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
                 <Icons.Home size={18} className="text-[#bfa15f]" />
-                1 · Hero Welcome Banner
+                1 Â· Hero Welcome Banner
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -478,7 +566,7 @@ export default function AdminStaticPages() {
             <div className="space-y-4 pt-6">
               <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
                 <Icons.User size={18} className="text-[#bfa15f]" />
-                2 · Director's Message Corner
+                2 Â· Director's Message Corner
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -515,7 +603,7 @@ export default function AdminStaticPages() {
             <div className="space-y-4 pt-6">
               <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
                 <Icons.FileText size={18} className="text-[#bfa15f]" />
-                2b · About SGSITS Introduction Block
+                2b Â· About SGSITS Introduction Block
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50/50 p-4 rounded border border-slate-200">
                 <div>
@@ -579,7 +667,7 @@ export default function AdminStaticPages() {
             <div className="space-y-4 pt-6">
               <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
                 <Icons.Building2 size={18} className="text-[#bfa15f]" />
-                2c · Homepage Shortcut Departments
+                2c Â· Homepage Shortcut Departments
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/50 p-4 rounded border border-slate-200">
                 <div>
@@ -673,7 +761,7 @@ export default function AdminStaticPages() {
             <div className="space-y-4 pt-6">
               <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
                 <Icons.BarChart3 size={18} className="text-[#bfa15f]" />
-                3 · Key Campus Statistics
+                3 Â· Key Campus Statistics
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {homepage.statsSection.items.map((stat: any, idx: number) => (
@@ -710,7 +798,7 @@ export default function AdminStaticPages() {
             <div className="space-y-4 pt-6">
               <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
                 <Icons.Newspaper size={18} className="text-[#bfa15f]" />
-                4 · Campus News Section Header
+                4 Â· Campus News Section Header
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -756,7 +844,7 @@ export default function AdminStaticPages() {
             <div className="space-y-4 pt-6">
               <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
                 <Icons.GraduationCap size={18} className="text-[#bfa15f]" />
-                5 · Academic Programs Section
+                5 Â· Academic Programs Section
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50/50 p-4 rounded border border-slate-150">
                 <div>
@@ -868,7 +956,7 @@ export default function AdminStaticPages() {
             <div className="space-y-4 pt-6">
               <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
                 <Icons.Compass size={18} className="text-[#bfa15f]" />
-                6 · Campus Life Section
+                6 Â· Campus Life Section
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50/50 p-4 rounded border border-slate-150">
                 <div>
@@ -1013,7 +1101,7 @@ export default function AdminStaticPages() {
             <div className="space-y-4 pt-6">
               <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
                 <Icons.HelpCircle size={18} className="text-[#bfa15f]" />
-                7 · Frequently Asked Questions (FAQs)
+                7 Â· Frequently Asked Questions (FAQs)
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50/50 p-4 rounded border border-slate-150">
                 <div>
@@ -1152,7 +1240,7 @@ export default function AdminStaticPages() {
             <div className="space-y-4 pt-6">
               <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
                 <Icons.Image size={18} className="text-[#bfa15f]" />
-                8 · Photo Gallery Headers
+                8 Â· Photo Gallery Headers
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
@@ -1207,7 +1295,7 @@ export default function AdminStaticPages() {
           </div>
         )}
 
-        {/* ─── ABOUT INSTITUTE TAB ───────────────────────────────────────────── */}
+        {/* â”€â”€â”€ ABOUT INSTITUTE TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'about_inst' && (
           <div className="space-y-6">
             <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2">Narrative Story paragraphs</h3>
@@ -1355,7 +1443,7 @@ export default function AdminStaticPages() {
           </div>
         )}
 
-        {/* ─── VISION & MISSION TAB ──────────────────────────────────────────── */}
+        {/* â”€â”€â”€ VISION & MISSION TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'vision_mission' && (
           <div className="space-y-6">
             <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2">Institutional Vision Statements</h3>
@@ -1370,7 +1458,7 @@ export default function AdminStaticPages() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase font-sans">Vision (Hindi - अनुवाद)</label>
+                <label className="text-xs font-bold text-slate-500 uppercase font-sans">Vision (Hindi - à¤…à¤¨à¥à¤µà¤¾à¤¦)</label>
                 <textarea
                   rows={3}
                   value={visionMission.visionHindi}
@@ -1441,10 +1529,10 @@ export default function AdminStaticPages() {
           </div>
         )}
 
-        {/* ─── GOVERNANCE & COUNCIL TAB ──────────────────────────────────────── */}
+        {/* â”€â”€â”€ GOVERNANCE & COUNCIL TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'governance' && (
           <div className="space-y-6">
-            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2">1 · Governing Body Board</h2>
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2">1 Â· Governing Body Board</h2>
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase">Board description</label>
               <textarea
@@ -1549,7 +1637,7 @@ export default function AdminStaticPages() {
             </div>
 
             {/* Academic Council Section */}
-            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">2 · Academic Council Board</h2>
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">2 Â· Academic Council Board</h2>
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase">Academic Council Description</label>
               <textarea
@@ -1662,10 +1750,10 @@ export default function AdminStaticPages() {
           </div>
         )}
 
-        {/* ─── ADMIN & DIRECTORY TAB ─────────────────────────────────────────── */}
+        {/* â”€â”€â”€ ADMIN & DIRECTORY TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'directory' && (
           <div className="space-y-6">
-            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2">1 · Administration Officials Roster</h2>
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2">1 Â· Administration Officials Roster</h2>
             <div className="space-y-2">
               <table className="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
                 <thead className="bg-slate-50 border-b border-slate-200">
@@ -1766,7 +1854,7 @@ export default function AdminStaticPages() {
             </div>
 
             {/* Telephone Directory Section */}
-            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">2 · Telephone Intercom Directory</h2>
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">2 Â· Telephone Intercom Directory</h2>
             <div className="space-y-2">
               <table className="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
                 <thead className="bg-slate-50 border-b border-slate-200">
@@ -1868,7 +1956,7 @@ export default function AdminStaticPages() {
           </div>
         )}
 
-        {/* ─── QUALITY & IQAC TAB ────────────────────────────────────────────── */}
+        {/* â”€â”€â”€ QUALITY & IQAC TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'iqac' && (
           <div className="space-y-6">
             <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2">About IQAC cell</h3>
@@ -2048,10 +2136,10 @@ export default function AdminStaticPages() {
           </div>
         )}
 
-        {/* ─── ACCREDITATION & INFRASTRUCTURE TAB ────────────────────────────── */}
+        {/* â”€â”€â”€ ACCREDITATION & INFRASTRUCTURE TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'accreditation_infra' && (
           <div className="space-y-6">
-            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2">1 · Institutional Accreditation</h2>
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2">1 Â· Institutional Accreditation</h2>
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase">About Accreditations</label>
               <textarea
@@ -2269,7 +2357,7 @@ export default function AdminStaticPages() {
             </div>
 
             {/* Infrastructure Section */}
-            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">2 · Campus Infrastructure</h2>
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">2 Â· Campus Infrastructure</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-bold text-slate-500 uppercase">Campus Area (e.g. 51+ Acres)</label>
@@ -2380,10 +2468,10 @@ export default function AdminStaticPages() {
           </div>
         )}
 
-        {/* ─── ACADEMICS & COURSES TAB ───────────────────────────────────────── */}
+        {/* â”€â”€â”€ ACADEMICS & COURSES TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'academics' && (
           <div className="space-y-6">
-            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2">1 · Undergraduate (UG) Courses</h2>
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2">1 Â· Undergraduate (UG) Courses</h2>
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase">UG Courses Intro narrative</label>
               <textarea
@@ -2482,7 +2570,7 @@ export default function AdminStaticPages() {
             </div>
 
             {/* Postgraduate section */}
-            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">2 · Postgraduate (PG) Courses</h2>
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">2 Â· Postgraduate (PG) Courses</h2>
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase">PG Courses Intro narrative</label>
               <textarea
@@ -2574,7 +2662,7 @@ export default function AdminStaticPages() {
               <div className="flex justify-start">
                 <button
                   onClick={() => {
-                    const list = [...academicsPg.programs, { program: 'M.Tech — Applied Science', dept: 'Applied Sciences', intake: 18, eligibility: 'B.Tech/GATE' }]
+                    const list = [...academicsPg.programs, { program: 'M.Tech â€” Applied Science', dept: 'Applied Sciences', intake: 18, eligibility: 'B.Tech/GATE' }]
                     setAcademicsPg({ ...academicsPg, programs: list })
                   }}
                   className="px-3 py-1 border border-dashed border-slate-300 hover:border-slate-500 text-slate-650 text-xs font-semibold rounded-md flex items-center gap-1.5"
@@ -2594,7 +2682,7 @@ export default function AdminStaticPages() {
             </div>
 
             {/* Academic Calendar Events section */}
-            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">3 · Academic Calendar</h2>
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">3 Â· Academic Calendar</h2>
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Calendar Schedule</label>
               <table className="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
@@ -2689,7 +2777,7 @@ export default function AdminStaticPages() {
           </div>
         )}
 
-        {/* ─── DIRECTOR'S MESSAGE TAB ────────────────────────────────────────── */}
+        {/* â”€â”€â”€ DIRECTOR'S MESSAGE TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'director_message' && (
           <div className="space-y-6">
             <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2">Director's Personal Details</h3>
@@ -2772,7 +2860,7 @@ export default function AdminStaticPages() {
           </div>
         )}
 
-        {/* ─── ADMINISTRATIVE COMMITTEES TAB ──────────────────────────────────── */}
+        {/* â”€â”€â”€ ADMINISTRATIVE COMMITTEES TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'committees' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2">
@@ -2938,7 +3026,7 @@ export default function AdminStaticPages() {
           </div>
         )}
 
-        {/* ─── SITE NAVIGATION & DROPDOWNS TAB ────────────────────────────────── */}
+        {/* â”€â”€â”€ SITE NAVIGATION & DROPDOWNS TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'navigation' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -3197,7 +3285,7 @@ export default function AdminStaticPages() {
           </div>
         )}
 
-        {/* ─── DYNAMIC PAGES BUILDER TAB ─────────────────────────────────────── */}
+        {/* â”€â”€â”€ DYNAMIC PAGES BUILDER TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'custom_pages' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -3252,19 +3340,19 @@ export default function AdminStaticPages() {
                           if (!window.confirm(`Are you sure you want to delete the dynamic page: "${p.title}"? This will also remove it from navigation menus.`)) {
                             return
                           }
-                          const current = mockStore.getCustomPages()
+                          const current = cms.getCustomPages()
                           const filteredPages = current.filter((x: any) => x.slug !== p.slug)
-                          mockStore.saveCustomPages(filteredPages)
+                          cms.saveCustomPages(filteredPages)
 
                           // Remove from navigation menu
-                          const navs = mockStore.getNavItems()
+                          const navs = cms.getNavItems()
                           const parentNav = navs.find((n: any) => n.id === parentMenu)
                           if (parentNav && parentNav.children) {
                             const path = parentMenu === 'campus-life'
                               ? `/students/${p.slug}`
                               : `/${parentMenu}/${p.slug}`
                             parentNav.children = parentNav.children.filter((c: any) => c.path !== path)
-                            mockStore.saveNavItems(navs)
+                            cms.saveNavItems(navs)
                           }
 
                           setToast(`Dynamic Page ${p.title} deleted.`)
@@ -3308,11 +3396,11 @@ export default function AdminStaticPages() {
                       affiliations: ['AICTE Approved', 'State Ratified']
                     }
 
-                    const current = mockStore.getCustomPages()
-                    mockStore.saveCustomPages([...current, newPage])
+                    const current = cms.getCustomPages()
+                    cms.saveCustomPages([...current, newPage])
                     
                     // Add page to navigation menus so it's instantly accessible!
-                    const navs = mockStore.getNavItems()
+                    const navs = cms.getNavItems()
                     const parentMenu = navs.find((n: any) => n.id === addPageForm.menu)
                     if (parentMenu && parentMenu.children) {
                       const path = addPageForm.menu === 'campus-life'
@@ -3324,7 +3412,7 @@ export default function AdminStaticPages() {
                           label: addPageForm.title,
                           path
                         })
-                        mockStore.saveNavItems(navs)
+                        cms.saveNavItems(navs)
                       }
                     }
 
@@ -3381,7 +3469,7 @@ export default function AdminStaticPages() {
                     </div>
                     <div className="flex gap-3 pt-2 border-t border-slate-100">
                       <button type="button" onClick={() => setShowAddPageModal(false)} className="flex-grow py-2 border border-slate-200 text-slate-700 rounded font-semibold text-xs uppercase tracking-wider hover:bg-slate-50">Cancel</button>
-                      <button type="submit" className="flex-grow py-2 bg-[#0b2545] text-white rounded font-semibold text-xs uppercase tracking-wider hover:opacity-90">✓ Draft Page</button>
+                      <button type="submit" className="flex-grow py-2 bg-[#0b2545] text-white rounded font-semibold text-xs uppercase tracking-wider hover:opacity-90">âœ“ Draft Page</button>
                     </div>
                   </form>
                 </div>
@@ -3418,13 +3506,13 @@ export default function AdminStaticPages() {
                       affiliations: resolvedAff
                     }
 
-                    mockStore.saveCustomPage(activeEditPage.slug, updatedPage)
+                    cms.saveCustomPage(activeEditPage.slug, updatedPage)
                     setToast(`Dynamic Page ${updatedPage.title} saved successfully.`)
                     setActiveEditPage(null)
                     refreshAll()
                   }} className="space-y-4">
                     <div className="flex items-center justify-between border-b border-slate-150 pb-2">
-                      <h3 className="font-bold text-slate-850 font-display text-sm uppercase tracking-wider">Edit Content — {activeEditPage.title}</h3>
+                      <h3 className="font-bold text-slate-850 font-display text-sm uppercase tracking-wider">Edit Content â€” {activeEditPage.title}</h3>
                       <button type="button" onClick={() => setActiveEditPage(null)} className="text-slate-400 hover:text-slate-600"><Icons.X size={18} /></button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -3490,7 +3578,7 @@ export default function AdminStaticPages() {
           </div>
         )}
 
-        {/* ─── ADMISSIONS CMS TAB ─────────────────────────────────────────────── */}
+        {/* â”€â”€â”€ ADMISSIONS CMS TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'admissions' && (
           <div className="space-y-8">
             <div className="flex items-center justify-between border-b border-slate-150 pb-4">
@@ -3522,7 +3610,7 @@ export default function AdminStaticPages() {
               ))}
             </div>
 
-            {/* ─── UG ADMISSIONS CMS SUBTAB ─── */}
+            {/* â”€â”€â”€ UG ADMISSIONS CMS SUBTAB â”€â”€â”€ */}
             {admSubTab === 'ug' && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -3832,7 +3920,7 @@ export default function AdminStaticPages() {
                   <button
                     type="button"
                     onClick={() => {
-                      const list = [...admissionUg.fees, { category: 'TFW (Tuition Fee Waiver)', tuition: '₹0', other: '₹12,500', total: '₹12,500' }]
+                      const list = [...admissionUg.fees, { category: 'TFW (Tuition Fee Waiver)', tuition: 'â‚¹0', other: 'â‚¹12,500', total: 'â‚¹12,500' }]
                       setAdmissionUg({ ...admissionUg, fees: list })
                     }}
                     className="px-3 py-1 border border-dashed border-slate-350 hover:border-slate-500 rounded text-xs font-semibold text-slate-655 flex items-center gap-1.5 bg-white"
@@ -3863,7 +3951,7 @@ export default function AdminStaticPages() {
               </div>
             )}
 
-            {/* ─── PG ADMISSIONS CMS SUBTAB ─── */}
+            {/* â”€â”€â”€ PG ADMISSIONS CMS SUBTAB â”€â”€â”€ */}
             {admSubTab === 'pg' && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -4084,7 +4172,7 @@ export default function AdminStaticPages() {
                   <button
                     type="button"
                     onClick={() => {
-                      const list = [...admissionPg.fees, { program: 'M.Pharm (All branches)', tuition: '₹48,000', other: '₹12,000', total: '₹60,000' }]
+                      const list = [...admissionPg.fees, { program: 'M.Pharm (All branches)', tuition: 'â‚¹48,000', other: 'â‚¹12,000', total: 'â‚¹60,000' }]
                       setAdmissionPg({ ...admissionPg, fees: list })
                     }}
                     className="px-3 py-1 border border-dashed border-slate-350 hover:border-slate-500 rounded text-xs font-semibold text-slate-655 flex items-center gap-1.5 bg-white"
@@ -4176,7 +4264,7 @@ export default function AdminStaticPages() {
                   <button
                     type="button"
                     onClick={() => {
-                      const list = [...admissionPg.scholarships, { title: 'Non-GATE Scholarship', amount: '₹8,000/month', desc: 'AICTE fellowship for PG candidates of accredited courses.', eligibility: 'Valid score / entrance' }]
+                      const list = [...admissionPg.scholarships, { title: 'Non-GATE Scholarship', amount: 'â‚¹8,000/month', desc: 'AICTE fellowship for PG candidates of accredited courses.', eligibility: 'Valid score / entrance' }]
                       setAdmissionPg({ ...admissionPg, scholarships: list })
                     }}
                     className="px-3 py-1 border border-dashed border-slate-350 hover:border-slate-500 rounded text-xs font-semibold text-slate-655 flex items-center gap-1.5 bg-white"
@@ -4301,7 +4389,7 @@ export default function AdminStaticPages() {
               </div>
             )}
 
-            {/* ─── PHD ADMISSIONS CMS SUBTAB ─── */}
+            {/* â”€â”€â”€ PHD ADMISSIONS CMS SUBTAB â”€â”€â”€ */}
             {admSubTab === 'phd' && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -4510,7 +4598,7 @@ export default function AdminStaticPages() {
               </div>
             )}
 
-            {/* ─── PROSPECTUS CMS SUBTAB ─── */}
+            {/* â”€â”€â”€ PROSPECTUS CMS SUBTAB â”€â”€â”€ */}
             {admSubTab === 'prospectus' && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -4627,7 +4715,7 @@ export default function AdminStaticPages() {
                   <button
                     type="button"
                     onClick={() => {
-                      const list = [...admissionProspectus.archive, { year: '2020–21', fileUrl: '#' }]
+                      const list = [...admissionProspectus.archive, { year: '2020â€“21', fileUrl: '#' }]
                       setAdmissionProspectus({ ...admissionProspectus, archive: list })
                     }}
                     className="px-3 py-1 border border-dashed border-slate-350 hover:border-slate-500 rounded text-xs font-semibold text-slate-655 flex items-center gap-1.5 bg-white"
@@ -4649,12 +4737,12 @@ export default function AdminStaticPages() {
           </div>
         )}
 
-        {/* ─── PLACEMENTS CMS TAB ───────────────────────────────────────────── */}
+        {/* â”€â”€â”€ PLACEMENTS CMS TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'placements' && (
           <PlacementCms />
         )}
 
-        {/* ─── CAMPUS LIFE CMS TAB ───────────────────────────────────────────── */}
+        {/* â”€â”€â”€ CAMPUS LIFE CMS TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeTab === 'campus_life' && clActivities && clNCC && clNSS && clSchGovt && clSchInst && clSSS && (
           <div className="space-y-6">
             <div>
@@ -4687,7 +4775,7 @@ export default function AdminStaticPages() {
               ))}
             </div>
 
-            {/* ── ACTIVITIES ── */}
+            {/* â”€â”€ ACTIVITIES â”€â”€ */}
             {clSubTab === 'activities' && (
               <div className="space-y-5">
                 <div>
@@ -4738,7 +4826,7 @@ export default function AdminStaticPages() {
               </div>
             )}
 
-            {/* ── NCC ── */}
+            {/* â”€â”€ NCC â”€â”€ */}
             {clSubTab === 'ncc' && (
               <div className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -4822,7 +4910,7 @@ export default function AdminStaticPages() {
               </div>
             )}
 
-            {/* ── NSS ── */}
+            {/* â”€â”€ NSS â”€â”€ */}
             {clSubTab === 'nss' && (
               <div className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -4906,7 +4994,7 @@ export default function AdminStaticPages() {
               </div>
             )}
 
-            {/* ── GOVT SCHOLARSHIPS ── */}
+            {/* â”€â”€ GOVT SCHOLARSHIPS â”€â”€ */}
             {clSubTab === 'sch_govt' && (
               <div className="space-y-5">
                 <div>
@@ -4984,7 +5072,7 @@ export default function AdminStaticPages() {
               </div>
             )}
 
-            {/* ── INSTITUTE SCHOLARSHIPS ── */}
+            {/* â”€â”€ INSTITUTE SCHOLARSHIPS â”€â”€ */}
             {clSubTab === 'sch_inst' && (
               <div className="space-y-5">
                 <div>
@@ -5048,7 +5136,7 @@ export default function AdminStaticPages() {
               </div>
             )}
 
-            {/* ── SSS (Support Services) ── */}
+            {/* â”€â”€ SSS (Support Services) â”€â”€ */}
             {clSubTab === 'sss' && (
               <div className="space-y-5">
                 <div>
@@ -5111,6 +5199,1451 @@ export default function AdminStaticPages() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* â”€â”€â”€ FACILITIES CMS TAB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {activeTab === 'facilities' && facLibrary && facBoysHostel && facGirlsHostel && facComputerCenter && facGamesSports && facDispensary && facIDEALab && facGymnasium && facWorkshop && facCIDI && facTransitHostel && facStaffQuarters && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.Building size={18} className="text-[#bfa15f]" />
+                Facilities &amp; Campus Amenities CMS
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">Control, edit, and update details for all 12 key facilities across the institute</p>
+            </div>
+
+            {/* Sub-tab bar */}
+            <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
+              {([
+                { id: 'library', label: 'Central Library' },
+                { id: 'boys_hostel', label: 'Boys Hostel' },
+                { id: 'girls_hostel', label: 'Girls Hostel' },
+                { id: 'computer_center', label: 'Computer Center' },
+                { id: 'sports', label: 'Games & Sports' },
+                { id: 'dispensary', label: 'Dispensary' },
+                { id: 'idea_lab', label: 'IDEA Lab' },
+                { id: 'gymnasium', label: 'Gymnasium' },
+                { id: 'workshop', label: 'Central Workshop' },
+                { id: 'cidi', label: 'CIDI Center' },
+                { id: 'transit_hostel', label: 'Transit Hostel' },
+                { id: 'staff_quarters', label: 'Staff Quarters' },
+              ] as const).map(st => (
+                <button
+                  key={st.id}
+                  onClick={() => setFacSubTab(st.id)}
+                  className={`px-3 py-1.5 text-xs font-bold uppercase rounded-md border transition-all ${
+                    facSubTab === st.id
+                      ? 'bg-[#0b2545] border-[#0b2545] text-white shadow-sm font-semibold'
+                      : 'bg-white border-slate-200 text-slate-750 hover:bg-slate-100 hover:text-black font-semibold'
+                  }`}
+                >
+                  {st.label}
+                </button>
+              ))}
+            </div>
+
+            {/* â”€â”€ Library â”€â”€ */}
+            {facSubTab === 'library' && (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Introduction Text</label>
+                  <textarea rows={4} value={facLibrary.intro || ''}
+                    onChange={e => setFacLibrary({ ...facLibrary, intro: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Email</label>
+                    <input type="text" value={facLibrary.email || ''}
+                      onChange={e => setFacLibrary({ ...facLibrary, email: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Phone</label>
+                    <input type="text" value={facLibrary.phone || ''}
+                      onChange={e => setFacLibrary({ ...facLibrary, phone: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Opening Hours</label>
+                    <input type="text" value={facLibrary.openingHours || ''}
+                      onChange={e => setFacLibrary({ ...facLibrary, openingHours: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                </div>
+
+                {/* Collections CRUD */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Library Holdings (Collections)</label>
+                    <button onClick={() => setFacLibrary({ ...facLibrary, collections: [...(facLibrary.collections || []), { label: '', value: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-650 flex items-center gap-1 hover:bg-slate-50">
+                      <Icons.Plus size={11} /> Add Holding
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {(facLibrary.collections || []).map((col: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2 flex flex-col justify-between">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-450 font-mono">HOLDING #{idx + 1}</span>
+                          <button onClick={() => { const list = facLibrary.collections.filter((_: any, i: number) => i !== idx); setFacLibrary({ ...facLibrary, collections: list }) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Label (e.g. Books &amp; Textbooks)</label>
+                            <input type="text" value={col.label}
+                              onChange={e => { const list = [...facLibrary.collections]; list[idx] = { ...list[idx], label: e.target.value }; setFacLibrary({ ...facLibrary, collections: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Value (e.g. 50,000+)</label>
+                            <input type="text" value={col.value}
+                              onChange={e => { const list = [...facLibrary.collections]; list[idx] = { ...list[idx], value: e.target.value }; setFacLibrary({ ...facLibrary, collections: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* E-Resources CRUD */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">E-Resources &amp; Digital Library</label>
+                    <button onClick={() => setFacLibrary({ ...facLibrary, eResources: [...(facLibrary.eResources || []), { name: '', url: '', desc: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-650 flex items-center gap-1 hover:bg-slate-50">
+                      <Icons.Plus size={11} /> Add Resource
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(facLibrary.eResources || []).map((res: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-455 font-mono">RESOURCE #{idx + 1}</span>
+                          <button onClick={() => { const list = facLibrary.eResources.filter((_: any, i: number) => i !== idx); setFacLibrary({ ...facLibrary, eResources: list }) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Resource Name</label>
+                            <input type="text" value={res.name}
+                              onChange={e => { const list = [...facLibrary.eResources]; list[idx] = { ...list[idx], name: e.target.value }; setFacLibrary({ ...facLibrary, eResources: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">URL Link</label>
+                            <input type="text" value={res.url}
+                              onChange={e => { const list = [...facLibrary.eResources]; list[idx] = { ...list[idx], url: e.target.value }; setFacLibrary({ ...facLibrary, eResources: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-450 uppercase">Short Description</label>
+                          <input type="text" value={res.desc}
+                            onChange={e => { const list = [...facLibrary.eResources]; list[idx] = { ...list[idx], desc: e.target.value }; setFacLibrary({ ...facLibrary, eResources: list }) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Borrowing Rules CRUD */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Book Issue Borrowing Rules</label>
+                    <button onClick={() => setFacLibrary({ ...facLibrary, borrowingRules: [...(facLibrary.borrowingRules || []), { category: '', books: 0, period: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-650 flex items-center gap-1 hover:bg-slate-50">
+                      <Icons.Plus size={11} /> Add Rule
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(facLibrary.borrowingRules || []).map((rule: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-455 font-mono">RULE #{idx + 1}</span>
+                          <button onClick={() => { const list = facLibrary.borrowingRules.filter((_: any, i: number) => i !== idx); setFacLibrary({ ...facLibrary, borrowingRules: list }) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Category Name</label>
+                            <input type="text" value={rule.category}
+                              onChange={e => { const list = [...facLibrary.borrowingRules]; list[idx] = { ...list[idx], category: e.target.value }; setFacLibrary({ ...facLibrary, borrowingRules: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Books Allowed</label>
+                            <input type="number" value={rule.books}
+                              onChange={e => { const list = [...facLibrary.borrowingRules]; list[idx] = { ...list[idx], books: parseInt(e.target.value) || 0 }; setFacLibrary({ ...facLibrary, borrowingRules: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Loan Period</label>
+                            <input type="text" value={rule.period}
+                              onChange={e => { const list = [...facLibrary.borrowingRules]; list[idx] = { ...list[idx], period: e.target.value }; setFacLibrary({ ...facLibrary, borrowingRules: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button onClick={() => triggerSave('fac_library', facLibrary, 'Central Library details updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save Library Data
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* â”€â”€ Hostels (Boys & Girls) â”€â”€ */}
+            {(facSubTab === 'boys_hostel' || facSubTab === 'girls_hostel') && (() => {
+              const currentHostel = facSubTab === 'boys_hostel' ? facBoysHostel : facGirlsHostel;
+              const setHostel = facSubTab === 'boys_hostel' ? setFacBoysHostel : setFacGirlsHostel;
+              const saveKey = facSubTab === 'boys_hostel' ? 'fac_boys_hostel' : 'fac_girls_hostel';
+              const labelPrefix = facSubTab === 'boys_hostel' ? 'Boys Hostel' : 'Girls Hostel';
+              
+              return (
+                <div className="space-y-5">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Introduction Text</label>
+                    <textarea rows={4} value={currentHostel.intro || ''}
+                      onChange={e => setHostel({ ...currentHostel, intro: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Chief/Lady Warden Name</label>
+                      <input type="text" value={currentHostel.wardenName || ''}
+                        onChange={e => setHostel({ ...currentHostel, wardenName: e.target.value })}
+                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Warden Email</label>
+                      <input type="text" value={currentHostel.wardenEmail || ''}
+                        onChange={e => setHostel({ ...currentHostel, wardenEmail: e.target.value })}
+                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Warden Phone</label>
+                      <input type="text" value={currentHostel.wardenPhone || ''}
+                        onChange={e => setHostel({ ...currentHostel, wardenPhone: e.target.value })}
+                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Total Capacity</label>
+                      <input type="text" value={currentHostel.totalCapacity || ''}
+                        onChange={e => setHostel({ ...currentHostel, totalCapacity: e.target.value })}
+                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                  </div>
+
+                  {/* Stats CRUD */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-bold text-slate-500 uppercase">Hostel Stats Summary</label>
+                      <button onClick={() => setHostel({ ...currentHostel, stats: [...(currentHostel.stats || []), { label: '', value: '' }] })}
+                        className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-650 flex items-center gap-1 hover:bg-slate-50">
+                        <Icons.Plus size={11} /> Add Stat
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {(currentHostel.stats || []).map((s: any, idx: number) => (
+                        <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2 flex flex-col justify-between">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-slate-450 font-mono">STAT #{idx + 1}</span>
+                            <button onClick={() => { const list = currentHostel.stats.filter((_: any, i: number) => i !== idx); setHostel({ ...currentHostel, stats: list }) }}
+                              className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="text-[9px] font-bold text-slate-450 uppercase">Label (e.g. Security)</label>
+                              <input type="text" value={s.label}
+                                onChange={e => { const list = [...currentHostel.stats]; list[idx] = { ...list[idx], label: e.target.value }; setHostel({ ...currentHostel, stats: list }) }}
+                                className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary" />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-bold text-slate-455 uppercase">Value (e.g. 24x7)</label>
+                              <input type="text" value={s.value}
+                                onChange={e => { const list = [...currentHostel.stats]; list[idx] = { ...list[idx], value: e.target.value }; setHostel({ ...currentHostel, stats: list }) }}
+                                className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary" />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Blocks CRUD */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-bold text-slate-500 uppercase">Hostel Blocks / Sub-buildings</label>
+                      <button onClick={() => setHostel({ ...currentHostel, blocks: [...(currentHostel.blocks || []), { name: '', capacity: 0, rooms: '', year: '' }] })}
+                        className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-655 flex items-center gap-1 hover:bg-slate-50">
+                        <Icons.Plus size={11} /> Add Block
+                      </button>
+                    </div>
+                    <div className="space-y-3">
+                      {(currentHostel.blocks || []).map((block: any, idx: number) => (
+                        <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-slate-455 font-mono">BLOCK #{idx + 1}</span>
+                            <button onClick={() => { const list = currentHostel.blocks.filter((_: any, i: number) => i !== idx); setHostel({ ...currentHostel, blocks: list }) }}
+                              className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                            <div>
+                              <label className="text-[9px] font-bold text-slate-450 uppercase">Block Name</label>
+                              <input type="text" value={block.name}
+                                onChange={e => { const list = [...currentHostel.blocks]; list[idx] = { ...list[idx], name: e.target.value }; setHostel({ ...currentHostel, blocks: list }) }}
+                                className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-bold text-slate-450 uppercase">Capacity (students)</label>
+                              <input type="number" value={block.capacity}
+                                onChange={e => { const list = [...currentHostel.blocks]; list[idx] = { ...list[idx], capacity: parseInt(e.target.value) || 0 }; setHostel({ ...currentHostel, blocks: list }) }}
+                                className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-bold text-slate-450 uppercase">Room Details</label>
+                              <input type="text" value={block.rooms}
+                                onChange={e => { const list = [...currentHostel.blocks]; list[idx] = { ...list[idx], rooms: e.target.value }; setHostel({ ...currentHostel, blocks: list }) }}
+                                className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-bold text-slate-450 uppercase">Establishment Year</label>
+                              <input type="text" value={block.year}
+                                onChange={e => { const list = [...currentHostel.blocks]; list[idx] = { ...list[idx], year: e.target.value }; setHostel({ ...currentHostel, blocks: list }) }}
+                                className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Amenities */}
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Amenities (One per line)</label>
+                    <textarea rows={5} value={(currentHostel.amenities || []).join('\n')}
+                      onChange={e => setHostel({ ...currentHostel, amenities: e.target.value.split('\n').map(l => l.trim()).filter(Boolean) })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-100 flex justify-end">
+                    <button onClick={() => triggerSave(saveKey, currentHostel, `${labelPrefix} details updated!`)}
+                      className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                      <Icons.Save size={14} className="text-[#bfa15f]" /> Save {labelPrefix} Data
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* â”€â”€ Computer Center â”€â”€ */}
+            {facSubTab === 'computer_center' && (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Introduction Text</label>
+                  <textarea rows={4} value={facComputerCenter.intro || ''}
+                    onChange={e => setFacComputerCenter({ ...facComputerCenter, intro: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Email</label>
+                    <input type="text" value={facComputerCenter.email || ''}
+                      onChange={e => setFacComputerCenter({ ...facComputerCenter, email: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Phone</label>
+                    <input type="text" value={facComputerCenter.phone || ''}
+                      onChange={e => setFacComputerCenter({ ...facComputerCenter, phone: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                </div>
+
+                {/* Stats CRUD */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Center Stats Summary</label>
+                    <button onClick={() => setFacComputerCenter({ ...facComputerCenter, stats: [...(facComputerCenter.stats || []), { label: '', value: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-650 flex items-center gap-1 hover:bg-slate-50">
+                      <Icons.Plus size={11} /> Add Stat
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    {(facComputerCenter.stats || []).map((s: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2 flex flex-col justify-between">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-450 font-mono">STAT #{idx + 1}</span>
+                          <button onClick={() => { const list = facComputerCenter.stats.filter((_: any, i: number) => i !== idx); setFacComputerCenter({ ...facComputerCenter, stats: list }) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Label (e.g. Computers)</label>
+                            <input type="text" value={s.label}
+                              onChange={e => { const list = [...facComputerCenter.stats]; list[idx] = { ...list[idx], label: e.target.value }; setFacComputerCenter({ ...facComputerCenter, stats: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-455 uppercase">Value (e.g. 300+)</label>
+                            <input type="text" value={s.value}
+                              onChange={e => { const list = [...facComputerCenter.stats]; list[idx] = { ...list[idx], value: e.target.value }; setFacComputerCenter({ ...facComputerCenter, stats: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Services Provided (One per line)</label>
+                    <textarea rows={6} value={(facComputerCenter.services || []).join('\n')}
+                      onChange={e => setFacComputerCenter({ ...facComputerCenter, services: e.target.value.split('\n').map(l => l.trim()).filter(Boolean) })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Software Licenses (One per line)</label>
+                    <textarea rows={6} value={(facComputerCenter.software || []).join('\n')}
+                      onChange={e => setFacComputerCenter({ ...facComputerCenter, software: e.target.value.split('\n').map(l => l.trim()).filter(Boolean) })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button onClick={() => triggerSave('fac_computer_center', facComputerCenter, 'Computer Center details updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save Computer Center Data
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* â”€â”€ Games & Sports â”€â”€ */}
+            {facSubTab === 'sports' && (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Introduction Text</label>
+                  <textarea rows={4} value={facGamesSports.intro || ''}
+                    onChange={e => setFacGamesSports({ ...facGamesSports, intro: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Sports Officer / Contact Name</label>
+                    <input type="text" value={facGamesSports.contactName || ''}
+                      onChange={e => setFacGamesSports({ ...facGamesSports, contactName: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Email</label>
+                    <input type="text" value={facGamesSports.contactEmail || ''}
+                      onChange={e => setFacGamesSports({ ...facGamesSports, contactEmail: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Phone</label>
+                    <input type="text" value={facGamesSports.contactPhone || ''}
+                      onChange={e => setFacGamesSports({ ...facGamesSports, contactPhone: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Key Achievements (One per line)</label>
+                  <textarea rows={4} value={(facGamesSports.achievements || []).join('\n')}
+                    onChange={e => setFacGamesSports({ ...facGamesSports, achievements: e.target.value.split('\n').map(l => l.trim()).filter(Boolean) })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+
+                {/* Sports Facilities CRUD */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Sports Facilities &amp; Grounds</label>
+                    <button onClick={() => setFacGamesSports({ ...facGamesSports, sportsFacilities: [...(facGamesSports.sportsFacilities || []), { name: '', description: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-650 flex items-center gap-1 hover:bg-slate-50">
+                      <Icons.Plus size={11} /> Add Facility
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(facGamesSports.sportsFacilities || []).map((fac: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-450 font-mono">FACILITY #{idx + 1}</span>
+                          <button onClick={() => { const list = facGamesSports.sportsFacilities.filter((_: any, i: number) => i !== idx); setFacGamesSports({ ...facGamesSports, sportsFacilities: list }) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-450 uppercase">Facility Name (e.g. Cricket Ground)</label>
+                          <input type="text" value={fac.name}
+                            onChange={e => { const list = [...facGamesSports.sportsFacilities]; list[idx] = { ...list[idx], name: e.target.value }; setFacGamesSports({ ...facGamesSports, sportsFacilities: list }) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-450 uppercase">Description</label>
+                          <input type="text" value={fac.description}
+                            onChange={e => { const list = [...facGamesSports.sportsFacilities]; list[idx] = { ...list[idx], description: e.target.value }; setFacGamesSports({ ...facGamesSports, sportsFacilities: list }) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button onClick={() => triggerSave('fac_games_sports', facGamesSports, 'Games & Sports details updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save Games &amp; Sports Data
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* â”€â”€ Dispensary â”€â”€ */}
+            {facSubTab === 'dispensary' && (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Introduction Text</label>
+                  <textarea rows={4} value={facDispensary.intro || ''}
+                    onChange={e => setFacDispensary({ ...facDispensary, intro: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Working / OPD Hours</label>
+                    <input type="text" value={facDispensary.timings || ''}
+                      onChange={e => setFacDispensary({ ...facDispensary, timings: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Emergency Phone</label>
+                    <input type="text" value={facDispensary.emergencyPhone || ''}
+                      onChange={e => setFacDispensary({ ...facDispensary, emergencyPhone: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Email</label>
+                    <input type="text" value={facDispensary.email || ''}
+                      onChange={e => setFacDispensary({ ...facDispensary, email: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Medical Services Offered (One per line)</label>
+                  <textarea rows={5} value={(facDispensary.services || []).join('\n')}
+                    onChange={e => setFacDispensary({ ...facDispensary, services: e.target.value.split('\n').map(l => l.trim()).filter(Boolean) })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+
+                {/* Staff List CRUD */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Dispensary Doctors &amp; Medical Staff</label>
+                    <button onClick={() => setFacDispensary({ ...facDispensary, staffList: [...(facDispensary.staffList || []), { role: '', name: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-650 flex items-center gap-1 hover:bg-slate-50">
+                      <Icons.Plus size={11} /> Add Staff Member
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {(facDispensary.staffList || []).map((staff: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2 flex flex-col justify-between">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-450 font-mono">STAFF #{idx + 1}</span>
+                          <button onClick={() => { const list = facDispensary.staffList.filter((_: any, i: number) => i !== idx); setFacDispensary({ ...facDispensary, staffList: list }) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Role / Designation (e.g. Medical Officer)</label>
+                            <input type="text" value={staff.role}
+                              onChange={e => { const list = [...facDispensary.staffList]; list[idx] = { ...list[idx], role: e.target.value }; setFacDispensary({ ...facDispensary, staffList: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Full Name</label>
+                            <input type="text" value={staff.name}
+                              onChange={e => { const list = [...facDispensary.staffList]; list[idx] = { ...list[idx], name: e.target.value }; setFacDispensary({ ...facDispensary, staffList: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button onClick={() => triggerSave('fac_dispensary', facDispensary, 'Dispensary details updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save Dispensary Data
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* â”€â”€ IDEA Lab â”€â”€ */}
+            {facSubTab === 'idea_lab' && (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">About / Description</label>
+                  <textarea rows={4} value={facIDEALab.about || ''}
+                    onChange={e => setFacIDEALab({ ...facIDEALab, about: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Email</label>
+                  <input type="text" value={facIDEALab.contactEmail || ''}
+                    onChange={e => setFacIDEALab({ ...facIDEALab, contactEmail: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+
+                {/* Stats CRUD */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Lab Stats Summary</label>
+                    <button onClick={() => setFacIDEALab({ ...facIDEALab, stats: [...(facIDEALab.stats || []), { label: '', value: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-650 flex items-center gap-1 hover:bg-slate-50">
+                      <Icons.Plus size={11} /> Add Stat
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    {(facIDEALab.stats || []).map((s: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2 flex flex-col justify-between">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-450 font-mono">STAT #{idx + 1}</span>
+                          <button onClick={() => { const list = facIDEALab.stats.filter((_: any, i: number) => i !== idx); setFacIDEALab({ ...facIDEALab, stats: list }) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Label</label>
+                            <input type="text" value={s.label}
+                              onChange={e => { const list = [...facIDEALab.stats]; list[idx] = { ...list[idx], label: e.target.value }; setFacIDEALab({ ...facIDEALab, stats: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-455 uppercase">Value</label>
+                            <input type="text" value={s.value}
+                              onChange={e => { const list = [...facIDEALab.stats]; list[idx] = { ...list[idx], value: e.target.value }; setFacIDEALab({ ...facIDEALab, stats: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Equipment List (One per line)</label>
+                    <textarea rows={6} value={(facIDEALab.equipment || []).join('\n')}
+                      onChange={e => setFacIDEALab({ ...facIDEALab, equipment: e.target.value.split('\n').map(l => l.trim()).filter(Boolean) })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Programs Conducted (One per line)</label>
+                    <textarea rows={6} value={(facIDEALab.programs || []).join('\n')}
+                      onChange={e => setFacIDEALab({ ...facIDEALab, programs: e.target.value.split('\n').map(l => l.trim()).filter(Boolean) })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button onClick={() => triggerSave('fac_idea_lab', facIDEALab, 'IDEA Lab details updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save IDEA Lab Data
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* â”€â”€ Gymnasium â”€â”€ */}
+            {facSubTab === 'gymnasium' && (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">About / Description</label>
+                  <textarea rows={4} value={facGymnasium.about || ''}
+                    onChange={e => setFacGymnasium({ ...facGymnasium, about: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Email</label>
+                    <input type="text" value={facGymnasium.contactEmail || ''}
+                      onChange={e => setFacGymnasium({ ...facGymnasium, contactEmail: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Phone</label>
+                    <input type="text" value={facGymnasium.contactPhone || ''}
+                      onChange={e => setFacGymnasium({ ...facGymnasium, contactPhone: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                </div>
+
+                {/* Stats CRUD */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Gym Stats Summary</label>
+                    <button onClick={() => setFacGymnasium({ ...facGymnasium, stats: [...(facGymnasium.stats || []), { label: '', value: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-650 flex items-center gap-1 hover:bg-slate-50">
+                      <Icons.Plus size={11} /> Add Stat
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {(facGymnasium.stats || []).map((s: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2 flex flex-col justify-between">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-450 font-mono">STAT #{idx + 1}</span>
+                          <button onClick={() => { const list = facGymnasium.stats.filter((_: any, i: number) => i !== idx); setFacGymnasium({ ...facGymnasium, stats: list }) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Label</label>
+                            <input type="text" value={s.label}
+                              onChange={e => { const list = [...facGymnasium.stats]; list[idx] = { ...list[idx], label: e.target.value }; setFacGymnasium({ ...facGymnasium, stats: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-455 uppercase">Value</label>
+                            <input type="text" value={s.value}
+                              onChange={e => { const list = [...facGymnasium.stats]; list[idx] = { ...list[idx], value: e.target.value }; setFacGymnasium({ ...facGymnasium, stats: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Equipment List (One per line)</label>
+                  <textarea rows={5} value={(facGymnasium.equipment || []).join('\n')}
+                    onChange={e => setFacGymnasium({ ...facGymnasium, equipment: e.target.value.split('\n').map(l => l.trim()).filter(Boolean) })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+
+                {/* Timings Slots CRUD */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Operating Hours / Batches</label>
+                    <button onClick={() => setFacGymnasium({ ...facGymnasium, timings: [...(facGymnasium.timings || []), { slot: '', time: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-655 flex items-center gap-1 hover:bg-slate-50">
+                      <Icons.Plus size={11} /> Add Timing Slot
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(facGymnasium.timings || []).map((t: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-455 font-mono">SLOT #{idx + 1}</span>
+                          <button onClick={() => { const list = facGymnasium.timings.filter((_: any, i: number) => i !== idx); setFacGymnasium({ ...facGymnasium, timings: list }) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Slot Label (e.g. Girls - Evening)</label>
+                            <input type="text" value={t.slot}
+                              onChange={e => { const list = [...facGymnasium.timings]; list[idx] = { ...list[idx], slot: e.target.value }; setFacGymnasium({ ...facGymnasium, timings: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Time Range (e.g. 3:00 PM - 5:00 PM)</label>
+                            <input type="text" value={t.time}
+                              onChange={e => { const list = [...facGymnasium.timings]; list[idx] = { ...list[idx], time: e.target.value }; setFacGymnasium({ ...facGymnasium, timings: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button onClick={() => triggerSave('fac_gymnasium', facGymnasium, 'Gymnasium details updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save Gymnasium Data
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* â”€â”€ Central Workshop â”€â”€ */}
+            {facSubTab === 'workshop' && (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">About / Description</label>
+                  <textarea rows={4} value={facWorkshop.about || ''}
+                    onChange={e => setFacWorkshop({ ...facWorkshop, about: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Email</label>
+                    <input type="text" value={facWorkshop.contactEmail || ''}
+                      onChange={e => setFacWorkshop({ ...facWorkshop, contactEmail: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Phone</label>
+                    <input type="text" value={facWorkshop.contactPhone || ''}
+                      onChange={e => setFacWorkshop({ ...facWorkshop, contactPhone: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Modern Equipment (One per line)</label>
+                  <textarea rows={5} value={(facWorkshop.modernEquipment || []).join('\n')}
+                    onChange={e => setFacWorkshop({ ...facWorkshop, modernEquipment: e.target.value.split('\n').map(l => l.trim()).filter(Boolean) })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+
+                {/* Shop Sections CRUD */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Shop Sections &amp; Divisions</label>
+                    <button onClick={() => setFacWorkshop({ ...facWorkshop, shops: [...(facWorkshop.shops || []), { name: '', desc: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-655 flex items-center gap-1 hover:bg-slate-50">
+                      <Icons.Plus size={11} /> Add Shop
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(facWorkshop.shops || []).map((shop: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-455 font-mono">SHOP #{idx + 1}</span>
+                          <button onClick={() => { const list = facWorkshop.shops.filter((_: any, i: number) => i !== idx); setFacWorkshop({ ...facWorkshop, shops: list }) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div className="space-y-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Shop Name (e.g. Carpentry Shop)</label>
+                            <input type="text" value={shop.name}
+                              onChange={e => { const list = [...facWorkshop.shops]; list[idx] = { ...list[idx], name: e.target.value }; setFacWorkshop({ ...facWorkshop, shops: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Shop Description</label>
+                            <input type="text" value={shop.desc}
+                              onChange={e => { const list = [...facWorkshop.shops]; list[idx] = { ...list[idx], desc: e.target.value }; setFacWorkshop({ ...facWorkshop, shops: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Timings Slots CRUD */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Operating Hours</label>
+                    <button onClick={() => setFacWorkshop({ ...facWorkshop, timings: [...(facWorkshop.timings || []), { day: '', hours: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-655 flex items-center gap-1 hover:bg-slate-50">
+                      <Icons.Plus size={11} /> Add Timings Row
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(facWorkshop.timings || []).map((t: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-455 font-mono">TIMING #{idx + 1}</span>
+                          <button onClick={() => { const list = facWorkshop.timings.filter((_: any, i: number) => i !== idx); setFacWorkshop({ ...facWorkshop, timings: list }) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Days Category (e.g. Working Days)</label>
+                            <input type="text" value={t.day}
+                              onChange={e => { const list = [...facWorkshop.timings]; list[idx] = { ...list[idx], day: e.target.value }; setFacWorkshop({ ...facWorkshop, timings: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Hours (e.g. 9:00 AM - 5:00 PM)</label>
+                            <input type="text" value={t.hours}
+                              onChange={e => { const list = [...facWorkshop.timings]; list[idx] = { ...list[idx], hours: e.target.value }; setFacWorkshop({ ...facWorkshop, timings: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button onClick={() => triggerSave('fac_workshop', facWorkshop, 'Workshop details updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save Workshop Data
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* â”€â”€ CIDI Center â”€â”€ */}
+            {facSubTab === 'cidi' && (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">About / Description</label>
+                  <textarea rows={4} value={facCIDI.about || ''}
+                    onChange={e => setFacCIDI({ ...facCIDI, about: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Email</label>
+                    <input type="text" value={facCIDI.contactEmail || ''}
+                      onChange={e => setFacCIDI({ ...facCIDI, contactEmail: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Phone</label>
+                    <input type="text" value={facCIDI.contactPhone || ''}
+                      onChange={e => setFacCIDI({ ...facCIDI, contactPhone: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                </div>
+
+                {/* Stats CRUD */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Incubation &amp; Startup Stats Summary</label>
+                    <button onClick={() => setFacCIDI({ ...facCIDI, stats: [...(facCIDI.stats || []), { label: '', value: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-650 flex items-center gap-1 hover:bg-slate-50">
+                      <Icons.Plus size={11} /> Add Stat
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    {(facCIDI.stats || []).map((s: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2 flex flex-col justify-between">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-450 font-mono">STAT #{idx + 1}</span>
+                          <button onClick={() => { const list = facCIDI.stats.filter((_: any, i: number) => i !== idx); setFacCIDI({ ...facCIDI, stats: list }) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Label (e.g. Mentors Network)</label>
+                            <input type="text" value={s.label}
+                              onChange={e => { const list = [...facCIDI.stats]; list[idx] = { ...list[idx], label: e.target.value }; setFacCIDI({ ...facCIDI, stats: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-455 uppercase">Value (e.g. 50+)</label>
+                            <input type="text" value={s.value}
+                              onChange={e => { const list = [...facCIDI.stats]; list[idx] = { ...list[idx], value: e.target.value }; setFacCIDI({ ...facCIDI, stats: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Facilities Provided (One per line)</label>
+                  <textarea rows={5} value={(facCIDI.facilities || []).join('\n')}
+                    onChange={e => setFacCIDI({ ...facCIDI, facilities: e.target.value.split('\n').map(l => l.trim()).filter(Boolean) })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+
+                {/* Programs CRUD */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Incubation &amp; Accelerator Programs</label>
+                    <button onClick={() => setFacCIDI({ ...facCIDI, programs: [...(facCIDI.programs || []), { title: '', desc: '', freq: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-655 flex items-center gap-1 hover:bg-slate-50">
+                      <Icons.Plus size={11} /> Add Program
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(facCIDI.programs || []).map((prog: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-455 font-mono">PROGRAM #{idx + 1}</span>
+                          <button onClick={() => { const list = facCIDI.programs.filter((_: any, i: number) => i !== idx); setFacCIDI({ ...facCIDI, programs: list }) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Program Title</label>
+                            <input type="text" value={prog.title}
+                              onChange={e => { const list = [...facCIDI.programs]; list[idx] = { ...list[idx], title: e.target.value }; setFacCIDI({ ...facCIDI, programs: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-450 uppercase">Frequency (e.g. Quarterly)</label>
+                            <input type="text" value={prog.freq}
+                              onChange={e => { const list = [...facCIDI.programs]; list[idx] = { ...list[idx], freq: e.target.value }; setFacCIDI({ ...facCIDI, programs: list }) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-450 uppercase">Description</label>
+                          <textarea rows={2} value={prog.desc}
+                            onChange={e => { const list = [...facCIDI.programs]; list[idx] = { ...list[idx], desc: e.target.value }; setFacCIDI({ ...facCIDI, programs: list }) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button onClick={() => triggerSave('fac_cidi', facCIDI, 'CIDI details updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save CIDI Data
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* â”€â”€ Transit Hostel & Staff Quarters â”€â”€ */}
+            {(facSubTab === 'transit_hostel' || facSubTab === 'staff_quarters') && (() => {
+              const currentRes = facSubTab === 'transit_hostel' ? facTransitHostel : facStaffQuarters;
+              const setRes = facSubTab === 'transit_hostel' ? setFacTransitHostel : setFacStaffQuarters;
+              const saveKey = facSubTab === 'transit_hostel' ? 'fac_transit_hostel' : 'fac_staff_quarters';
+              const labelPrefix = facSubTab === 'transit_hostel' ? 'Transit Hostel' : 'Staff Quarters';
+
+              return (
+                <div className="space-y-5">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">About / Description</label>
+                    <textarea rows={4} value={currentRes.about || ''}
+                      onChange={e => setRes({ ...currentRes, about: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Email</label>
+                      <input type="text" value={currentRes.contactEmail || ''}
+                        onChange={e => setRes({ ...currentRes, contactEmail: e.target.value })}
+                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Phone</label>
+                      <input type="text" value={currentRes.contactPhone || ''}
+                        onChange={e => setRes({ ...currentRes, contactPhone: e.target.value })}
+                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                    </div>
+                    {facSubTab === 'transit_hostel' && (
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Reception / Check-in Hours</label>
+                        <input type="text" value={currentRes.timings || ''}
+                          onChange={e => setRes({ ...currentRes, timings: e.target.value })}
+                          className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Stats CRUD */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-bold text-slate-500 uppercase">Residential Stats Summary</label>
+                      <button onClick={() => setRes({ ...currentRes, stats: [...(currentRes.stats || []), { label: '', value: '' }] })}
+                        className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-650 flex items-center gap-1 hover:bg-slate-50">
+                        <Icons.Plus size={11} /> Add Stat
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {(currentRes.stats || []).map((s: any, idx: number) => (
+                        <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2 flex flex-col justify-between">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-slate-450 font-mono">STAT #{idx + 1}</span>
+                            <button onClick={() => { const list = currentRes.stats.filter((_: any, i: number) => i !== idx); setRes({ ...currentRes, stats: list }) }}
+                              className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="text-[9px] font-bold text-slate-450 uppercase">Label (e.g. Availability)</label>
+                              <input type="text" value={s.label}
+                                onChange={e => { const list = [...currentRes.stats]; list[idx] = { ...list[idx], label: e.target.value }; setRes({ ...currentRes, stats: list }) }}
+                                className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary" />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-bold text-slate-455 uppercase">Value (e.g. On Request)</label>
+                              <input type="text" value={s.value}
+                                onChange={e => { const list = [...currentRes.stats]; list[idx] = { ...list[idx], value: e.target.value }; setRes({ ...currentRes, stats: list }) }}
+                                className="w-full border border-slate-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary" />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Amenities &amp; Features (One per line)</label>
+                    <textarea rows={5} value={(currentRes.amenities || []).join('\n')}
+                      onChange={e => setRes({ ...currentRes, amenities: e.target.value.split('\n').map(l => l.trim()).filter(Boolean) })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-100 flex justify-end">
+                    <button onClick={() => triggerSave(saveKey, currentRes, `${labelPrefix} details updated!`)}
+                      className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                      <Icons.Save size={14} className="text-[#bfa15f]" /> Save {labelPrefix} Data
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+
+          </div>
+        )}
+
+        {/* ─── BRANDING TAB ─────────────────────────────────────────────────────── */}
+        {activeTab === 'branding' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h2 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.Palette size={18} className="text-[#bfa15f]" /> Branding &amp; Institute Identity
+              </h2>
+              <button
+                onClick={() => { brandingService.saveBranding(branding); setToast('Branding saved!') }}
+                className="px-5 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/30 shadow"
+              >
+                <Icons.Save size={13} className="text-[#bfa15f]" /> Save Branding
+              </button>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {([
+                ['shortCode', 'Short Code (e.g. SGS)'],
+                ['shortName', 'Short Name (e.g. SGSITS)'],
+                ['fullName', 'Full Institute Name'],
+                ['establishedYear', 'Established Year'],
+                ['tagline', 'Primary Tagline'],
+                ['subTagline', 'Sub-Tagline (header bar)'],
+                ['logoUrl', 'Logo URL'],
+                ['logoAlt', 'Logo Alt Text'],
+                ['logoSuffix', 'Logo Suffix Label'],
+                ['mobileDrawerTitle', 'Mobile Drawer Title'],
+                ['mobileDrawerFooter', 'Mobile Drawer Footer'],
+                ['mobileNavSectionLabel', 'Mobile Nav Section Label'],
+              ] as [keyof BrandingConfig, string][]).map(([field, label]) => (
+                <div key={field}>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">{label}</label>
+                  <input
+                    type="text"
+                    value={branding[field] ?? ''}
+                    onChange={e => setBranding(prev => ({ ...prev, [field]: e.target.value }))}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0b2545]"
+                  />
+                </div>
+              ))}
+            </div>
+            {branding.logoUrl && (
+              <div className="flex items-center gap-4 mt-4 p-4 border border-slate-200 rounded-lg bg-slate-50">
+                <img src={branding.logoUrl} alt={branding.logoAlt} className="w-16 h-16 object-contain" />
+                <div>
+                  <p className="font-bold text-primary text-sm">{branding.fullName}</p>
+                  <p className="text-xs text-slate-500">{branding.subTagline}</p>
+                  <p className="text-[11px] text-[#bfa15f] font-semibold mt-0.5">{branding.tagline}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ─── CHATBOT TAB ──────────────────────────────────────────────────────── */}
+        {activeTab === 'chatbot' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h2 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.Bot size={18} className="text-[#bfa15f]" /> Chatbot Configuration
+              </h2>
+              <button
+                onClick={() => { chatbotService.saveChatbotConfig(chatbot); setToast('Chatbot config saved!') }}
+                className="px-5 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/30 shadow"
+              >
+                <Icons.Save size={13} className="text-[#bfa15f]" /> Save Config
+              </button>
+            </div>
+            {/* Core settings */}
+            <div className="grid sm:grid-cols-2 gap-4">
+              {([
+                ['botName', 'Bot Name'],
+                ['avatarUrl', 'Avatar URL'],
+                ['welcomeMessage', 'Welcome Message'],
+                ['inputPlaceholder', 'Input Placeholder'],
+                ['fallbackMessage', 'Fallback / No-match Reply'],
+              ] as [keyof ChatbotConfig, string][]).filter(([k]) => typeof chatbot[k] === 'string').map(([field, label]) => (
+                <div key={field} className={field === 'welcomeMessage' || field === 'fallbackMessage' ? 'sm:col-span-2' : ''}>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">{label}</label>
+                  {field === 'welcomeMessage' || field === 'fallbackMessage' ? (
+                    <textarea
+                      rows={3}
+                      value={chatbot[field] as string}
+                      onChange={e => setChatbot(prev => ({ ...prev, [field]: e.target.value }))}
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0b2545]"
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      value={chatbot[field] as string}
+                      onChange={e => setChatbot(prev => ({ ...prev, [field]: e.target.value }))}
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0b2545]"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+            {/* Quick Prompts */}
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Quick Prompts (one per line)</label>
+              <textarea
+                rows={4}
+                value={chatbot.quickPrompts.join('\n')}
+                onChange={e => setChatbot(prev => ({ ...prev, quickPrompts: e.target.value.split('\n').map(s => s.trim()).filter(Boolean) }))}
+                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0b2545]"
+              />
+            </div>
+            {/* Response Categories */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-bold text-sm text-primary uppercase tracking-wider">Response Categories ({chatbot.responses.length})</h3>
+                <button
+                  onClick={() => setChatbot(prev => ({ ...prev, responses: [...prev.responses, { id: Date.now().toString(), category: 'New Category', keywords: [], reply: '' }] }))}
+                  className="text-xs px-3 py-1.5 bg-[#bfa15f]/10 border border-[#bfa15f]/30 text-[#bfa15f] font-bold rounded-lg"
+                >
+                  + Add Response
+                </button>
+              </div>
+              <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                {chatbot.responses.map((resp: ChatbotResponseItem, idx: number) => (
+                  <div key={resp.id || idx} className="border border-slate-200 rounded-lg p-4 bg-slate-50 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs text-primary uppercase">{resp.category}</span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setEditingResponseIdx(editingResponseIdx === idx ? null : idx)}
+                          className="text-xs px-2 py-1 bg-[#0b2545]/10 rounded text-[#0b2545] font-semibold"
+                        >
+                          {editingResponseIdx === idx ? 'Done' : 'Edit'}
+                        </button>
+                        <button
+                          onClick={() => setChatbot(prev => ({ ...prev, responses: prev.responses.filter((_, i) => i !== idx) }))}
+                          className="text-xs px-2 py-1 bg-red-50 border border-red-200 rounded text-red-500 font-semibold"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                    {editingResponseIdx === idx && (
+                      <div className="space-y-2">
+                        <div>
+                          <label className="text-[10px] font-bold uppercase text-slate-500">Category Name</label>
+                          <input type="text" value={resp.category}
+                            onChange={e => { const r = [...chatbot.responses]; r[idx] = { ...r[idx], category: e.target.value }; setChatbot(p => ({ ...p, responses: r })) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-primary" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold uppercase text-slate-500">Keywords (comma-separated)</label>
+                          <input type="text" value={resp.keywords.join(', ')}
+                            onChange={e => { const r = [...chatbot.responses]; r[idx] = { ...r[idx], keywords: e.target.value.split(',').map(k => k.trim()).filter(Boolean) }; setChatbot(p => ({ ...p, responses: r })) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-primary" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold uppercase text-slate-500">Reply Text</label>
+                          <textarea rows={3} value={resp.reply}
+                            onChange={e => { const r = [...chatbot.responses]; r[idx] = { ...r[idx], reply: e.target.value }; setChatbot(p => ({ ...p, responses: r })) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-primary" />
+                        </div>
+                      </div>
+                    )}
+                    {editingResponseIdx !== idx && (
+                      <div className="text-xs text-slate-500">
+                        <span className="font-semibold text-slate-700">Keywords:</span> {resp.keywords.join(', ') || '—'}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─── SEO MANAGER TAB ──────────────────────────────────────────────────── */}
+        {activeTab === 'seo' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h2 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.Search size={18} className="text-[#bfa15f]" /> Per-Page SEO Manager
+              </h2>
+              <button
+                onClick={() => { seoService.savePageSeo(activeSeoKey, allSeo[activeSeoKey]); setToast(`SEO saved for "${activeSeoKey}"!`) }}
+                className="px-5 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/30 shadow"
+              >
+                <Icons.Save size={13} className="text-[#bfa15f]" /> Save Page SEO
+              </button>
+            </div>
+            <div className="flex gap-4">
+              {/* Page selector */}
+              <div className="w-56 shrink-0">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Page</label>
+                <div className="border border-slate-200 rounded-lg overflow-hidden max-h-[500px] overflow-y-auto">
+                  {Object.keys(allSeo).map(key => (
+                    <button
+                      key={key}
+                      onClick={() => setActiveSeoKey(key)}
+                      className={`w-full text-left px-3 py-2 text-xs font-medium border-b border-slate-100 last:border-0 transition-colors ${activeSeoKey === key ? 'bg-[#0b2545] text-white font-bold' : 'bg-white hover:bg-slate-50 text-slate-700'}`}
+                    >
+                      {key}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* SEO fields */}
+              {allSeo[activeSeoKey] && (
+                <div className="flex-1 space-y-4">
+                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                    <p className="text-[11px] font-bold uppercase text-slate-500">Editing: <span className="text-[#0b2545]">{activeSeoKey}</span></p>
+                  </div>
+                  {([
+                    ['pageTitle', 'Page Title (HTML <title>)', false],
+                    ['metaDescription', 'Meta Description', true],
+                    ['keywords', 'Meta Keywords (comma-separated)', false],
+                    ['ogTitle', 'Open Graph Title', false],
+                    ['ogDescription', 'OG Description', true],
+                    ['ogImage', 'OG Image URL', false],
+                    ['canonicalUrl', 'Canonical URL', false],
+                  ] as [keyof SeoMeta, string, boolean][]).map(([field, label, multiline]) => (
+                    <div key={field}>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">{label}</label>
+                      {multiline ? (
+                        <textarea
+                          rows={3}
+                          value={(allSeo[activeSeoKey][field] ?? '') as string}
+                          onChange={e => setAllSeo(prev => ({ ...prev, [activeSeoKey]: { ...prev[activeSeoKey], [field]: e.target.value } }))}
+                          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0b2545]"
+                        />
+                      ) : (
+                        <input
+                          type="text"
+                          value={(allSeo[activeSeoKey][field] ?? '') as string}
+                          onChange={e => setAllSeo(prev => ({ ...prev, [activeSeoKey]: { ...prev[activeSeoKey], [field]: e.target.value } }))}
+                          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0b2545]"
+                        />
+                      )}
+                    </div>
+                  ))}
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Twitter Card Type</label>
+                    <select
+                      value={allSeo[activeSeoKey].twitterCard ?? 'summary_large_image'}
+                      onChange={e => setAllSeo(prev => ({ ...prev, [activeSeoKey]: { ...prev[activeSeoKey], twitterCard: e.target.value as 'summary' | 'summary_large_image' } }))}
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0b2545] bg-white"
+                    >
+                      <option value="summary">summary</option>
+                      <option value="summary_large_image">summary_large_image</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ─── UI LABELS TAB ────────────────────────────────────────────────────── */}
+        {activeTab === 'ui_labels' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h2 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.Type size={18} className="text-[#bfa15f]" /> Global UI Labels
+              </h2>
+              <button
+                onClick={() => { uiLabelsService.saveUiLabels(uiLabels); setToast('UI Labels saved!') }}
+                className="px-5 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/30 shadow"
+              >
+                <Icons.Save size={13} className="text-[#bfa15f]" /> Save Labels
+              </button>
+            </div>
+            {/* Sections editor */}
+            {(Object.entries(uiLabels) as [string, Record<string, unknown>][])
+              .filter(([, v]) => typeof v === 'object' && v !== null && !Array.isArray(v))
+              .map(([section, fields]) => (
+              <div key={section} className="border border-slate-200 rounded-lg overflow-hidden">
+                <div className="bg-[#0b2545]/5 border-b border-slate-200 px-4 py-2.5">
+                  <h3 className="font-bold text-xs text-[#0b2545] uppercase tracking-wider">{section.replace(/([A-Z])/g, ' $1').trim()}</h3>
+                </div>
+                <div className="p-4 grid sm:grid-cols-2 gap-3">
+                  {(Object.entries(fields) as [string, unknown][])
+                    .filter(([, v]) => typeof v === 'string')
+                    .map(([key, value]) => (
+                    <div key={key}>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                      </label>
+                      <input
+                        type="text"
+                        value={value as string}
+                        onChange={e => setUiLabels(prev => ({
+                          ...prev,
+                          [section]: { ...(prev as any)[section], [key]: e.target.value }
+                        }))}
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0b2545]"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {/* Quick Links (array section) */}
+            <div className="border border-slate-200 rounded-lg overflow-hidden">
+              <div className="bg-[#0b2545]/5 border-b border-slate-200 px-4 py-2.5 flex items-center justify-between">
+                <h3 className="font-bold text-xs text-[#0b2545] uppercase tracking-wider">Top Bar Quick Links</h3>
+                <button
+                  onClick={() => setUiLabels(prev => ({ ...prev, topBarQuickLinks: [...prev.topBarQuickLinks, { label: '', to: '' }] }))}
+                  className="text-xs px-3 py-1 bg-[#bfa15f]/10 border border-[#bfa15f]/30 text-[#bfa15f] font-bold rounded"
+                >
+                  + Add Link
+                </button>
+              </div>
+              <div className="p-4 space-y-3">
+                {uiLabels.topBarQuickLinks.map((ql, idx) => (
+                  <div key={idx} className="flex gap-3 items-center">
+                    <input
+                      type="text"
+                      placeholder="Label"
+                      value={ql.label}
+                      onChange={e => {
+                        const links = [...uiLabels.topBarQuickLinks]; links[idx] = { ...links[idx], label: e.target.value };
+                        setUiLabels(prev => ({ ...prev, topBarQuickLinks: links }))
+                      }}
+                      className="flex-1 border border-slate-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Path (e.g. /notices)"
+                      value={ql.to}
+                      onChange={e => {
+                        const links = [...uiLabels.topBarQuickLinks]; links[idx] = { ...links[idx], to: e.target.value };
+                        setUiLabels(prev => ({ ...prev, topBarQuickLinks: links }))
+                      }}
+                      className="flex-1 border border-slate-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary"
+                    />
+                    <button
+                      onClick={() => setUiLabels(prev => ({ ...prev, topBarQuickLinks: prev.topBarQuickLinks.filter((_, i) => i !== idx) }))}
+                      className="text-xs px-2 py-1.5 bg-red-50 border border-red-200 text-red-500 font-semibold rounded"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 

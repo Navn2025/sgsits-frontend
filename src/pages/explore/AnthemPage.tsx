@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, Music, Award } from 'lucide-react'
 
 const stanzas = [
@@ -39,6 +40,7 @@ const AnthemPage: React.FC = () => {
 
   return (
     <div className="space-y-10">
+      <PageSeo pageKey="explore/anthem" />
       {/* Page Header */}
       <div className="border-b border-slate-200 pb-6">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1.5">Institute Heritage</span>

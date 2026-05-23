@@ -1,10 +1,18 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { ChevronRight, Home } from 'lucide-react'
+import { uiLabelsService, uiLabelsDefaults } from '../../services/uiLabelsService'
 
 const Breadcrumbs: React.FC = () => {
   const location = useLocation()
-  
+  const [homeLabel, setHomeLabel] = useState(uiLabelsDefaults.breadcrumbs.homeLabel)
+
+  useEffect(() => {
+    uiLabelsService.getUiLabels().then((labels) => {
+      setHomeLabel(labels.breadcrumbs.homeLabel)
+    })
+  }, [])
+
   const pathnames = location.pathname.split('/').filter((x) => x)
 
   if (pathnames.length === 0) return null
@@ -24,7 +32,7 @@ const Breadcrumbs: React.FC = () => {
             className="flex items-center gap-1 text-gray-600 hover:text-primary transition-colors"
           >
             <Home className="w-3.5 h-3.5" />
-            <span>Home</span>
+            <span>{homeLabel}</span>
           </Link>
         </li>
 

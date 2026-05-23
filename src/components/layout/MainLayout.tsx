@@ -9,26 +9,36 @@ import {
   Cloud
 } from 'lucide-react'
 import Chatbot from '../global/Chatbot'
-import { departmentsList } from '../../constants/departmentsList'
-import { settingsService, footerDefaults, siteSettingsDefaults, topBarDefaults } from '../../services/settingsService'
+import { settingsService, siteSettingsDefaults, topBarDefaults, footerDefaults } from '../../services/settingsService'
+import { brandingService, brandingDefaults } from '../../services/brandingService'
+import { navigationService, quickLinksDefaults } from '../../services/navigationService'
+import { uiLabelsService, uiLabelsDefaults } from '../../services/uiLabelsService'
 import type { FooterData, TopBarData } from '../../mock/settings/settingsData'
 import type { SiteSettings } from '../../types'
+import type { BrandingConfig } from '../../services/brandingService'
+import type { UiLabelsConfig } from '../../services/uiLabelsService'
 import { navService, navItemsDefault } from '../../services/navService'
+import { departmentService } from '../../services/departmentService'
+import type { DepartmentSummary } from '../../services/departmentService'
 
 // --- TOP BAR COMPONENT ---
 interface TopBarProps {
   topBar: TopBarData
+  quickLinks: { label: string; to: string }[]
+  loginLabel: string
 }
 
-const TopBar: React.FC<TopBarProps> = ({ topBar }) => {
+const TopBar: React.FC<TopBarProps> = ({ topBar, quickLinks, loginLabel }) => {
   return (
     <div className="bg-primary text-white/80 text-xs md:text-sm py-2 border-b border-white/10 w-full relative z-30 font-sans font-medium">
       <div className="w-full px-4 lg:px-12 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-between sm:items-center">
+        {/* Dynamic quick links — admin-controlled via uiLabels.topBarQuickLinks */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 md:gap-x-6">
-          <Link to="/students/activities" className="hover:text-white transition-colors">Students</Link>
-          <Link to="/about/administration" className="hover:text-white transition-colors">Faculty</Link>
-          <Link to="/about/institute" className="hover:text-white transition-colors">Alumni</Link>
-          <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
+          {quickLinks.map((ql) => (
+            <Link key={ql.to} to={ql.to} className="hover:text-white transition-colors">
+              {ql.label}
+            </Link>
+          ))}
           {topBar.helpline && (
             <span className="hidden lg:inline text-white/50">| Helpline: {topBar.helpline}</span>
           )}
@@ -59,7 +69,7 @@ const TopBar: React.FC<TopBarProps> = ({ topBar }) => {
             <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
             </svg>
-            <span>Login</span>
+            <span>{loginLabel}</span>
           </Link>
         </div>
       </div>
@@ -72,27 +82,47 @@ interface LogoBannerProps {
   onMobileToggle: () => void
   mobileOpen: boolean
   settings: SiteSettings
+  branding: BrandingConfig
+  mobileMenuOpenLabel: string
+  mobileMenuCloseLabel: string
 }
 
-const LogoBanner: React.FC<LogoBannerProps> = ({ onMobileToggle, mobileOpen, settings }) => {
+const LogoBanner: React.FC<LogoBannerProps> = ({
+  onMobileToggle,
+  mobileOpen,
+  settings,
+  branding,
+  mobileMenuOpenLabel,
+  mobileMenuCloseLabel,
+}) => {
   return (
     <div className="w-full border-b sticky top-0 z-50 lg:static lg:z-20 bg-white border-slate-100 shadow-sm">
       <div className="w-full px-4 lg:px-12 py-3 flex items-center justify-between gap-3 sm:gap-4">
         <div className="flex min-w-0 items-center gap-3 sm:gap-5">
+          {/* Logo image — dynamic from brandingService */}
           <div className="shrink-0 rounded-full flex items-center justify-center w-[58px] h-[58px] sm:w-[80px] sm:h-[80px]">
-            <img src="/assets/image.png" alt="SGSITS Logo" className="w-full h-full object-contain" />
+            <img src={branding.logoUrl} alt={branding.logoAlt} className="w-full h-full object-contain" />
           </div>
           <div className="min-w-0">
+            {/* Institution name — dynamic from brandingService */}
             <h1 className="font-bold text-[13px] leading-[1.2] tracking-tight sm:text-[22px] lg:text-[25px] text-primary font-display">
-              Shri G. S. Institute of{' '}
-              <span className="block sm:inline">Technology & Science</span>
+              {branding.fullName.includes('Technology') ? (
+                <>
+                  {branding.fullName.split('Technology')[0]}Technology
+                  <span className="block sm:inline"> & Science</span>
+                </>
+              ) : (
+                branding.fullName
+              )}
             </h1>
+            {/* Sub-tagline — dynamic from brandingService */}
             <p className="font-bold text-[10px] sm:text-xs mt-1 uppercase tracking-[0.03em] hidden md:block text-slate-500">
-              Govt. Aided Autonomous Institute, Indore (M.P.) - Estd. 1952
+              {branding.subTagline}
             </p>
           </div>
         </div>
         <div className="hidden lg:flex items-center space-x-6 shrink-0">
+          {/* Tagline accent box — from settingsService */}
           <div className="border border-accent/30 px-4 py-1.5 text-accent font-bold text-[12px] bg-accent/5 hidden xl:block uppercase tracking-wider rounded-sm">
             {settings.tagline}
           </div>
@@ -100,7 +130,7 @@ const LogoBanner: React.FC<LogoBannerProps> = ({ onMobileToggle, mobileOpen, set
         <button
           className="lg:hidden p-2 rounded transition-colors shrink-0 text-primary hover:bg-gray-100"
           onClick={onMobileToggle}
-          aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-label={mobileOpen ? mobileMenuCloseLabel : mobileMenuOpenLabel}
         >
           {mobileOpen ? <X size={24} strokeWidth={2.5} /> : <Menu size={24} strokeWidth={2.5} />}
         </button>
@@ -114,9 +144,12 @@ interface StickyNavProps {
   mobileOpen: boolean
   onMobileClose: () => void
   navItemsList: any[]
+  branding: BrandingConfig
+  quickLinks: { label: string; to: string }[]
+  loginLabel: string
 }
 
-const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose, navItemsList }) => {
+const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose, navItemsList, branding, quickLinks, loginLabel }) => {
   const [navVisible, setNavVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isStuck, setIsStuck] = useState(false)
@@ -258,11 +291,13 @@ const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose, navIte
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-4 py-4 text-slate-900 shadow-sm">
               <div className="flex min-w-0 items-center gap-3 pr-3">
                 <div className="h-10 w-10 shrink-0 rounded-full bg-slate-50 p-1 border border-slate-200">
-                  <img src="/assets/image.png" alt="SGSITS Logo" className="h-full w-full object-contain" />
+                  {/* Logo — dynamic from brandingService */}
+                  <img src={branding.logoUrl} alt={branding.logoAlt} className="h-full w-full object-contain" />
                 </div>
                 <div className="min-w-0">
+                  {/* Institution name — dynamic from brandingService */}
                   <p className="text-sm font-bold leading-tight text-primary sm:text-base">
-                    Shri G.S. Institute Of Technology &amp; Science
+                    {branding.fullName}
                   </p>
                 </div>
               </div>
@@ -321,13 +356,21 @@ const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose, navIte
             </nav>
 
             <div className="border-t border-gray-200 bg-white px-4 py-5 text-slate-850">
+              {/* Quick links grid — dynamic from navigationService.getQuickLinks() */}
               <div className="grid grid-cols-2 gap-3 text-sm font-medium">
-                <Link to="/students/activities" onClick={onMobileClose} className="rounded-xl border border-gray-200 bg-white px-4 py-3 transition-colors hover:bg-gray-50 text-center">Students</Link>
-                <Link to="/about/administration" onClick={onMobileClose} className="rounded-xl border border-gray-200 bg-white px-4 py-3 transition-colors hover:bg-gray-50 text-center">Faculty</Link>
-                <Link to="/about/institute" onClick={onMobileClose} className="rounded-xl border border-gray-200 bg-white px-4 py-3 transition-colors hover:bg-gray-50 text-center">About</Link>
-                <Link to="/contact" onClick={onMobileClose} className="rounded-xl border border-gray-200 bg-white px-4 py-3 transition-colors hover:bg-gray-50 text-center">Contact</Link>
+                {quickLinks.map((ql) => (
+                  <Link
+                    key={ql.to}
+                    to={ql.to}
+                    onClick={onMobileClose}
+                    className="rounded-xl border border-gray-200 bg-white px-4 py-3 transition-colors hover:bg-gray-50 text-center"
+                  >
+                    {ql.label}
+                  </Link>
+                ))}
               </div>
 
+              {/* Login button — label from uiLabelsService */}
               <Link
                 to="/login"
                 onClick={onMobileClose}
@@ -336,7 +379,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose, navIte
                 <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
                 </svg>
-                Login
+                {loginLabel}
               </Link>
             </div>
           </div>
@@ -400,9 +443,10 @@ const CampusRevealBanner: React.FC = () => {
 interface FooterProps {
   footerData: FooterData
   settings: SiteSettings
+  depts: DepartmentSummary[]
 }
 
-const Footer: React.FC<FooterProps> = ({ footerData, settings }) => {
+const Footer: React.FC<FooterProps> = ({ footerData, settings, depts }) => {
   return (
     <>
       {/* Weather & Social Bar */}
@@ -465,11 +509,11 @@ const Footer: React.FC<FooterProps> = ({ footerData, settings }) => {
             ))}
           </div>
 
-          {/* Section 3: Departments */}
+          {/* Section 3: Departments — loaded dynamically from departmentService */}
           <div className="py-8 border-b border-white/10">
             <h3 className="font-bold text-white text-lg mb-6 tracking-wide">Departments</h3>
             <div className="grid grid-cols-2 lg:grid-cols-4 md:grid-cols-3 gap-y-5 gap-x-6 text-sm font-medium">
-              {departmentsList.map((dept) => (
+              {depts.map((dept) => (
                 <Link key={dept.slug} to={`/departments/${dept.slug}`} className="hover:text-white transition-colors">
                   {dept.shortName}
                 </Link>
@@ -541,24 +585,47 @@ const MainLayout: React.FC = () => {
   const [topBar, setTopBar] = useState<TopBarData>(topBarDefaults)
   const [navItemsList, setNavItemsList] = useState<any[]>(navItemsDefault)
   const [footerData, setFooterData] = useState<FooterData>(footerDefaults)
+  const [footerDepts, setFooterDepts] = useState<DepartmentSummary[]>([])
   const [alerts, setAlerts] = useState<any[]>([])
+  // Branding, UI labels, and quick links — all backend-controlled
+  const [branding, setBranding] = useState<BrandingConfig>(brandingDefaults)
+  const [labels, setLabels] = useState<UiLabelsConfig>(uiLabelsDefaults)
+  const [quickLinks, setQuickLinks] = useState<{ label: string; to: string }[]>(quickLinksDefaults)
 
   // Load configuration on mount
   useEffect(() => {
     const fetchLayoutConfig = async () => {
       try {
-        const [loadedSettings, loadedTopBar, loadedNav, loadedFooter, loadedAlerts] = await Promise.all([
+        const [
+          loadedSettings,
+          loadedTopBar,
+          loadedNav,
+          loadedFooter,
+          loadedAlerts,
+          loadedBranding,
+          loadedLabels,
+          loadedQuickLinks,
+          loadedDepts,
+        ] = await Promise.all([
           settingsService.getSiteSettings(),
           settingsService.getTopBarData(),
           navService.getNavItems(),
           settingsService.getFooterData(),
-          settingsService.getAlerts()
+          settingsService.getAlerts(),
+          brandingService.getBranding(),
+          uiLabelsService.getUiLabels(),
+          navigationService.getQuickLinks(),
+          departmentService.getDepartments(),
         ])
         setSettings(loadedSettings)
         setTopBar(loadedTopBar)
         setNavItemsList(loadedNav)
         setFooterData(loadedFooter)
         setAlerts(loadedAlerts)
+        setBranding(loadedBranding)
+        setLabels(loadedLabels)
+        setQuickLinks(loadedQuickLinks)
+        setFooterDepts(loadedDepts)
       } catch (error) {
         console.error('Failed to load layout CMS settings:', error)
       }
@@ -611,14 +678,29 @@ const MainLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-slate-800 bg-[#f7f8fa] transition-colors duration-300">
-      <TopBar topBar={topBar} />
-      <LogoBanner onMobileToggle={() => setMobileOpen(o => !o)} mobileOpen={mobileOpen} settings={settings} />
-      <StickyNav mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} navItemsList={navItemsList} />
+      <TopBar topBar={topBar} quickLinks={quickLinks} loginLabel={labels.header.loginLabel} />
+      <LogoBanner
+        onMobileToggle={() => setMobileOpen(o => !o)}
+        mobileOpen={mobileOpen}
+        settings={settings}
+        branding={branding}
+        mobileMenuOpenLabel={labels.header.mobileMenuOpenLabel}
+        mobileMenuCloseLabel={labels.header.mobileMenuCloseLabel}
+      />
+      <StickyNav
+        mobileOpen={mobileOpen}
+        onMobileClose={() => setMobileOpen(false)}
+        navItemsList={navItemsList}
+        branding={branding}
+        quickLinks={quickLinks}
+        loginLabel={labels.header.loginLabel}
+      />
 
       {/* Announcements Marquee */}
       <div className="relative w-full bg-black text-slate-100 flex items-center border-t border-b border-zinc-800">
+        {/* Label — dynamic from uiLabelsService (homepage.announcementsHeading) */}
         <div className="bg-primary text-white px-4 lg:px-8 py-2.5 font-bold text-[11px] sm:text-[13px] uppercase tracking-wider shrink-0 flex items-center sm:relative absolute inset-y-0 left-0 z-10 border-r-2 border-accent">
-          Announcements
+          {labels.homepage.announcementsHeading}
         </div>
         <div className="flex-1 overflow-hidden sm:ml-0 ml-[135px] py-2 flex items-center">
           {React.createElement('marquee', {
@@ -655,7 +737,7 @@ const MainLayout: React.FC = () => {
 
       {pathname === '/' && <CampusRevealBanner />}
 
-      <Footer footerData={footerData} settings={settings} />
+      <Footer footerData={footerData} settings={settings} depts={footerDepts} />
       {!mobileOpen && <Chatbot />}
     </div>
   )

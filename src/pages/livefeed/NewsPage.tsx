@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react'
+﻿import React, { useState, useMemo } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Link } from 'react-router-dom'
 import { mockStore } from '../../data/mockStore'
 import { Calendar, User, ArrowRight, Search } from 'lucide-react'
@@ -28,6 +29,7 @@ const NewsPage: React.FC = () => {
 
   return (
     <div className="space-y-6 bg-white">
+      <PageSeo pageKey="news" />
         {/* Search + Category Filters */}
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <div className="relative flex-1 min-w-0">

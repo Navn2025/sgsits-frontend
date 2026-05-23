@@ -5,6 +5,17 @@
  */
 
 // ─── Seed Data Imports ────────────────────────────────────────────────────────
+import { mockBrandingConfig, type BrandingConfig } from '../mock/branding/brandingData'
+import {
+  mockSidebarLinks,
+  mockSectionBanners,
+  mockDefaultSectionBanner,
+  type SidebarLink,
+  type SectionBanner,
+} from '../mock/sidebar/sidebarData'
+import { mockChatbotConfig, type ChatbotConfig } from '../mock/chatbot/chatbotData'
+import { mockSeoData, mockDefaultSeoMeta, type SeoMeta } from '../mock/seo/seoData'
+import { mockUiLabels, type UiLabelsConfig } from '../mock/uilabels/uiLabelsData'
 import { mockHomePageData } from '../mock/home/homeData'
 import {
   mockVisionMission,
@@ -729,7 +740,18 @@ export const mockStore = {
   getCommittees: (): any => readLocal('sgsits_about_committees', mockCommittees),
   saveCommittees: (data: any): void => writeLocal('sgsits_about_committees', data),
 
-  getNavItems: (): any => readLocal('sgsits_navigation_items', mockNavItems),
+  getNavItems: (): any => {
+    const navs = readLocal('sgsits_navigation_items', mockNavItems)
+    if (Array.isArray(navs) && !navs.some((n: any) => n.label === 'More')) {
+      const moreItem = mockNavItems.find(n => n.label === 'More')
+      if (moreItem) {
+        const updated = [...navs.filter(n => n.label !== 'More'), moreItem]
+        writeLocal('sgsits_navigation_items', updated)
+        return updated
+      }
+    }
+    return navs
+  },
   saveNavItems: (data: any): void => writeLocal('sgsits_navigation_items', data),
 
   // Departments CRUD
@@ -754,6 +776,14 @@ export const mockStore = {
   saveCustomPage: (slug: string, data: any): void => {
     const list = readLocal('sgsits_custom_pages', defaultCustomPages)
     writeLocal('sgsits_custom_pages', list.map((p: any) => p.slug === slug ? { ...p, ...data } : p))
+  },
+  addCustomPage: (data: any): void => {
+    const list = readLocal('sgsits_custom_pages', defaultCustomPages)
+    writeLocal('sgsits_custom_pages', [...list, { ...data, id: uid() }])
+  },
+  deleteCustomPage: (slug: string): void => {
+    const list = readLocal('sgsits_custom_pages', defaultCustomPages)
+    writeLocal('sgsits_custom_pages', list.filter((p: any) => p.slug !== slug))
   },
 
   // Admissions CMS Data
@@ -854,4 +884,54 @@ export const mockStore = {
 
   getStaffQuarters: (): any => readLocal('sgsits_facility_staff_quarters', mockStaffQuarters),
   saveStaffQuarters: (data: any): void => writeLocal('sgsits_facility_staff_quarters', data),
+
+  // ─── Branding & Identity ──────────────────────────────────────────────────
+  getBranding: (): BrandingConfig => readLocal('sgsits_branding', mockBrandingConfig),
+  saveBranding: (data: BrandingConfig): void => writeLocal('sgsits_branding', data),
+
+  // ─── Sidebar Navigation & Section Banners ────────────────────────────────
+  getSidebarLinks: (section: string): SidebarLink[] =>
+    (readLocal('sgsits_sidebar_links', mockSidebarLinks) as Record<string, SidebarLink[]>)[section] ?? [],
+  getAllSidebarLinks: (): Record<string, SidebarLink[]> =>
+    readLocal('sgsits_sidebar_links', mockSidebarLinks),
+  saveAllSidebarLinks: (data: Record<string, SidebarLink[]>): void =>
+    writeLocal('sgsits_sidebar_links', data),
+  saveSidebarLinks: (section: string, links: SidebarLink[]): void => {
+    const all = readLocal('sgsits_sidebar_links', mockSidebarLinks) as Record<string, SidebarLink[]>
+    writeLocal('sgsits_sidebar_links', { ...all, [section]: links })
+  },
+
+  getSectionBanner: (section: string): SectionBanner =>
+    ((readLocal('sgsits_section_banners', mockSectionBanners) as Record<string, SectionBanner>)[section]
+      ?? mockDefaultSectionBanner),
+  getAllSectionBanners: (): Record<string, SectionBanner> =>
+    readLocal('sgsits_section_banners', mockSectionBanners),
+  saveAllSectionBanners: (data: Record<string, SectionBanner>): void =>
+    writeLocal('sgsits_section_banners', data),
+  saveSectionBanner: (section: string, banner: SectionBanner): void => {
+    const all = readLocal('sgsits_section_banners', mockSectionBanners) as Record<string, SectionBanner>
+    writeLocal('sgsits_section_banners', { ...all, [section]: banner })
+  },
+
+  // ─── Chatbot Configuration ────────────────────────────────────────────────
+  getChatbotConfig: (): ChatbotConfig => readLocal('sgsits_chatbot_config', mockChatbotConfig),
+  saveChatbotConfig: (data: ChatbotConfig): void => writeLocal('sgsits_chatbot_config', data),
+
+  // ─── Per-Page SEO Metadata ────────────────────────────────────────────────
+  getPageSeo: (pageKey: string): SeoMeta => {
+    const all = readLocal('sgsits_seo_data', mockSeoData) as Record<string, SeoMeta>
+    return all[pageKey] ?? { ...mockDefaultSeoMeta, pageKey }
+  },
+  getAllPageSeo: (): Record<string, SeoMeta> =>
+    readLocal('sgsits_seo_data', mockSeoData),
+  savePageSeo: (pageKey: string, seo: SeoMeta): void => {
+    const all = readLocal('sgsits_seo_data', mockSeoData) as Record<string, SeoMeta>
+    writeLocal('sgsits_seo_data', { ...all, [pageKey]: seo })
+  },
+  saveAllPageSeo: (data: Record<string, SeoMeta>): void =>
+    writeLocal('sgsits_seo_data', data),
+
+  // ─── Global UI Labels ─────────────────────────────────────────────────────
+  getUiLabels: (): UiLabelsConfig => readLocal('sgsits_ui_labels', mockUiLabels),
+  saveUiLabels: (data: UiLabelsConfig): void => writeLocal('sgsits_ui_labels', data),
 }

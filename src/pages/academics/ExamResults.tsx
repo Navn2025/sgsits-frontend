@@ -1,4 +1,5 @@
-import React from 'react'
+﻿import React from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Calendar, ExternalLink, RefreshCw } from 'lucide-react'
 
 const schedules = [
@@ -10,6 +11,7 @@ const schedules = [
 const ExamResults: React.FC = () => {
   return (
     <div className="space-y-10">
+      <PageSeo pageKey="academics/exam-results" />
       {/* Page Header */}
       <div className="border-b border-slate-200 pb-5">
         <span className="text-xs uppercase font-extrabold tracking-widest text-accent">Academics</span>

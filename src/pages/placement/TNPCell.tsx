@@ -12,6 +12,7 @@ import {
   recruitingPartnersDefault,
   tnpCellInfoDefault,      type TNPCellInfo,
 } from '../../services/placementService'
+import PageSeo from '../../components/global/PageSeo'
 
 const TNPCell: React.FC = () => {
   const [records,    setRecords]    = useState<PlacementRecord[]>(placementRecordsDefault)
@@ -35,6 +36,7 @@ const TNPCell: React.FC = () => {
 
   return (
     <div className="space-y-10">
+      <PageSeo pageKey="placement/tnp-cell" />
       {/* Header */}
       <div className="border-b border-slate-200 pb-6">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1.5">Placements</span>

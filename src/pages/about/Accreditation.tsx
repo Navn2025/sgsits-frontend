@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Award, Star, TrendingUp, CheckCircle, BookOpen } from 'lucide-react'
 import { aboutService, accreditationDefault, type AccreditationData } from '../../services/aboutService'
 
@@ -29,6 +30,7 @@ const Accreditation: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      <PageSeo pageKey="about/accreditation" />
       <div className="border-b border-gray-200 pb-4">
         <h2 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>Accreditation</h2>
         <p className="text-sm text-gray-500 mt-1">NAAC, NBA, and NIRF recognition</p>

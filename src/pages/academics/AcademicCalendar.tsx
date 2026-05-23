@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Calendar, Download } from 'lucide-react'
 import { academicsService, academicCalendarDefault } from '../../services/academicsService'
 import type { AcademicCalendarEvent } from '../../services/academicsService'
@@ -33,6 +34,7 @@ const AcademicCalendar: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      <PageSeo pageKey="academics/calendar" />
       <div className="border-b border-gray-200 pb-4">
         <h2 className="text-2xl md:text-3xl font-bold font-display text-primary">Academic Calendar</h2>
         <p className="text-sm text-gray-500 mt-1 font-sans">Academic session 2025–2026</p>

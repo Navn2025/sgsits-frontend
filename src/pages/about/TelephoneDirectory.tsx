@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Search, Phone } from 'lucide-react'
 import { aboutService, telephoneDirectoryDefault, type TelephoneEntry } from '../../services/aboutService'
 
@@ -18,6 +19,7 @@ const TelephoneDirectory: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <PageSeo pageKey="about/telephone-directory" />
       <div className="border-b border-gray-200 pb-4">
         <h2 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>Telephone Directory</h2>
         <p className="text-sm text-gray-500 mt-1">Department-wise contact numbers</p>

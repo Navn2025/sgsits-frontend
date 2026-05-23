@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+﻿import React, { useEffect, useState } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Lightbulb, Rocket, CheckCircle2, ExternalLink, Phone, Mail } from 'lucide-react'
 import { mockStore } from '../../data/mockStore'
 
@@ -9,6 +10,7 @@ const CIDI: React.FC = () => {
 
   return (
     <div className="space-y-10">
+      <PageSeo pageKey="facilities/cidi" />
       <div className="border-b border-slate-200 pb-5">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Facilities</span>
         <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">CIDI — Centre for Innovation, Design &amp; Incubation</h2>

@@ -1,85 +1,25 @@
-import React from 'react'
+/**
+ * SidebarLayout — Two-column layout with a sticky left sidebar and scrollable
+ * content area. Also renders the section banner at the top.
+ *
+ * ALL banner data loaded through navigationService (never hardcoded):
+ *  - Section banner (title, subtitle, sectionLabel) → GET /api/navigation/section-banner/:section
+ *  - Sidebar links                                   → GET /api/navigation/sidebar/:section
+ *  - UI labels (portal suffix)                       → GET /api/settings/ui-labels
+ *
+ * Admin can: edit any banner title/subtitle, change section labels, add/remove links.
+ */
+
+import React, { useState, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import LeftSidebar from './LeftSidebar'
 import Breadcrumbs from '../global/Breadcrumbs'
-import { sidebarLinks } from '../../constants/sidebarLinks'
-import { 
-  Info, 
-  GraduationCap, 
-  Building2, 
-  FileCheck2, 
-  Briefcase, 
-  Compass, 
-  Lightbulb, 
-  Award,
-  BookOpen
-} from 'lucide-react'
+import { navigationService, sidebarLinksDefaults, sectionBannersDefaults, defaultSectionBanner } from '../../services/navigationService'
+import { uiLabelsService, uiLabelsDefaults } from '../../services/uiLabelsService'
+import type { SectionBanner } from '../../services/navigationService'
 
 interface SidebarLayoutProps {
   section?: string
-}
-
-const sectionDetails: Record<string, { title: string; subtitle: string; icon: React.ComponentType<any> }> = {
-  about: {
-    title: 'About the Institute',
-    subtitle: 'Discover the heritage, autonomous status, and leadership of SGSITS Indore.',
-    icon: Info
-  },
-  academics: {
-    title: 'Academics at SGSITS',
-    subtitle: 'Rigorous schemes, ordinances, and academic calendars designed for excellence.',
-    icon: GraduationCap
-  },
-  facilities: {
-    title: 'Campus & Facilities',
-    subtitle: 'State-of-the-art resources, research labs, hostel life, and sports complexes.',
-    icon: Building2
-  },
-  admission: {
-    title: 'Admissions Portal',
-    subtitle: 'Shape your future here. Find entry pathways, eligibility requirements, and guides.',
-    icon: FileCheck2
-  },
-  placement: {
-    title: 'Training & Placements',
-    subtitle: 'Bridging academia and top-tier global industries. View our exceptional stats.',
-    icon: Briefcase
-  },
-  explore: {
-    title: 'Explore SGSITS',
-    subtitle: 'Browse photo albums, watch video tours, and discover our historical campus.',
-    icon: Compass
-  },
-  startup: {
-    title: 'Startup & Innovation Cell',
-    subtitle: 'Nurturing student-led entrepreneurship, incubation, and technological research.',
-    icon: Lightbulb
-  },
-  teqip: {
-    title: 'TEQIP Initiatives',
-    subtitle: 'Technical Education Quality Improvement Programme of the Government of India.',
-    icon: Award
-  },
-  news: {
-    title: 'Campus News & Stories',
-    subtitle: 'Achievements, research breakthroughs, events, and stories from the SGSITS community.',
-    icon: BookOpen
-  },
-  notices: {
-    title: 'Official Notices',
-    subtitle: 'Academic announcements, exams schedules, and administrative notifications.',
-    icon: Info
-  },
-  events: {
-    title: 'Campus Events',
-    subtitle: 'Conferences, technical festivals, sports events, and cultural programs at SGSITS.',
-    icon: Compass
-  },
-  tenders: {
-    title: 'Active Tenders',
-    subtitle: 'Procurement notices, bids, and active contract opportunities of the institute.',
-    icon: FileCheck2
-  }
 }
 
 const SidebarLayout: React.FC<SidebarLayoutProps> = ({ section }) => {
@@ -92,29 +32,40 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ section }) => {
   }
 
   const activeSection = getActiveSection()
-  const links = sidebarLinks[activeSection] || []
-  const hasSidebar = links.length > 0
 
-  const details = sectionDetails[activeSection] || {
-    title: 'SGSITS Indore',
-    subtitle: 'An Institute of National Standing - Established in 1952',
-    icon: BookOpen
-  }
+  // ── Section banner — loaded through service layer ──────────────────────────
+  const [banner, setBanner] = useState<SectionBanner>(
+    sectionBannersDefaults[activeSection] || defaultSectionBanner
+  )
+
+  // ── Portal suffix label — loaded through service layer ────────────────────
+  const [portalSuffix, setPortalSuffix] = useState<string>(uiLabelsDefaults.sidebar.portalSuffix)
+
+  useEffect(() => {
+    navigationService.getSectionBanner(activeSection).then(setBanner)
+    uiLabelsService.getUiLabels().then(l => setPortalSuffix(l.sidebar.portalSuffix))
+  }, [activeSection])
+
+  // Determine if sidebar has links for this section (use synchronous defaults to avoid flash)
+  const hasSidebar = (sidebarLinksDefaults[activeSection] || []).length > 0
 
   return (
     <div className="w-full flex flex-col min-h-screen">
-      {/* Clean Academic Section Banner */}
+      {/* Section Banner — all content from navigationService */}
       <div className="w-full bg-[#f7f8fa] text-slate-900 py-8 px-4 lg:px-12 relative border-b-2 border-slate-200">
         <div className="max-w-[1400px] mx-auto relative z-10">
           <div className="max-w-3xl">
+            {/* Section label + portal suffix — both dynamic */}
             <span className="text-[#0b2545] font-semibold text-[11px] font-bold uppercase tracking-widest block mb-2">
-              {activeSection} Portal
+              {banner.sectionLabel}{portalSuffix}
             </span>
+            {/* Section title — dynamic from banner.title */}
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 font-display">
-              {details.title}
+              {banner.title}
             </h1>
+            {/* Section subtitle — dynamic from banner.subtitle */}
             <p className="text-sm text-slate-500 mt-2 font-medium">
-              {details.subtitle}
+              {banner.subtitle}
             </p>
           </div>
         </div>

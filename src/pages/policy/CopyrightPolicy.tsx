@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
+import PageSeo from '../../components/global/PageSeo'
 import { ChevronRight, Copyright } from 'lucide-react';
 
 const sections = [
@@ -43,6 +44,7 @@ Requests should include: a description of the content to be used; the intended p
 export default function CopyrightPolicy() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <PageSeo pageKey="policy/copyright" />
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-2 text-sm text-white/70 mb-3">

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+﻿import React, { useEffect, useState } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Cpu, Wifi, Clock, Database, Terminal } from 'lucide-react'
 import { mockStore } from '../../data/mockStore'
 
@@ -27,6 +28,7 @@ const ComputerCenter: React.FC = () => {
 
   return (
     <div className="space-y-10">
+      <PageSeo pageKey="facilities/computer-center" />
       {/* Page Header */}
       <div className="border-b border-slate-200 dark:border-slate-800 pb-5">
         <span className="text-xs uppercase font-extrabold tracking-widest text-accent">Facilities</span>

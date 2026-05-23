@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Users, X } from 'lucide-react'
 import { aboutService, committeesDefault, type CommitteeData } from '../../services/aboutService'
 
@@ -29,6 +30,7 @@ const Committees: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
+      <PageSeo pageKey="about/committees" />
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     )

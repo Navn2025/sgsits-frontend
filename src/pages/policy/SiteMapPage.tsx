@@ -1,4 +1,5 @@
-import React from 'react'
+﻿import React from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Link } from 'react-router-dom'
 
 const sections = [
@@ -31,6 +32,7 @@ const sections = [
 const SiteMapPage: React.FC = () => {
   return (
     <div className="space-y-8">
+      <PageSeo pageKey="policy/sitemap" />
       <div className="border-b border-gray-200 pb-4">
         <h2 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>Sitemap</h2>
         <p className="text-sm text-gray-500 mt-1">Complete navigation map of the SGSITS website</p>

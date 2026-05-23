@@ -1,9 +1,23 @@
+/**
+ * TopAccessibilityBar — Top utility bar with helpline, accessibility tools, and theme toggle.
+ *
+ * ALL label text loaded from uiLabelsService — admin can change:
+ *   • "Skip to Content" label
+ *   • "Text Size:" label
+ *   • "A-" / "A" / "A+" button text
+ *   • "High Contrast" / "Normal Contrast" toggle text
+ *   • "Switch to Dark Mode" / "Switch to Light Mode" title text
+ * Helpline/email/ERP data from settingsService.
+ */
+
 import React, { useEffect, useState } from 'react'
 import { useUIStore } from '../../../store/uiStore'
 import { Sun, Moon, Eye, EyeOff, Type } from 'lucide-react'
 // ─── Service layer ────────────────────────────────────────────────────────────
 import { settingsService, topBarDefaults } from '../../../services/settingsService'
+import { uiLabelsService, uiLabelsDefaults } from '../../../services/uiLabelsService'
 import type { TopBarData } from '../../../mock/settings/settingsData'
+import type { UiLabelsConfig } from '../../../services/uiLabelsService'
 
 const TopAccessibilityBar: React.FC = () => {
   const {
@@ -16,8 +30,12 @@ const TopAccessibilityBar: React.FC = () => {
   // ── Top bar data — loaded through service layer ───────────────────────────
   const [barData, setBarData] = useState<TopBarData>(topBarDefaults)
 
+  // ── UI labels — loaded through service layer ──────────────────────────────
+  const [labels, setLabels] = useState<UiLabelsConfig>(uiLabelsDefaults)
+
   useEffect(() => {
     settingsService.getTopBarData().then(setBarData)
+    uiLabelsService.getUiLabels().then(setLabels)
   }, [])
 
   // Apply Font Scale to <html> element
@@ -46,7 +64,6 @@ const TopAccessibilityBar: React.FC = () => {
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light')
 
   useEffect(() => {
-    // Initial check
     if (document.documentElement.classList.contains('dark')) {
       setTheme('dark')
     }
@@ -62,6 +79,8 @@ const TopAccessibilityBar: React.FC = () => {
       setTheme('dark')
     }
   }
+
+  const a11y = labels.accessibility
 
   return (
     <div className="w-full bg-slate-900 text-slate-200 border-b border-slate-800 text-xs px-4 py-2 transition-colors duration-300">
@@ -86,7 +105,7 @@ const TopAccessibilityBar: React.FC = () => {
             href="#main-content"
             className="hover:text-brand-gold font-medium px-2 py-0.5 border border-slate-700 hover:border-brand-gold rounded transition-colors"
           >
-            Skip to Content
+            {a11y.skipToContent}
           </a>
 
           <div className="h-4 w-px bg-slate-700" />
@@ -94,7 +113,7 @@ const TopAccessibilityBar: React.FC = () => {
           {/* Font Resizing */}
           <div className="flex items-center gap-1">
             <span className="text-slate-400 mr-1 flex items-center gap-0.5">
-              <Type className="w-3.5 h-3.5" /> Text Size:
+              <Type className="w-3.5 h-3.5" /> {a11y.textSizeLabel}
             </span>
             <button
               onClick={() => setFontSize('sm')}
@@ -105,7 +124,7 @@ const TopAccessibilityBar: React.FC = () => {
               }`}
               title="Decrease Font Size"
             >
-              A-
+              {a11y.textSizeSmall}
             </button>
             <button
               onClick={() => setFontSize('base')}
@@ -116,7 +135,7 @@ const TopAccessibilityBar: React.FC = () => {
               }`}
               title="Normal Font Size"
             >
-              A
+              {a11y.textSizeNormal}
             </button>
             <button
               onClick={() => setFontSize('lg')}
@@ -127,7 +146,7 @@ const TopAccessibilityBar: React.FC = () => {
               }`}
               title="Increase Font Size"
             >
-              A+
+              {a11y.textSizeLarge}
             </button>
           </div>
 
@@ -146,12 +165,12 @@ const TopAccessibilityBar: React.FC = () => {
             {highContrast ? (
               <>
                 <EyeOff className="w-3.5 h-3.5" />
-                <span>Normal Contrast</span>
+                <span>{a11y.normalContrast}</span>
               </>
             ) : (
               <>
                 <Eye className="w-3.5 h-3.5" />
-                <span>High Contrast</span>
+                <span>{a11y.highContrast}</span>
               </>
             )}
           </button>
@@ -162,7 +181,7 @@ const TopAccessibilityBar: React.FC = () => {
           <button
             onClick={toggleTheme}
             className="p-1 rounded-full border border-slate-700 hover:border-slate-500 hover:bg-slate-800 transition-all text-slate-350 hover:text-white"
-            title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+            title={theme === 'light' ? a11y.darkMode : a11y.lightMode}
           >
             {theme === 'light' ? (
               <Moon className="w-3.5 h-3.5 text-slate-300" />

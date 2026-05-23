@@ -1,4 +1,5 @@
 import React from 'react'
+import PageSeo from '../components/global/PageSeo'
 import { Link, useLocation } from 'react-router-dom'
 import { PageHeader, PortalCard } from '../components/layout/PortalLayout'
 import { Construction, ArrowLeft } from 'lucide-react'
@@ -23,6 +24,7 @@ const PortalComingSoon: React.FC<ComingSoonProps> = ({ title, description, backT
 
   return (
     <div className="space-y-5">
+      <PageSeo pageKey="portal-coming-soon" />
       <PageHeader title={title} subtitle="Module under development" />
       <PortalCard>
         <div className="py-12 flex flex-col items-center text-center">

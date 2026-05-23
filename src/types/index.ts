@@ -199,6 +199,149 @@ export interface SiteSettings {
   }
 }
 
+// ── Branding & Identity ────────────────────────
+export interface BrandingConfig {
+  shortCode: string
+  shortName: string
+  fullName: string
+  establishedYear: string
+  subTagline: string
+  tagline: string
+  logoUrl: string
+  logoAlt: string
+  logoSuffix: string
+  mobileDrawerTitle: string
+  mobileDrawerFooter: string
+  mobileNavSectionLabel: string
+}
+
+// ── Navigation: Sidebar & Quick Links ──────────
+export interface SidebarNavLink {
+  label: string
+  path: string
+}
+
+export interface SectionBanner {
+  section: string
+  title: string
+  subtitle: string
+  iconName: string
+  sectionLabel: string
+}
+
+export interface QuickLink {
+  label: string
+  to: string
+}
+
+// ── SEO ────────────────────────────────────────
+export interface SeoMeta {
+  pageKey: string
+  pageTitle: string
+  metaDescription: string
+  ogTitle?: string
+  ogDescription?: string
+  ogImage?: string
+  canonicalUrl?: string
+  twitterCard?: 'summary' | 'summary_large_image'
+  keywords?: string
+}
+
+// ── Chatbot ────────────────────────────────────
+export interface ChatbotResponseItem {
+  id: string
+  category: string
+  keywords: string[]
+  reply: string
+}
+
+export interface ChatbotConfig {
+  botName: string
+  avatarUrl: string
+  welcomeMessage: string
+  inputPlaceholder: string
+  fallbackMessage: string
+  quickPrompts: string[]
+  responses: ChatbotResponseItem[]
+}
+
+// ── UI Labels ──────────────────────────────────
+export interface UiLabelsConfig {
+  accessibility: {
+    skipToContent: string
+    textSizeLabel: string
+    textSizeSmall: string
+    textSizeNormal: string
+    textSizeLarge: string
+    highContrast: string
+    normalContrast: string
+    lightMode: string
+    darkMode: string
+  }
+  homepage: {
+    announcementsHeading: string
+    announcementsBadge: string
+    viewAllNoticesLabel: string
+    viewAllDepartmentsLabel: string
+    viewAllFaqsLabel: string
+    viewAllGalleryLabel: string
+  }
+  header: {
+    searchPlaceholder: string
+    searchButtonLabel: string
+    loginLabel: string
+    erpPortalFallbackLabel: string
+    mobileMenuOpenLabel: string
+    mobileMenuCloseLabel: string
+  }
+  sidebar: {
+    sectionMenuLabel: string
+    portalSuffix: string
+  }
+  footer: {
+    copyrightPrefix: string
+  }
+  breadcrumbs: {
+    homeLabel: string
+  }
+  notFound: {
+    heading: string
+    subheading: string
+    backLabel: string
+    homeLabel: string
+  }
+  portal: {
+    loadingLabel: string
+    errorLabel: string
+    saveLabel: string
+    cancelLabel: string
+    editLabel: string
+    deleteLabel: string
+    addLabel: string
+    confirmDeleteLabel: string
+    searchPlaceholder: string
+  }
+  topBarQuickLinks: QuickLink[]
+}
+
+// ── Homepage Section Config ────────────────────
+export type HomeSectionId =
+  | 'hero'
+  | 'hero_tiles'
+  | 'about_director'
+  | 'campus_news'
+  | 'academics'
+  | 'departments'
+  | 'stats'
+  | 'campus_life'
+  | 'faqs_gallery'
+
+export interface HomeSectionConfig {
+  id: HomeSectionId
+  enabled: boolean
+  order: number
+}
+
 // ── API Generic Wrappers ───────────────────────
 export interface ApiResponse<T> {
   success: boolean

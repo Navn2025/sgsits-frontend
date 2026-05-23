@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react'
+﻿import React, { useState, useMemo } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { mockStore } from '../../data/mockStore'
 import { Search, FileText, ChevronLeft, ChevronRight, Tag, Eye } from 'lucide-react'
 import PdfViewerModal from '../../components/global/PdfViewerModal'
@@ -58,6 +59,7 @@ const NoticesPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <PageSeo pageKey="notices" />
       {/* Hero */}
       <div className="bg-primary">
         <div className="max-w-6xl mx-auto px-6 py-12">

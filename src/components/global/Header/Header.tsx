@@ -4,6 +4,10 @@ import { useUIStore } from '../../../store/uiStore'
 // ─── Service layer — the ONLY data source ────────────────────────────────────
 import { navService, navItemsDefault } from '../../../services/navService'
 import type { NavItem } from '../../../services/navService'
+import { brandingService, brandingDefaults } from '../../../services/brandingService'
+import { uiLabelsService, uiLabelsDefaults } from '../../../services/uiLabelsService'
+import type { BrandingConfig } from '../../../services/brandingService'
+import type { UiLabelsConfig } from '../../../services/uiLabelsService'
 import TopAccessibilityBar from './TopAccessibilityBar'
 import Logo from './Logo'
 import { Menu, X, ChevronDown, Search, ArrowRight } from 'lucide-react'
@@ -19,13 +23,21 @@ const Header: React.FC = () => {
   // ── Navigation items — loaded through the service layer ───────────────────
   const [navItems, setNavItems] = useState<NavItem[]>(navItemsDefault)
 
+  // ── Branding — loaded through branding service ────────────────────────────
+  const [branding, setBranding] = useState<BrandingConfig>(brandingDefaults)
+
+  // ── UI Labels — loaded through uiLabels service ───────────────────────────
+  const [labels, setLabels] = useState<UiLabelsConfig>(uiLabelsDefaults)
+
   useEffect(() => {
     navService.getNavItems().then(setNavItems)
+    brandingService.getBranding().then(setBranding)
+    uiLabelsService.getUiLabels().then(setLabels)
   }, [])
 
   // ── ERP Portal link — loaded through top-bar settings ────────────────────
   const [erpUrl, setErpUrl] = useState<string>('https://www.sgsits.ac.in')
-  const [erpLabel, setErpLabel] = useState<string>('ERP Portal')
+  const [erpLabel, setErpLabel] = useState<string>(uiLabelsDefaults.header.erpPortalFallbackLabel)
 
   useEffect(() => {
     import('../../../services/settingsService').then(({ settingsService: svc }) => {
@@ -164,7 +176,7 @@ const Header: React.FC = () => {
                   >
                     <input
                       type="text"
-                      placeholder="Search announcements, courses..."
+                      placeholder={labels.header.searchPlaceholder}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full px-3 py-1.5 rounded-md border border-slate-200 bg-white text-xs focus:outline-none focus:border-brand-burgundy focus:ring-1 focus:ring-brand-burgundy text-slate-800"
@@ -174,7 +186,7 @@ const Header: React.FC = () => {
                       type="submit"
                       className="px-3 py-1.5 bg-brand-burgundy text-white rounded-md text-xs font-bold"
                     >
-                      Go
+                      {labels.header.searchButtonLabel}
                     </button>
                   </form>
                 </div>
@@ -207,7 +219,7 @@ const Header: React.FC = () => {
             {/* Drawer top branding */}
             <div className="p-4 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900/50">
               <span className="font-display font-extrabold text-sm text-brand-burgundy dark:text-brand-gold tracking-wide uppercase">
-                SGSITS NAVIGATION
+                {branding.mobileDrawerTitle}
               </span>
               <button
                 onClick={toggleMobileMenu}
@@ -280,7 +292,7 @@ const Header: React.FC = () => {
 
             {/* Drawer bottom info */}
             <div className="p-4 bg-white dark:bg-slate-900/50 border-t border-slate-200/80 dark:border-slate-800 text-[10px] text-center text-slate-400 dark:text-slate-500">
-              Shri G. S. Institute • Estd. 1952
+              {branding.mobileDrawerFooter}
             </div>
           </div>
         </div>

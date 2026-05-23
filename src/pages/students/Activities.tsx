@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+﻿import React, { useEffect, useState } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { mockStore } from '../../data/mockStore'
 
 const Activities: React.FC = () => {
@@ -12,6 +13,7 @@ const Activities: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      <PageSeo pageKey="students/activities" />
       <div className="border-b border-gray-200 pb-4">
         <h2 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>Student Activities</h2>
         <p className="text-sm text-gray-500 mt-1">Cultural, technical, and social activities</p>

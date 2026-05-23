@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Mail, Phone, MapPin } from 'lucide-react'
 import { aboutService, directorMessageDefault, type DirectorMessageData } from '../../services/aboutService'
+import PageSeo from '../../components/global/PageSeo'
 
 const DirectorMessage: React.FC = () => {
   const [data, setData] = useState<DirectorMessageData>(directorMessageDefault)
@@ -11,6 +12,7 @@ const DirectorMessage: React.FC = () => {
 
   return (
     <div className="space-y-10">
+      <PageSeo pageKey="about/director-message" />
       {/* Page Header */}
       <div className="border-b border-gray-100 pb-5">
         <span className="text-xs uppercase font-extrabold tracking-widest text-accent">Leadership</span>

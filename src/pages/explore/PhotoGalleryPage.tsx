@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Link } from 'react-router-dom'
 import { Image as ImageIcon, Calendar, ChevronRight, Camera, Filter } from 'lucide-react'
 import { mockStore } from '../../data/mockStore'
@@ -17,6 +18,7 @@ const PhotoGalleryPage: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      <PageSeo pageKey="explore/gallery" />
       {/* Page Header */}
       <div className="border-b border-slate-200 pb-6">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1.5">Visual Archive</span>

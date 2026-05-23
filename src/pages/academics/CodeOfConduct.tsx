@@ -1,4 +1,5 @@
-import React from 'react'
+﻿import React from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { GraduationCap, Users, Building2, Scale, AlertTriangle, FileText, ArrowUpRight } from 'lucide-react'
 
 const guidelines = [
@@ -27,6 +28,7 @@ const guidelines = [
 const CodeOfConduct: React.FC = () => {
   return (
     <div className="space-y-10">
+      <PageSeo pageKey="academics/code-of-conduct" />
       {/* Page Header */}
       <div className="border-b border-gray-100 dark:border-slate-800 pb-5">
         <span className="text-xs uppercase font-extrabold tracking-widest text-accent">Student Policies</span>

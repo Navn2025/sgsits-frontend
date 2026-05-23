@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
+import PageSeo from '../components/global/PageSeo'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAdminStore } from '../store/adminStore'
 import { authAPI } from '../api'
@@ -161,6 +162,7 @@ const Login: React.FC = () => {
         backgroundAttachment: 'fixed',
       }}
     >
+      <PageSeo pageKey="login" />
       {/* Overlay */}
       <div className="absolute inset-0 z-0 pointer-events-none" style={{ background: 'rgba(11,37,69,0.55)' }} />
 

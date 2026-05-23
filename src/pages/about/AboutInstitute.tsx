@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import * as Icons from 'lucide-react'
 import { getAboutInstitute } from '../../services/aboutService'
 import type { AboutInstituteData } from '../../services/aboutService'
+import PageSeo from '../../components/global/PageSeo'
 
 const AboutInstitute: React.FC = () => {
   const [data, setData] = useState<AboutInstituteData | null>(null)
@@ -29,6 +30,7 @@ const AboutInstitute: React.FC = () => {
 
   return (
     <div className="space-y-12 bg-white">
+      <PageSeo pageKey="about/institute" />
       {/* Page Header */}
       <div className="border-b border-slate-200 pb-5">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Institute Overview</span>

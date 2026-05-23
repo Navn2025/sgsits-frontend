@@ -1,8 +1,10 @@
-import React from 'react'
+﻿import React from 'react'
+import PageSeo from '../../components/global/PageSeo'
 
 const WebInfoManager: React.FC = () => {
   return (
     <div className="space-y-8">
+      <PageSeo pageKey="policy/web-info-manager" />
       <div className="border-b border-gray-200 pb-4">
         <h2 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>Web Information Manager</h2>
         <p className="text-sm text-gray-500 mt-1">SGSITS Indore — Official Policy</p>

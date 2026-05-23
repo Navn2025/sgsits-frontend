@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Link } from 'react-router-dom'
 import { ChevronRight, Users } from 'lucide-react'
 
@@ -82,6 +83,7 @@ const DepartmentLanding: React.FC = () => {
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 lg:px-12 py-8">
+      <PageSeo pageKey="departments" />
       {/* Header */}
       <div className="border-b border-slate-200 pb-6 mb-8">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Academic Departments</span>

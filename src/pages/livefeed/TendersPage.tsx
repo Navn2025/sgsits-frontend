@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Download, FileText } from 'lucide-react'
 import { livefeedService, tendersDefault, type Tender } from '../../services/livefeedService'
 
@@ -16,6 +17,7 @@ const TendersPage: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      <PageSeo pageKey="tenders" />
       <div className="border-b border-slate-200 pb-5">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Procurement</span>
         <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">Tenders</h2>

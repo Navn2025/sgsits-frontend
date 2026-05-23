@@ -1,10 +1,12 @@
 import React from 'react'
+import PageSeo from '../components/global/PageSeo'
 import { Link } from 'react-router-dom'
 import { Home, ArrowLeft, ShieldQuestion } from 'lucide-react'
 
 const NotFound: React.FC = () => {
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center py-12 px-6 text-center bg-white">
+      <PageSeo pageKey="404" />
       {/* 404 Compass Graphic */}
       <div className="relative mb-8 group">
         <div className="absolute inset-0 bg-slate-100 rounded-full filter blur-xl"></div>

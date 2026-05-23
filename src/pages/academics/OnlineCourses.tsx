@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { ExternalLink } from 'lucide-react'
 import { academicsService, onlineCoursesDefault } from '../../services/academicsService'
 import type { OnlineCourseLink } from '../../services/academicsService'
@@ -20,6 +21,7 @@ const OnlineCourses: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      <PageSeo pageKey="academics/online-courses" />
       <div className="border-b border-gray-200 pb-4">
         <h2 className="text-2xl md:text-3xl font-bold font-display text-primary">Online Courses</h2>
         <p className="text-sm text-gray-500 mt-1 font-sans">MOOC, NPTEL & SWAYAM courses at SGSITS</p>

@@ -1,4 +1,5 @@
-import React from 'react'
+﻿import React from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { FileText, Download, AlertCircle, CheckCircle2 } from 'lucide-react'
 
 const gradeTable = [
@@ -22,6 +23,7 @@ const ordinanceDocuments = [
 const Ordinances: React.FC = () => {
   return (
     <div className="space-y-10">
+      <PageSeo pageKey="academics/ordinances" />
       <div className="border-b border-slate-200 pb-5">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Academics</span>
         <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">Academic Ordinances</h2>

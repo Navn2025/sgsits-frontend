@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
+import PageSeo from '../../components/global/PageSeo'
 import { ChevronRight, Link2 } from 'lucide-react';
 
 const sections = [
@@ -43,6 +44,7 @@ Include the page on which the broken link appears, the URL of the broken link (i
 export default function HyperlinkPolicy() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <PageSeo pageKey="policy/hyperlink" />
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-2 text-sm text-white/70 mb-3">

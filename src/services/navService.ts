@@ -2,7 +2,7 @@
  * Nav Service — Site navigation / menu structure
  */
 
-import { type NavItem } from '../mock/navbar/navData'
+import { mockNavItems, type NavItem } from '../mock/navbar/navData'
 import { mockStore } from '../data/mockStore'
 
 /**
@@ -22,7 +22,8 @@ export const saveNavItems = async (data: NavItem[]): Promise<void> => {
 }
 
 // Synchronous default — used as useState initial value to avoid flash
-export const navItemsDefault: NavItem[] = []
+// Populated with mock data so navbar renders correctly on first paint (no empty-array flash)
+export const navItemsDefault: NavItem[] = mockNavItems
 
 export type { NavItem }
 

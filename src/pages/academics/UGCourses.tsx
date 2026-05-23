@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { GraduationCap } from 'lucide-react'
 import { academicsService, ugCoursesDefault } from '../../services/academicsService'
 import type { UGCoursesData } from '../../services/academicsService'
@@ -20,6 +21,7 @@ const UGCourses: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      <PageSeo pageKey="academics/courses/ug" />
       <div className="border-b border-gray-200 pb-4">
         <h2 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>Undergraduate Programs</h2>
         <p className="text-sm text-gray-500 mt-2 leading-relaxed">{ugData.intro}</p>

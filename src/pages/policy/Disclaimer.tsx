@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
+import PageSeo from '../../components/global/PageSeo'
 import { ChevronRight, AlertTriangle } from 'lucide-react';
 
 const sections = [
@@ -43,6 +44,7 @@ If you have any questions or concerns about this Disclaimer, please contact the 
 export default function Disclaimer() {
   return (
     <div className="min-h-screen bg-gray-50">
+      <PageSeo pageKey="policy/disclaimer" />
       {/* Hero */}
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-4xl mx-auto">

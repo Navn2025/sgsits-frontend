@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+﻿import React, { useEffect, useState } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { BookOpen, Monitor, Clock, Phone, Mail, ExternalLink, Users, CheckCircle2 } from 'lucide-react'
 import { mockStore } from '../../data/mockStore'
 
@@ -9,6 +10,7 @@ const Library: React.FC = () => {
 
   return (
     <div className="space-y-10">
+      <PageSeo pageKey="facilities/library" />
       {/* Page Header */}
       <div className="border-b border-slate-200 pb-5">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Facilities</span>

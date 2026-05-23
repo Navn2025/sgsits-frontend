@@ -1,54 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle2, ChevronDown } from 'lucide-react'
-
-const infoCards = [
-  {
-    icon: MapPin,
-    title: 'Visit Us',
-    color: 'bg-[#0b2545]/5 border-[#0b2545]/20',
-    iconColor: 'text-[#0b2545] bg-[#0b2545]/10',
-    items: [
-      'Shri G. S. Institute of Technology & Science',
-      '23, Park Road, Indore',
-      'Madhya Pradesh — 452003, India',
-    ],
-  },
-  {
-    icon: Phone,
-    title: 'Call Us',
-    color: 'bg-[#bfa15f]/10 border-[#bfa15f]/30',
-    iconColor: 'text-[#bfa15f] bg-[#bfa15f]/15',
-    items: [
-      '0731-2582100 — Director Office',
-      '0731-2582124 — Registrar',
-      '0731-2431234 — General Enquiry',
-      'Fax: 0731-2432540',
-    ],
-  },
-  {
-    icon: Mail,
-    title: 'Write to Us',
-    color: 'bg-[#0b2545]/10 border-[#0b2545]/25',
-    iconColor: 'text-[#0b2545] bg-[#0b2545]/15',
-    items: [
-      'director@sgsits.ac.in',
-      'registrar@sgsits.ac.in',
-      'admissions@sgsits.ac.in',
-      'wadmin@sgsits.ac.in (Website)',
-    ],
-  },
-]
-
-const helplines = [
-  { dept: 'Admissions (UG/PG)', person: 'Admission Cell', phone: '0731-2431235', email: 'admissions@sgsits.ac.in' },
-  { dept: 'Academics & Results', person: 'Academic Office', phone: '0731-2431236', email: 'academics@sgsits.ac.in' },
-  { dept: 'Examinations', person: 'Examination Cell', phone: '0731-2431237', email: 'exam@sgsits.ac.in' },
-  { dept: 'Placement & Internships', person: 'T&P Cell', phone: '0731-2431238', email: 'placement@sgsits.ac.in' },
-  { dept: 'Hostel & Accommodation', person: 'Hostel Office', phone: '0731-2431239', email: 'hostel@sgsits.ac.in' },
-  { dept: 'Scholarships & Financial Aid', person: 'Finance Office', phone: '0731-2431240', email: 'finance@sgsits.ac.in' },
-  { dept: 'Research & PhD', person: 'Dean R&D', phone: '0731-2431241', email: 'research@sgsits.ac.in' },
-  { dept: 'Student Affairs & NSS', person: 'Dean Students', phone: '0731-2431242', email: 'students@sgsits.ac.in' },
-]
+import PageSeo from '../components/global/PageSeo'
+import { contactService, contactDefault, type ContactData } from '../services/contactService'
 
 type SubjectKey = 'Admissions' | 'Academics' | 'Faculty' | 'Admin' | 'Placement' | 'Other'
 const subjects: SubjectKey[] = ['Admissions', 'Academics', 'Faculty', 'Admin', 'Placement', 'Other']
@@ -62,9 +15,51 @@ interface FormData {
 }
 
 const ContactUs: React.FC = () => {
+  const [contactData, setContactData] = useState<ContactData>(contactDefault)
   const [form, setForm] = useState<FormData>({ name: '', email: '', phone: '', subject: '', message: '' })
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    contactService.getContactData().then(setContactData)
+  }, [])
+
+  // Build info cards dynamically from contactData
+  const infoCards = [
+    {
+      icon: MapPin,
+      title: 'Visit Us',
+      color: 'bg-[#0b2545]/5 border-[#0b2545]/20',
+      iconColor: 'text-[#0b2545] bg-[#0b2545]/10',
+      items: [
+        contactData.instituteName,
+        contactData.address,
+        `${contactData.city}, ${contactData.state} — ${contactData.pincode}, India`,
+      ],
+    },
+    {
+      icon: Phone,
+      title: 'Call Us',
+      color: 'bg-[#bfa15f]/10 border-[#bfa15f]/30',
+      iconColor: 'text-[#bfa15f] bg-[#bfa15f]/15',
+      items: contactData.offices.slice(0, 4).map(o => `${o.phone} — ${o.title}`),
+    },
+    {
+      icon: Mail,
+      title: 'Write to Us',
+      color: 'bg-[#0b2545]/10 border-[#0b2545]/25',
+      iconColor: 'text-[#0b2545] bg-[#0b2545]/15',
+      items: contactData.offices.slice(0, 4).map(o => o.email),
+    },
+  ]
+
+  // Build helplines from offices
+  const helplines = contactData.offices.map(o => ({
+    dept: o.title,
+    person: o.name,
+    phone: o.phone,
+    email: o.email,
+  }))
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
@@ -81,6 +76,7 @@ const ContactUs: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <PageSeo pageKey="contact" />
       {/* Hero Banner */}
       <div className="relative bg-primary overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -235,17 +231,17 @@ const ContactUs: React.FC = () => {
           {/* Map */}
           <div>
             <span className="text-[11px] uppercase font-bold tracking-widest text-accent block mb-2">Find Us</span>
-            <h2 className="text-2xl font-display font-bold text-primary mb-5">SGSITS Campus, Indore</h2>
+            <h2 className="text-2xl font-display font-bold text-primary mb-5">{contactData.instituteName.split('(')[0].trim()}, {contactData.city}</h2>
             <div className="rounded-xl overflow-hidden border-2 border-slate-200 shadow-md mb-5" style={{ height: '320px' }}>
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3679.9!2d75.8577!3d22.7196!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3962fc9ce8e6a80f%3A0xd34e427dbec15f24!2sSGSITS%20Indore!5e0!3m2!1sen!2sin!4v1716000000000"
+                src={contactData.mapEmbedUrl}
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="SGSITS Location Map"
+                title={`${contactData.instituteName} Location Map`}
               />
             </div>
             {/* Office Hours */}

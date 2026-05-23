@@ -1,4 +1,5 @@
-import React from 'react'
+﻿import React from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { useParams } from 'react-router-dom'
 import {
   CheckCircle2, Download, Mail, FlaskConical, GraduationCap,
@@ -114,6 +115,7 @@ const TeqipPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <PageSeo pageKey="teqip" />
 
       {/* Hero */}
       <div className="relative bg-primary overflow-hidden">

@@ -181,18 +181,20 @@ export const mockHomePageData: HomePageData = {
     keywords: 'SGSITS, Indore, engineering college, autonomous institute, B.Tech, M.Tech, MBA, PhD, Madhya Pradesh',
   },
 
-  // Future admin panel: enable/disable and reorder any section
+  // ── Section Config — admin can enable/disable and reorder homepage sections ──
+  // Types: 'hero' | 'about' | 'news' | 'academics' | 'departments' | 'stats' | 'campus_life' | 'faqs_gallery'
+  // Note: 'hero' renders both the hero banner AND the hero tiles (they are visually coupled).
+  //       'about' renders the About blurb, Director's Corner, and Announcements panel.
+  //       'faqs_gallery' renders the FAQs column and Photo Gallery column together.
   sections: [
-    { id: 'hero',        type: 'hero',           enabled: true, order: 1 },
-    { id: 'heroTiles',   type: 'hero-tiles',     enabled: true, order: 2 },
-    { id: 'about',       type: 'about',          enabled: true, order: 3 },
-    { id: 'news',        type: 'news',           enabled: true, order: 4 },
-    { id: 'academics',   type: 'academics',      enabled: true, order: 5 },
-    { id: 'departments', type: 'departments',    enabled: true, order: 6 },
-    { id: 'stats',       type: 'stats-banner',   enabled: true, order: 7 },
-    { id: 'campusLife',  type: 'campus-life',    enabled: true, order: 8 },
-    { id: 'faqs',        type: 'faqs',           enabled: true, order: 9 },
-    { id: 'gallery',     type: 'gallery',        enabled: true, order: 10 },
+    { id: 'hero',         type: 'hero',          enabled: true, order: 1 },
+    { id: 'about',        type: 'about',         enabled: true, order: 2 },
+    { id: 'news',         type: 'news',          enabled: true, order: 3 },
+    { id: 'academics',    type: 'academics',     enabled: true, order: 4 },
+    { id: 'departments',  type: 'departments',   enabled: true, order: 5 },
+    { id: 'stats',        type: 'stats',         enabled: true, order: 6 },
+    { id: 'campus_life',  type: 'campus_life',   enabled: true, order: 7 },
+    { id: 'faqs_gallery', type: 'faqs_gallery',  enabled: true, order: 8 },
   ],
 
   hero: {

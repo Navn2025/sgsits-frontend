@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
+import PageSeo from '../../components/global/PageSeo'
 import { Link } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import { mockStore } from '../../data/mockStore';
@@ -13,6 +14,7 @@ export default function PGAdmission() {
   if (!data) {
     return (
       <div className="flex items-center justify-center min-h-[50vh] w-full">
+      <PageSeo pageKey="admission/pg" />
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );

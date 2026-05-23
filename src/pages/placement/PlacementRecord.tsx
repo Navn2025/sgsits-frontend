@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { Award, TrendingUp, Building2, Users, BarChart2, Briefcase, ChevronRight } from 'lucide-react'
 import {
   placementService,
@@ -20,6 +21,7 @@ const PlacementRecordPage: React.FC = () => {
 
   return (
     <div className="space-y-10">
+      <PageSeo pageKey="placement/records" />
       {/* Header */}
       <div className="border-b border-slate-200 pb-6">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1.5">Placements</span>

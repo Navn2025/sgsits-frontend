@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
+import PageSeo from '../../components/global/PageSeo'
 import { GraduationCap, CheckCircle2, ExternalLink } from 'lucide-react'
 import { academicsService, pgCoursesDefault } from '../../services/academicsService'
 import type { PGCoursesData } from '../../services/academicsService'
@@ -20,6 +21,7 @@ const PGCourses: React.FC = () => {
 
   return (
     <div className="space-y-10">
+      <PageSeo pageKey="academics/courses/pg" />
       <div className="border-b border-slate-200 pb-5">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Academics</span>
         <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">Postgraduate Programs</h2>
