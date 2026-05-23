@@ -16,10 +16,10 @@ const otherDepts = departmentsList.filter(d =>
 )
 
 const programBadgeColor = (prog: string) => {
-  if (prog === 'UG') return 'bg-blue-50 text-blue-700 border-blue-200'
-  if (prog === 'PG') return 'bg-purple-50 text-purple-700 border-purple-200'
-  if (prog === 'PhD') return 'bg-green-50 text-green-700 border-green-200'
-  if (prog === 'PTDC') return 'bg-orange-50 text-orange-700 border-orange-200'
+  if (prog === 'UG') return 'bg-[#0b2545]/5 text-[#0b2545] border-[#0b2545]/20'
+  if (prog === 'PG') return 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25'
+  if (prog === 'PhD') return 'bg-[#bfa15f]/10 text-[#bfa15f] border-[#bfa15f]/30'
+  if (prog === 'PTDC') return 'bg-[#bfa15f]/15 text-[#bfa15f] border-[#bfa15f]/40'
   return 'bg-slate-50 text-slate-600 border-slate-200'
 }
 

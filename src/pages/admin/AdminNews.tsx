@@ -19,7 +19,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
     return () => clearTimeout(t)
   }, [onClose])
   return (
-    <div className="fixed bottom-4 right-4 z-50 bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 text-sm font-medium">
+    <div className="fixed bottom-4 right-4 z-50 bg-[#bfa15f] text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 text-sm font-medium">
       {message}
       <button onClick={onClose}><X size={14} /></button>
     </div>
@@ -100,14 +100,14 @@ export default function AdminNews() {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">{n.category}</span>
+                  <span className="px-2 py-0.5 bg-[#0b2545]/10 text-[#0b2545] rounded-full text-xs font-medium">{n.category}</span>
                 </td>
                 <td className="px-4 py-3 text-slate-500 text-xs">{n.author}</td>
                 <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">{n.date}</td>
                 <td className="px-4 py-3 text-center">
                   <div className="inline-flex items-center gap-2">
-                    <button onClick={() => openEdit(n)} className="p-1.5 rounded hover:bg-blue-50 text-blue-600 transition-colors"><Pencil size={14} /></button>
-                    <button onClick={() => setDeleteTarget(n)} className="p-1.5 rounded hover:bg-red-50 text-red-500 transition-colors"><Trash2 size={14} /></button>
+                    <button onClick={() => openEdit(n)} className="p-1.5 rounded hover:bg-[#0b2545]/5 text-[#0b2545] transition-colors"><Pencil size={14} /></button>
+                    <button onClick={() => setDeleteTarget(n)} className="p-1.5 rounded hover:bg-slate-100 text-slate-500 transition-colors"><Trash2 size={14} /></button>
                   </div>
                 </td>
               </tr>
@@ -126,22 +126,22 @@ export default function AdminNews() {
             </div>
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Title <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Title <span className="text-[#bfa15f]">*</span></label>
                 <input required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.title} onChange={e => f('title', e.target.value)} placeholder="News article title" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Category <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Category <span className="text-[#bfa15f]">*</span></label>
                   <input required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.category} onChange={e => f('category', e.target.value)} placeholder="e.g. Research, Placement" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Author <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Author <span className="text-[#bfa15f]">*</span></label>
                   <input required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.author} onChange={e => f('author', e.target.value)} placeholder="Author name" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Date <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Date <span className="text-[#bfa15f]">*</span></label>
                   <input type="date" required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.date} onChange={e => f('date', e.target.value)} />
                 </div>
                 <div>
@@ -150,11 +150,11 @@ export default function AdminNews() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Excerpt <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Excerpt <span className="text-[#bfa15f]">*</span></label>
                 <textarea required rows={2} className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" value={form.excerpt} onChange={e => f('excerpt', e.target.value)} placeholder="Short summary shown in card view..." />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Content <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Content <span className="text-[#bfa15f]">*</span></label>
                 <textarea required rows={5} className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y" value={form.content} onChange={e => f('content', e.target.value)} placeholder="Full article content..." />
               </div>
               <div className="flex gap-3 pt-2 border-t border-slate-100">
@@ -169,12 +169,12 @@ export default function AdminNews() {
       {deleteTarget && (
         <div className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 text-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3"><Trash2 size={22} className="text-red-600" /></div>
+            <div className="w-12 h-12 bg-[#0b2545]/10 rounded-full flex items-center justify-center mx-auto mb-3"><Trash2 size={22} className="text-[#0b2545]" /></div>
             <h3 className="font-bold text-slate-800 text-lg mb-1">Delete News Item?</h3>
             <p className="text-slate-500 text-sm mb-5 line-clamp-2">"{deleteTarget.title}"</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteTarget(null)} className="flex-1 py-2 border border-slate-300 text-slate-700 rounded font-semibold text-sm hover:bg-slate-50">Cancel</button>
-              <button onClick={handleDelete} className="flex-1 py-2 bg-red-600 text-white rounded font-semibold text-sm hover:bg-red-700">Delete</button>
+              <button onClick={handleDelete} className="flex-1 py-2 bg-[#0b2545] text-white rounded font-semibold text-sm hover:bg-[#0b2545]/90">Delete</button>
             </div>
           </div>
         </div>

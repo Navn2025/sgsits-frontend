@@ -30,7 +30,7 @@ const AboutInstitute: React.FC = () => {
           ABOUT the <span className="font-serif italic font-semibold text-primary">INSTITUTE</span>
         </h2>
         <p className="text-xs font-semibold text-slate-500 mt-1 font-sans uppercase tracking-wider">
-          Shri Govindram Seksaria Institute of Technology and Science, Indore
+          Shri G. S. Institute of Technology & Science, Indore
         </p>
       </div>
 
@@ -38,7 +38,7 @@ const AboutInstitute: React.FC = () => {
       <div className="border-l-2 border-accent pl-6">
         <div className="text-slate-650 space-y-4 text-sm leading-relaxed font-sans text-justify">
           <p className="text-base text-slate-800 leading-relaxed font-medium">
-            <strong>Shri Govindram Seksaria Institute of Technology and Science (SGSITS)</strong>, Indore was established in 
+            <strong>Shri G. S. Institute of Technology & Science (SGSITS)</strong>, Indore was established in 
             <strong className="text-primary font-bold"> 1952</strong> by the Late Seth Shri Govindram Seksaria, a renowned industrialist and philanthropist. The 
             institute is recognized as one of the premier technical institutions in Central India and has been a beacon of technical 
             education and research excellence for over seven decades.

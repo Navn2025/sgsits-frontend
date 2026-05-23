@@ -72,6 +72,69 @@ export const authAPI = {
     }
   },
 
+  /**
+   * HOD (Head of Department) login
+   * Backend endpoint: POST /api/auth/hod/login
+   * Body: { employeeId, password }
+   */
+  hodLogin: async (employeeId: string, password: string): Promise<LoginResponse> => {
+    await delay(800)
+    if (!employeeId || !password) throw new Error('Invalid credentials')
+    return {
+      token: `mock-hod-jwt-${generateId()}`,
+      user: {
+        id: `hod-${generateId()}`,
+        name: 'Head of Department',
+        email: `${employeeId.toLowerCase()}@sgsits.ac.in`,
+        role: 'hod',
+        employeeId,
+        department: 'Computer Engineering',
+      }
+    }
+  },
+
+  /**
+   * Exam Department / Exam Controller login
+   * Backend endpoint: POST /api/auth/exam/login
+   * Body: { employeeId, password }
+   */
+  examLogin: async (employeeId: string, password: string): Promise<LoginResponse> => {
+    await delay(800)
+    if (!employeeId || !password) throw new Error('Invalid credentials')
+    return {
+      token: `mock-exam-jwt-${generateId()}`,
+      user: {
+        id: `exam-${generateId()}`,
+        name: 'Exam Controller',
+        email: `${employeeId.toLowerCase()}@sgsits.ac.in`,
+        role: 'exam_controller',
+        employeeId,
+        department: 'Examination Cell',
+      }
+    }
+  },
+
+  /**
+   * Placement Officer login (Training & Placement cell)
+   * Backend endpoint: POST /api/auth/placement/login
+   * Body: { employeeId, password }
+   */
+  placementLogin: async (employeeId: string, password: string): Promise<LoginResponse> => {
+    await delay(800)
+    if (!employeeId || !password) throw new Error('Invalid credentials')
+    return {
+      token: `mock-placement-jwt-${generateId()}`,
+      user: {
+        id: `plc-${generateId()}`,
+        name: 'Placement Officer',
+        email: `${employeeId.toLowerCase()}@sgsits.ac.in`,
+        role: 'placement_officer',
+        employeeId,
+        department: 'Training & Placement Cell',
+      }
+    }
+  },
+
   logout: async () => {
     await delay(200)
     // REAL: return apiClient.post('/auth/logout')

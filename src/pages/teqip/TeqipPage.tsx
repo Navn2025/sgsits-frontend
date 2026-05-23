@@ -11,35 +11,35 @@ const achievements = [
     title: 'Laboratories Upgraded',
     value: '18',
     desc: '18 state-of-the-art laboratories upgraded across departments including Electronics, Computer Science, Mechanical, and Civil Engineering with world-class equipment.',
-    color: 'bg-blue-50 border-blue-200 text-blue-700',
+    color: 'bg-[#0b2545]/5 border-[#0b2545]/20 text-[#0b2545]',
   },
   {
     icon: GraduationCap,
     title: 'Students Trained',
     value: '2,400+',
     desc: 'Over 2,400 students received specialized training through bridge courses, remedial programs, and industry-skill enhancement workshops.',
-    color: 'bg-green-50 border-green-200 text-green-700',
+    color: 'bg-[#bfa15f]/10 border-[#bfa15f]/30 text-[#bfa15f]',
   },
   {
     icon: Users,
     title: 'Faculty Development',
     value: '215',
     desc: '215 faculty members attended Faculty Development Programs (FDPs), Short-Term Training Programs (STTPs), and international workshops.',
-    color: 'bg-purple-50 border-purple-200 text-purple-700',
+    color: 'bg-[#0b2545]/10 border-[#0b2545]/25 text-[#0b2545]',
   },
   {
     icon: TrendingUp,
     title: 'Research Grants',
     value: '₹3.8 Cr',
     desc: '₹3.8 Crores in sponsored research grants secured from DST, SERB, DBT, and industry partners under TEQIP funding facilitation.',
-    color: 'bg-amber-50 border-amber-200 text-amber-700',
+    color: 'bg-[#bfa15f]/15 border-[#bfa15f]/40 text-[#bfa15f]',
   },
   {
     icon: Building2,
     title: 'Placement Improvement',
     value: '+38%',
     desc: 'Placement rates improved by 38% during the TEQIP period, with 45+ new industry MoUs signed for internships, placements, and research collaboration.',
-    color: 'bg-red-50 border-red-200 text-red-700',
+    color: 'bg-[#0b2545]/15 border-[#0b2545]/30 text-[#0b2545]',
   },
 ]
 
@@ -264,8 +264,8 @@ const TeqipPage: React.FC = () => {
                     <div className="w-12 text-right text-xs font-bold text-slate-500 font-sans">{m.year}</div>
                     <div className={`w-3 h-3 rounded-full border-2 ml-3 shrink-0 ${
                       m.type === 'funding' ? 'bg-accent border-accent' :
-                      m.type === 'infra' ? 'bg-blue-500 border-blue-500' :
-                      m.type === 'academic' ? 'bg-green-500 border-green-500' :
+                      m.type === 'infra' ? 'bg-[#0b2545] border-[#0b2545]' :
+                      m.type === 'academic' ? 'bg-[#bfa15f] border-[#bfa15f]' :
                       'bg-primary border-primary'
                     }`} />
                   </div>
@@ -280,8 +280,8 @@ const TeqipPage: React.FC = () => {
             {[
               { color: 'bg-primary', label: 'Milestone' },
               { color: 'bg-accent', label: 'Funding' },
-              { color: 'bg-blue-500', label: 'Infrastructure' },
-              { color: 'bg-green-500', label: 'Academic' },
+              { color: 'bg-[#0b2545]', label: 'Infrastructure' },
+              { color: 'bg-[#bfa15f]', label: 'Academic' },
             ].map((l) => (
               <div key={l.label} className="flex items-center gap-2 text-xs text-slate-600 font-medium">
                 <div className={`w-3 h-3 rounded-full ${l.color}`} />
@@ -299,8 +299,8 @@ const TeqipPage: React.FC = () => {
             {downloads.map((doc) => (
               <div key={doc.title} className="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between hover:border-slate-400 hover:shadow-sm transition-all group">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-red-50 border border-red-200 rounded-lg flex items-center justify-center shrink-0">
-                    <FileText size={16} className="text-red-600" />
+                  <div className="w-9 h-9 bg-[#bfa15f]/10 border border-[#bfa15f]/30 rounded-lg flex items-center justify-center shrink-0">
+                    <FileText size={16} className="text-[#bfa15f]" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-primary">{doc.title}</p>

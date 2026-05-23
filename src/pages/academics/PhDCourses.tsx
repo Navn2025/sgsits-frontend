@@ -113,7 +113,7 @@ const PhDCourses: React.FC = () => {
           <div className="space-y-2 text-sm text-slate-600 font-sans">
             <div className="flex justify-between py-1 border-b border-slate-100">
               <span>GATE/NET Scholars (Full-time)</span>
-              <span className="font-semibold text-green-700">₹12,400/month</span>
+              <span className="font-semibold text-[#bfa15f]">₹12,400/month</span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-100">
               <span>Sponsored/Industry Scholars</span>

@@ -108,7 +108,7 @@ const PlacementContact: React.FC = () => {
             </div>
             <div className="flex justify-between">
               <span>Sunday & Holidays</span>
-              <span className="font-semibold text-red-600">Closed</span>
+              <span className="font-semibold text-[#0b2545]">Closed</span>
             </div>
           </div>
         </div>

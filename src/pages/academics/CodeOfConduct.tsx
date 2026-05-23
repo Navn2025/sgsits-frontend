@@ -39,15 +39,15 @@ const CodeOfConduct: React.FC = () => {
       </div>
 
       {/* Critical Zero Tolerance Alert Banner */}
-      <div className="bg-red-50 dark:bg-red-950/20 border-l-4 border-red-500 rounded-lg p-5 flex items-start gap-4">
-        <div className="w-10 h-10 rounded bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-650 dark:text-red-400 shrink-0">
+      <div className="bg-[#bfa15f]/10 dark:bg-[#bfa15f]/15 border-l-4 border-[#bfa15f] rounded-lg p-5 flex items-start gap-4">
+        <div className="w-10 h-10 rounded bg-[#bfa15f]/20 flex items-center justify-center text-[#0b2545] dark:text-[#bfa15f] shrink-0">
           <AlertTriangle size={20} className="stroke-[2.5]" />
         </div>
         <div className="space-y-1">
-          <h4 className="font-bold text-[14px] text-red-900 dark:text-red-400">
+          <h4 className="font-bold text-[14px] text-[#0b2545] dark:text-[#bfa15f]">
             Strict Zero-Tolerance Anti-Ragging Regulation
           </h4>
-          <p className="text-xs text-red-700 dark:text-red-300 font-medium leading-relaxed">
+          <p className="text-xs text-[#0b2545] dark:text-slate-300 font-medium leading-relaxed">
             Ragging in any form is a severe criminal offense under State and Central legislation. Any student found guilty of ragging on or off-campus is liable to face immediate police arrest, immediate expulsion from the institute, and a permanent academic ban.
           </p>
         </div>
@@ -79,7 +79,7 @@ const CodeOfConduct: React.FC = () => {
       </div>
 
       {/* PDF Download Widget */}
-      <div className="bg-[#0a1c30] dark:bg-slate-850 text-white rounded-lg p-5 border-l-4 border-accent shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div className="bg-[#0b2545] dark:bg-slate-850 text-white rounded-lg p-5 border-l-4 border-accent shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded bg-white/10 flex items-center justify-center text-accent shrink-0">
             <FileText size={20} className="stroke-[2]" />

@@ -71,12 +71,12 @@ const companies: Company[] = [
 ]
 
 const sectorConfig: Record<string, { color: string; bg: string; border: string; badge: string }> = {
-  IT:          { color: 'text-blue-700',   bg: 'bg-blue-50',   border: 'border-blue-200',   badge: 'bg-blue-100 text-blue-700' },
-  Product:     { color: 'text-purple-700', bg: 'bg-purple-50', border: 'border-purple-200', badge: 'bg-purple-100 text-purple-700' },
-  Core:        { color: 'text-orange-700', bg: 'bg-orange-50', border: 'border-orange-200', badge: 'bg-orange-100 text-orange-700' },
+  IT:          { color: 'text-[#0b2545]',   bg: 'bg-[#0b2545]/5',   border: 'border-[#0b2545]/20',   badge: 'bg-[#0b2545]/10 text-[#0b2545]' },
+  Product:     { color: 'text-[#0b2545]', bg: 'bg-[#0b2545]/10', border: 'border-[#0b2545]/25', badge: 'bg-[#0b2545]/15 text-[#0b2545]' },
+  Core:        { color: 'text-[#bfa15f]', bg: 'bg-[#bfa15f]/10', border: 'border-[#bfa15f]/30', badge: 'bg-[#bfa15f]/15 text-[#bfa15f]' },
   PSU:         { color: 'text-slate-700',  bg: 'bg-slate-50',  border: 'border-slate-300',  badge: 'bg-slate-200 text-slate-700' },
-  Consulting:  { color: 'text-green-700',  bg: 'bg-green-50',  border: 'border-green-200',  badge: 'bg-green-100 text-green-700' },
-  Startup:     { color: 'text-pink-700',   bg: 'bg-pink-50',   border: 'border-pink-200',   badge: 'bg-pink-100 text-pink-700' },
+  Consulting:  { color: 'text-[#bfa15f]',  bg: 'bg-[#bfa15f]/5',  border: 'border-[#bfa15f]/25',  badge: 'bg-[#bfa15f]/10 text-[#bfa15f]' },
+  Startup:     { color: 'text-[#bfa15f]',   bg: 'bg-[#bfa15f]/15',   border: 'border-[#bfa15f]/40',   badge: 'bg-[#bfa15f]/20 text-[#bfa15f]' },
 }
 
 const SECTORS: Sector[] = ['All', 'IT', 'Product', 'Core', 'PSU', 'Consulting', 'Startup']

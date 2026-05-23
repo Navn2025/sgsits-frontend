@@ -36,7 +36,7 @@ const FirstYearInfo: React.FC = () => {
       <div className="bg-primary text-white rounded p-6">
         <h3 className="font-display font-bold text-lg mb-2">Welcome to SGSITS, Indore!</h3>
         <p className="text-sm text-slate-300 leading-relaxed font-sans">
-          Congratulations on your admission to Shri Govindram Seksaria Institute of Technology and Science.
+          Congratulations on your admission to Shri G. S. Institute of Technology & Science.
           As you begin your engineering journey at one of Central India's most prestigious institutes, this guide
           will help you navigate your first weeks smoothly. All B.Tech students undergo a <strong className="text-white">common first year</strong> before
           branching into their respective departments from the 2nd year.
@@ -44,11 +44,11 @@ const FirstYearInfo: React.FC = () => {
       </div>
 
       {/* Anti-Ragging Alert */}
-      <div className="bg-red-50 border border-red-200 rounded p-4 flex items-start gap-3">
-        <AlertCircle size={20} className="text-red-600 shrink-0 mt-0.5" />
+      <div className="bg-[#bfa15f]/10 border border-[#bfa15f]/30 rounded p-4 flex items-start gap-3">
+        <AlertCircle size={20} className="text-[#bfa15f] shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-bold text-red-700">Anti-Ragging Policy — Zero Tolerance</p>
-          <p className="text-xs text-red-600 font-medium mt-1 leading-relaxed">
+          <p className="text-sm font-bold text-[#0b2545]">Anti-Ragging Policy — Zero Tolerance</p>
+          <p className="text-xs text-[#0b2545] font-medium mt-1 leading-relaxed">
             SGSITS strictly prohibits ragging in any form. All students must submit anti-ragging affidavits (self + parent)
             on Day 1. <strong>National Anti-Ragging Helpline: 1800-180-5522</strong> (24×7, toll-free).
             Campus committee: antiranging@sgsits.ac.in

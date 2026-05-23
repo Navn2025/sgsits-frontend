@@ -1,16 +1,19 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAdminStore } from '../../store/adminStore'
 import {
   LayoutDashboard,
+  Users,
+  Network,
   Bell,
-  Newspaper,
+  Download,
   Calendar,
+  Image as ImageIcon,
+  FileCode,
+  Newspaper,
   FileSpreadsheet,
   AlertOctagon,
-  Network,
-  Users,
-  Image as ImageIcon,
+  UsersRound,
   Briefcase,
   Settings,
   LogOut,
@@ -22,6 +25,13 @@ const AdminLayout: React.FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, clearAuth } = useAdminStore()
+  const mainRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0
+    }
+  }, [location.pathname])
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to log out from the admin panel?')) {
@@ -30,27 +40,36 @@ const AdminLayout: React.FC = () => {
     }
   }
 
+  // Sidebar mirrors the Role-wise Actions doc (Central Admin: dashboard,
+  // users, departments, notices, downloads, events, gallery, pages) plus
+  // the existing CMS content modules (news, tenders, alerts, faculty
+  // directory, placement, settings).
   const menuItems = [
-    { label: 'Dashboard Overview', path: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Manage Notices', path: '/admin/notices', icon: Bell },
-    { label: 'Manage News', path: '/admin/news', icon: Newspaper },
-    { label: 'Manage Events', path: '/admin/events', icon: Calendar },
-    { label: 'Manage Tenders', path: '/admin/tenders', icon: FileSpreadsheet },
-    { label: 'Urgent Alerts', path: '/admin/alerts', icon: AlertOctagon },
-    { label: 'Departments', path: '/admin/departments', icon: Network },
-    { label: 'Faculty Directory', path: '/admin/faculty', icon: Users },
-    { label: 'Photo Gallery', path: '/admin/gallery', icon: ImageIcon },
-    { label: 'Placement Cell', path: '/admin/placement', icon: Briefcase },
-    { label: 'System Settings', path: '/admin/settings', icon: Settings },
+    // ── Per Role-wise Actions doc ──
+    { label: 'Dashboard Overview', path: '/dashboard/central-admin/dashboard',   icon: LayoutDashboard },
+    { label: 'Users',              path: '/dashboard/central-admin/users',       icon: Users },
+    { label: 'Departments',        path: '/dashboard/central-admin/departments', icon: Network },
+    { label: 'Global Notices',     path: '/dashboard/central-admin/notices',     icon: Bell },
+    { label: 'Downloads',          path: '/dashboard/central-admin/downloads',   icon: Download },
+    { label: 'Events',             path: '/dashboard/central-admin/events',      icon: Calendar },
+    { label: 'Gallery',            path: '/dashboard/central-admin/gallery',     icon: ImageIcon },
+    { label: 'Static Pages',       path: '/dashboard/central-admin/pages',       icon: FileCode },
+    // ── Existing CMS content modules ──
+    { label: 'News',               path: '/dashboard/central-admin/news',        icon: Newspaper },
+    { label: 'Tenders',            path: '/dashboard/central-admin/tenders',     icon: FileSpreadsheet },
+    { label: 'Urgent Alerts',      path: '/dashboard/central-admin/alerts',      icon: AlertOctagon },
+    { label: 'Faculty Directory',  path: '/dashboard/central-admin/faculty',     icon: UsersRound },
+    { label: 'Placement Records',  path: '/dashboard/central-admin/placement',   icon: Briefcase },
+    { label: 'System Settings',    path: '/dashboard/central-admin/settings',    icon: Settings },
   ]
 
   return (
-    <div className="min-h-screen flex bg-slate-50 transition-colors duration-300">
+    <div className="h-screen flex bg-slate-50 transition-colors duration-300 overflow-hidden w-screen">
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-white border-r border-slate-200 text-slate-600 flex flex-col justify-between flex-shrink-0 z-30">
-        <div>
+      <aside className="w-64 bg-white border-r border-slate-200 text-slate-600 flex flex-col justify-between flex-shrink-0 z-30 h-full">
+        <div className="flex flex-col flex-1 min-h-0">
           {/* Logo Brand area */}
-          <div className="p-5 border-b border-slate-150 flex items-center justify-between">
+          <div className="p-5 border-b border-slate-150 flex items-center justify-between shrink-0">
             <Link to="/" className="flex items-center gap-2 group">
               <div className="w-7 h-7 rounded bg-primary flex items-center justify-center border border-accent/30">
                 <span className="text-white text-[10px] font-bold">SG</span>
@@ -69,7 +88,7 @@ const AdminLayout: React.FC = () => {
           </div>
 
           {/* User profile card */}
-          <div className="p-4 mx-3 my-4 bg-slate-50 border border-slate-150 rounded-md flex items-center gap-3">
+          <div className="p-4 mx-3 my-4 bg-slate-50 border border-slate-150 rounded-md flex items-center gap-3 shrink-0">
             <div className="p-2 rounded-md bg-white border border-slate-150 text-accent">
               <UserCheck className="w-5 h-5" />
             </div>
@@ -80,7 +99,7 @@ const AdminLayout: React.FC = () => {
           </div>
 
           {/* Navigation link list */}
-          <nav className="px-3 space-y-1">
+          <nav className="px-3 space-y-1 flex-1 overflow-y-auto py-2">
             {menuItems.map((item) => {
               const Icon = item.icon
               const isActive = location.pathname === item.path
@@ -104,10 +123,10 @@ const AdminLayout: React.FC = () => {
         </div>
 
         {/* Footer actions area */}
-        <div className="p-4 border-t border-slate-150">
+        <div className="p-4 border-t border-slate-150 shrink-0">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-50 hover:bg-red-50 hover:text-red-600 text-slate-700 rounded-md text-xs font-bold transition-all border border-slate-200 hover:border-red-200 cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-50 hover:bg-[#0b2545]/5 hover:text-[#0b2545] text-slate-700 rounded-md text-xs font-bold transition-all border border-slate-200 hover:border-[#0b2545]/20 cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Sign Out</span>
@@ -116,21 +135,21 @@ const AdminLayout: React.FC = () => {
       </aside>
 
       {/* Main Content Dashboard Frame */}
-      <div className="flex-1 flex flex-col overflow-x-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden h-full">
         {/* Topbar */}
-        <header className="h-16 bg-white border-b border-slate-200/80 flex items-center justify-between px-6 transition-colors duration-300">
+        <header className="h-16 bg-white border-b border-slate-200/80 flex items-center justify-between px-6 transition-colors duration-300 shrink-0">
           <h2 className="font-display font-bold text-slate-800 text-base">
             System Administration Panel
           </h2>
           <div className="flex items-center gap-4 text-xs font-medium text-slate-500">
             <span>Server Time: <strong className="text-slate-800">2026-05-21</strong></span>
             <div className="h-4 w-px bg-slate-200" />
-            <span>Mode: <span className="bg-emerald-500/10 text-emerald-500 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20">Production</span></span>
+            <span>Mode: <span className="bg-[#bfa15f]/10 text-[#bfa15f] font-bold px-2 py-0.5 rounded-full border border-[#bfa15f]/30">Production</span></span>
           </div>
         </header>
 
         {/* Core CRUD outlet grid view */}
-        <main className="flex-grow p-6">
+        <main ref={mainRef} className="flex-grow p-6 overflow-y-auto">
           <Outlet />
         </main>
       </div>

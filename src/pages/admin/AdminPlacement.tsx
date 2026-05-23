@@ -15,7 +15,7 @@ const EMPTY: PlacementRecord = {
 function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t) }, [onClose])
   return (
-    <div className="fixed bottom-4 right-4 z-50 bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 text-sm font-medium">
+    <div className="fixed bottom-4 right-4 z-50 bg-[#bfa15f] text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 text-sm font-medium">
       {message}<button onClick={onClose}><X size={14} /></button>
     </div>
   )
@@ -114,7 +114,7 @@ export default function AdminPlacement() {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="font-semibold text-green-600">{r.studentsPlaced.toLocaleString()}</span>
+                  <span className="font-semibold text-[#bfa15f]">{r.studentsPlaced.toLocaleString()}</span>
                 </td>
                 <td className="px-4 py-3 text-slate-600">{r.companies}</td>
                 <td className="px-4 py-3 font-medium text-slate-700">{r.highestPackage}</td>
@@ -122,7 +122,7 @@ export default function AdminPlacement() {
                 <td className="px-4 py-3 max-w-xs">
                   <div className="flex flex-wrap gap-1">
                     {r.topRecruiters.slice(0, 4).map(rec => (
-                      <span key={rec} className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">{rec}</span>
+                      <span key={rec} className="px-1.5 py-0.5 bg-[#0b2545]/10 text-[#0b2545] rounded text-xs">{rec}</span>
                     ))}
                     {r.topRecruiters.length > 4 && (
                       <span className="text-xs text-slate-400">+{r.topRecruiters.length - 4}</span>
@@ -131,8 +131,8 @@ export default function AdminPlacement() {
                 </td>
                 <td className="px-4 py-3 text-center">
                   <div className="inline-flex items-center gap-2">
-                    <button onClick={() => openEdit(r)} className="p-1.5 rounded hover:bg-blue-50 text-blue-600 transition-colors"><Pencil size={14} /></button>
-                    <button onClick={() => setDeleteTarget(r)} className="p-1.5 rounded hover:bg-red-50 text-red-500 transition-colors"><Trash2 size={14} /></button>
+                    <button onClick={() => openEdit(r)} className="p-1.5 rounded hover:bg-[#0b2545]/5 text-[#0b2545] transition-colors"><Pencil size={14} /></button>
+                    <button onClick={() => setDeleteTarget(r)} className="p-1.5 rounded hover:bg-slate-100 text-slate-500 transition-colors"><Trash2 size={14} /></button>
                   </div>
                 </td>
               </tr>
@@ -151,27 +151,27 @@ export default function AdminPlacement() {
             </div>
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Academic Year <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Academic Year <span className="text-[#bfa15f]">*</span></label>
                 <input required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.year} onChange={e => f('year', e.target.value)} placeholder="2025-26" disabled={!!editItem} />
                 {editItem && <p className="text-xs text-slate-400 mt-1">Year cannot be changed after creation</p>}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Students Placed <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Students Placed <span className="text-[#bfa15f]">*</span></label>
                   <input type="number" min={0} required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.studentsPlaced} onChange={e => f('studentsPlaced', parseInt(e.target.value) || 0)} />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Companies <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Companies <span className="text-[#bfa15f]">*</span></label>
                   <input type="number" min={0} required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.companies} onChange={e => f('companies', parseInt(e.target.value) || 0)} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Highest Package <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Highest Package <span className="text-[#bfa15f]">*</span></label>
                   <input required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.highestPackage} onChange={e => f('highestPackage', e.target.value)} placeholder="₹48 LPA" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Average Package <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Average Package <span className="text-[#bfa15f]">*</span></label>
                   <input required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.averagePackage} onChange={e => f('averagePackage', e.target.value)} placeholder="₹7.2 LPA" />
                 </div>
               </div>
@@ -192,12 +192,12 @@ export default function AdminPlacement() {
       {deleteTarget && (
         <div className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 text-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3"><Trash2 size={22} className="text-red-600" /></div>
+            <div className="w-12 h-12 bg-[#0b2545]/10 rounded-full flex items-center justify-center mx-auto mb-3"><Trash2 size={22} className="text-[#0b2545]" /></div>
             <h3 className="font-bold text-slate-800 text-lg mb-1">Delete Placement Record?</h3>
             <p className="text-slate-500 text-sm mb-5">Academic Year: <strong>{deleteTarget.year}</strong></p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteTarget(null)} className="flex-1 py-2 border border-slate-300 text-slate-700 rounded font-semibold text-sm hover:bg-slate-50">Cancel</button>
-              <button onClick={handleDelete} className="flex-1 py-2 bg-red-600 text-white rounded font-semibold text-sm hover:bg-red-700">Delete</button>
+              <button onClick={handleDelete} className="flex-1 py-2 bg-[#0b2545] text-white rounded font-semibold text-sm hover:bg-[#0b2545]/90">Delete</button>
             </div>
           </div>
         </div>

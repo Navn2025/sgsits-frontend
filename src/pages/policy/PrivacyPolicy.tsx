@@ -46,7 +46,7 @@ export default function PrivacyPolicy() {
       {/* Hero */}
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-2 text-sm text-blue-200 mb-3">
+          <div className="flex items-center gap-2 text-sm text-white/70 mb-3">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight className="w-4 h-4" />
             <span className="text-white font-medium">Privacy Policy</span>
@@ -57,10 +57,10 @@ export default function PrivacyPolicy() {
             </div>
             <h1 className="text-4xl font-display font-bold">Privacy Policy</h1>
           </div>
-          <p className="text-blue-100 text-lg">
+          <p className="text-white/85 text-lg">
             SGSITS is committed to protecting your privacy and handling your personal information with care and transparency.
           </p>
-          <p className="text-blue-200 text-sm mt-3">Last Updated: January 15, 2025 | Effective Date: February 1, 2025</p>
+          <p className="text-white/70 text-sm mt-3">Last Updated: January 15, 2025 | Effective Date: February 1, 2025</p>
         </div>
       </div>
 
@@ -68,7 +68,7 @@ export default function PrivacyPolicy() {
         {/* Intro */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8">
           <p className="text-gray-700 leading-relaxed">
-            This Privacy Policy describes how Shri Govindram Seksaria Institute of Technology and Science ("SGSITS", "we", "our", or "us") collects, uses, and protects information obtained through the official SGSITS website (www.sgsits.ac.in) and affiliated digital services. By using our website, you agree to the practices described in this policy. If you do not agree, please discontinue use of our digital services.
+            This Privacy Policy describes how Shri G. S. Institute of Technology & Science ("SGSITS", "we", "our", or "us") collects, uses, and protects information obtained through the official SGSITS website (www.sgsits.ac.in) and affiliated digital services. By using our website, you agree to the practices described in this policy. If you do not agree, please discontinue use of our digital services.
           </p>
         </div>
 
@@ -89,7 +89,7 @@ export default function PrivacyPolicy() {
         </div>
 
         {/* Footer note */}
-        <div className="mt-8 bg-blue-50 rounded-xl border border-blue-100 p-6">
+        <div className="mt-8 bg-[#0b2545]/5 rounded-xl border border-[#0b2545]/15 p-6">
           <h3 className="font-semibold text-primary mb-2">Questions about this policy?</h3>
           <p className="text-gray-600 text-sm">
             Contact the SGSITS IT Cell at <span className="text-primary font-medium">itcell@sgsits.ac.in</span> or the Registrar's Office at <span className="text-primary font-medium">registrar@sgsits.ac.in</span>.

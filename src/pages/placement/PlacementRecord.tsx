@@ -32,7 +32,7 @@ const PlacementRecord: React.FC = () => {
       </div>
 
       {/* Big Stats — Latest Year */}
-      <div className="bg-gradient-to-br from-primary to-[#134074] rounded-2xl p-6 text-white">
+      <div className="bg-primary rounded-2xl p-6 text-white">
         <div className="flex items-center justify-between mb-5">
           <div>
             <p className="text-[10px] uppercase tracking-widest font-bold text-accent/80">Latest — {latest?.year}</p>
@@ -82,7 +82,7 @@ const PlacementRecord: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {records.map((r, idx) => (
-                  <tr key={r.year} className={`hover:bg-amber-50/30 transition-colors ${idx === 0 ? 'bg-amber-50/50' : ''}`}>
+                  <tr key={r.year} className={`hover:bg-[#bfa15f]/5 transition-colors ${idx === 0 ? 'bg-[#bfa15f]/10' : ''}`}>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
                         <span className="font-display font-extrabold text-primary">{r.year}</span>
@@ -193,14 +193,14 @@ const PlacementRecord: React.FC = () => {
                       <span className="text-xs font-bold text-slate-700">{d.placed}/{d.total}</span>
                     </td>
                     <td className="px-5 py-3.5 text-center">
-                      <span className={`text-xs font-black ${rate >= 90 ? 'text-green-600' : rate >= 80 ? 'text-amber-600' : 'text-slate-600'}`}>
+                      <span className={`text-xs font-black ${rate >= 90 ? 'text-[#bfa15f]' : rate >= 80 ? 'text-[#0b2545]' : 'text-slate-600'}`}>
                         {rate}%
                       </span>
                     </td>
                     <td className="px-5 py-3.5">
                       <div className="w-full bg-slate-100 rounded-full h-2">
                         <div
-                          className={`h-2 rounded-full ${rate >= 90 ? 'bg-green-500' : rate >= 80 ? 'bg-amber-500' : 'bg-slate-400'}`}
+                          className={`h-2 rounded-full ${rate >= 90 ? 'bg-[#bfa15f]' : rate >= 80 ? 'bg-[#0b2545]' : 'bg-slate-400'}`}
                           style={{ width: `${rate}%` }}
                         />
                       </div>

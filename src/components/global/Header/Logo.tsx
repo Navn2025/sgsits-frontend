@@ -20,7 +20,7 @@ const Logo: React.FC = () => {
           <path d="M30 45 h40 M50 25 v45 M35 70 h30" strokeWidth="3" opacity="0.6" />
           
           {/* Star at center top */}
-          <polygon points="50,22 52,27 57,27 53,30 55,35 50,32 45,35 47,30 43,27 48,27" fill="hsl(45, 80%, 48%)" stroke="none" />
+          <polygon points="50,22 52,27 57,27 53,30 55,35 50,32 45,35 47,30 43,27 48,27" fill="#bfa15f" stroke="none" />
           
           {/* Book icon lines */}
           <path d="M35 55 C42 55 50 58 50 58 C50 58 58 55 65 55 M35 60 C42 60 50 63 50 63 C50 63 58 60 65 60" strokeWidth="2.5" />
@@ -36,7 +36,7 @@ const Logo: React.FC = () => {
           SGSITS INDORE
         </h1>
         <p className="text-[10px] sm:text-[11px] font-medium text-slate-500 leading-none mt-0.5 max-w-[280px] sm:max-w-md line-clamp-1">
-          Shri Govindram Seksaria Institute of Technology and Science
+          Shri G. S. Institute of Technology & Science
         </p>
         <span className="text-[9px] text-brand-burgundy font-bold tracking-wider uppercase leading-none mt-1">
           Estd. 1952 • Autonomous Grant-in-Aid Institute

@@ -175,7 +175,7 @@ const FacultyProfile: React.FC = () => {
               Biography & Core Competencies
             </h3>
             <p className="text-xs md:text-sm text-slate-650 leading-relaxed font-sans text-justify">
-              {facultyName} serves as a senior Academic Dean and core researcher in {deptName} at Shri Govindram Seksaria Institute of Technology and Science (SGSITS). With over 22 years of active pedagogical engagement and post-doctoral research coordinates, she guides advanced computing clusters and publishes regularly in top-tier national journals.
+              {facultyName} serves as a senior Academic Dean and core researcher in {deptName} at Shri G. S. Institute of Technology & Science (SGSITS). With over 22 years of active pedagogical engagement and post-doctoral research coordinates, she guides advanced computing clusters and publishes regularly in top-tier national journals.
             </p>
             <p className="text-xs md:text-sm text-slate-650 leading-relaxed font-sans text-justify">
               Her primary academic mission centers around outcome-oriented systems, collaborating on ISRO and DST grants, and mentoring Ph.D doctoral cohorts to transition novel computational theories into industrial models.
@@ -266,7 +266,7 @@ const FacultyProfile: React.FC = () => {
                   <p className="text-[11px] text-slate-500 mt-1">Sponsoring Agency: DST (Department of Science & Technology)</p>
                   <p className="text-[10px] text-primary font-bold mt-1">Budget: ₹42 Lakhs • Ongoing (2024-27)</p>
                 </div>
-                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-[9px] font-bold uppercase">Active</span>
+                <span className="px-2 py-0.5 bg-[#bfa15f]/10 text-[#bfa15f] border border-[#bfa15f]/30 rounded text-[9px] font-bold uppercase">Active</span>
               </div>
               <div className="p-4 border border-slate-200 rounded flex items-center justify-between hover:border-slate-400 transition-colors">
                 <div>

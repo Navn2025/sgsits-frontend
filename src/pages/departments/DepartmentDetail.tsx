@@ -11,11 +11,12 @@ import {
   Image as ImageIcon,
   Mail,
   Phone,
-  Download,
   Info,
   Sparkles,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Eye
 } from 'lucide-react'
+import PdfViewerModal from '../../components/global/PdfViewerModal'
 
 const TABS = [
   { id: 'about', label: 'About', icon: Info },
@@ -33,6 +34,21 @@ const TABS = [
 const DepartmentDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>()
   const [activeTab, setActiveTab] = useState('about')
+  const [facultyPage, setFacultyPage] = useState(1)
+  const [pdfViewer, setPdfViewer] = useState<{
+    isOpen: boolean
+    url: string
+    title: string
+  }>({
+    isOpen: false,
+    url: '',
+    title: ''
+  })
+
+  // Reset faculty page to 1 on department changes
+  React.useEffect(() => {
+    setFacultyPage(1)
+  }, [slug])
 
   // Find department metadata
   const dept = departmentsList.find((d) => d.slug === slug)
@@ -42,7 +58,7 @@ const DepartmentDetail: React.FC = () => {
   }
 
   // Curate Mock Faculty List for the Department
-  const mockFaculty = Array.from({ length: dept.facultyCount }).map((_, idx) => {
+  const mockFaculty = Array.from({ length: Math.max(dept.facultyCount, 28) }).map((_, idx) => {
     const names = [
       'Dr. Smita Verma', 'Dr. Nitish Gupta', 'Dr. Joseph Thomas Andrews', 'Dr. Urjita Thakar', 
       'Dr. R.K. Khare', 'Dr. Satish Jain', 'Dr. H.K. Verma', 'Dr. R.C. Gurjar',
@@ -52,13 +68,30 @@ const DepartmentDetail: React.FC = () => {
     const designations = ['Professor & Head', 'Professor', 'Associate Professor', 'Assistant Professor']
     
     const isHod = idx === 0
+    const name = isHod ? dept.hodName : names[(idx + 4) % names.length]
+    const isFemale = name.includes('Smita') || name.includes('Urjita') || name.includes('Sunita') || name.includes('Vibha')
+    const imageUrl = isFemale 
+      ? [
+          'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=150&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=150&auto=format&fit=crop'
+        ][idx % 4]
+      : [
+          'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=150&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop'
+        ][idx % 4]
+
     return {
       id: `${dept.shortName.toLowerCase().replace(' ', '-')}-fac-${idx + 1}`,
-      name: isHod ? dept.hodName : names[(idx + 4) % names.length],
+      name,
       designation: isHod ? designations[0] : designations[(idx % 3) + 1],
       credential: isHod ? credentials[0] : credentials[(idx + 2) % credentials.length],
       email: isHod ? dept.hodEmail : `${names[(idx + 4) % names.length].toLowerCase().replace(/dr\.\s|ms\.\s/, '').replace(/\s/g, '.')}@sgsits.ac.in`,
-      researchArea: ['Machine Learning, IoT', 'Structural Engineering, Seismic Analysis', 'Power Systems, Renewable Energy', 'Synthetic Chemistry'][idx % 4]
+      researchArea: ['Machine Learning, IoT', 'Structural Engineering, Seismic Analysis', 'Power Systems, Renewable Energy', 'Synthetic Chemistry'][idx % 4],
+      imageUrl
     }
   })
 
@@ -144,7 +177,7 @@ const DepartmentDetail: React.FC = () => {
                 </h2>
               </div>
               <p className="text-xs md:text-sm text-slate-650 leading-relaxed font-sans text-justify">
-                The Department of <strong>{dept.name}</strong> at Shri Govindram Seksaria Institute of Technology and Science remains a cornerstone of scholastic excellence. The division offers premium engineering tracks coupled with robust research infrastructure, ensuring that graduating students possess elite design skills, theoretical expertise, and practical insight.
+                The Department of <strong>{dept.name}</strong> at Shri G. S. Institute of Technology & Science remains a cornerstone of scholastic excellence. The division offers premium engineering tracks coupled with robust research infrastructure, ensuring that graduating students possess elite design skills, theoretical expertise, and practical insight.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                 <div className="p-5 bg-white rounded border border-slate-200/80 space-y-3 flex flex-col hover:border-slate-350 transition-colors duration-200">
@@ -222,10 +255,10 @@ const DepartmentDetail: React.FC = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                 {[
-                  { title: 'B.Tech Scheme & Syllabus (1st Year Batch 2025-26)', size: '2.4 MB' },
-                  { title: 'B.Tech Core Scheme & Electives (2nd to 4th Year)', size: '4.8 MB' },
-                  { title: 'M.Tech / PGCourses Scheme (All Branches 2025-26)', size: '1.9 MB' },
-                  { title: 'List of Open Electives & Audit Courses (NEP 2020)', size: '1.2 MB' }
+                  { title: 'B.Tech Scheme & Syllabus (1st Year Batch 2025-26)', size: '2.4 MB', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+                  { title: 'B.Tech Core Scheme & Electives (2nd to 4th Year)', size: '4.8 MB', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+                  { title: 'M.Tech / PGCourses Scheme (All Branches 2025-26)', size: '1.9 MB', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+                  { title: 'List of Open Electives & Audit Courses (NEP 2020)', size: '1.2 MB', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
                 ].map((doc, idx) => (
                   <div
                     key={idx}
@@ -242,8 +275,12 @@ const DepartmentDetail: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    <button className="p-2 bg-white border border-slate-200 rounded hover:text-primary hover:border-slate-350 text-slate-500 hover:shadow-sm transition-colors duration-200">
-                      <Download className="w-3.5 h-3.5" />
+                    <button 
+                      onClick={() => setPdfViewer({ isOpen: true, url: doc.url, title: doc.title })}
+                      className="p-2 bg-white border border-slate-200 rounded hover:text-primary hover:border-slate-350 text-slate-500 hover:shadow-sm transition-colors duration-200"
+                      title="View PDF inline"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ))}
@@ -252,59 +289,139 @@ const DepartmentDetail: React.FC = () => {
           )}
 
           {/* ── FACULTY TAB ── */}
-          {activeTab === 'faculty' && (
-            <div className="space-y-6">
-              <div className="pb-3 border-b border-slate-200">
-                <h2 className="text-xl font-display font-bold text-slate-900">
-                  Department Faculty Directories
-                </h2>
-              </div>
-              <p className="text-xs md:text-sm text-slate-655 leading-relaxed font-sans">
-                Meet our core team of expert educators, researchers, and lab specialists guiding the technical department.
-              </p>
+          {activeTab === 'faculty' && (() => {
+            const ITEMS_PER_PAGE = 10
+            const totalFacultyPages = Math.ceil(mockFaculty.length / ITEMS_PER_PAGE)
+            const paginatedFaculty = mockFaculty.slice(
+              (facultyPage - 1) * ITEMS_PER_PAGE,
+              facultyPage * ITEMS_PER_PAGE
+            )
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                {mockFaculty.map((fac) => (
-                  <div
-                    key={fac.id}
-                    className="p-4 bg-white border border-slate-200 rounded flex flex-col justify-between space-y-4 hover:border-slate-400 shadow-sm transition-all duration-200"
-                  >
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-800">
-                            {fac.name}
-                          </h4>
-                          <p className="text-[10px] text-accent font-bold uppercase tracking-wider mt-0.5">
-                            {fac.designation}
-                          </p>
-                        </div>
-                        <span className="text-[9px] bg-slate-50 text-slate-600 border border-slate-250 px-2 py-0.5 rounded font-semibold font-sans">
-                          {fac.credential}
-                        </span>
-                      </div>
-                      
-                      <div className="text-[11px] text-slate-550 space-y-1 font-sans font-medium">
-                        <p><strong>Research Area:</strong> {fac.researchArea}</p>
-                        <p className="flex items-center gap-1 text-slate-500">
-                          <Mail className="w-3 h-3 flex-shrink-0" />
-                          {fac.email}
-                        </p>
-                      </div>
-                    </div>
+            const scrollToFacultyHeader = () => {
+              setTimeout(() => {
+                document.getElementById('faculty-tab-header')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }, 50)
+            }
 
-                    <Link
-                      to={`/faculty/${fac.id}`}
-                      className="inline-flex items-center justify-center gap-1.5 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 font-bold text-[10px] rounded hover:bg-slate-100 hover:text-primary hover:border-slate-350 transition-all duration-200"
+            return (
+              <div id="faculty-tab-header" className="space-y-6 scroll-mt-24">
+                <div className="pb-3 border-b border-slate-200">
+                  <h2 className="text-xl font-display font-bold text-slate-900">
+                    Department Faculty Directories
+                  </h2>
+                </div>
+                <p className="text-xs md:text-sm text-slate-655 leading-relaxed font-sans">
+                  Meet our core team of expert educators, researchers, and lab specialists guiding the technical department. Showing {(facultyPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(facultyPage * ITEMS_PER_PAGE, mockFaculty.length)} of {mockFaculty.length} members.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                  {paginatedFaculty.map((fac) => (
+                    <div
+                      key={fac.id}
+                      className="p-4 bg-white border border-slate-200 rounded flex flex-col justify-between space-y-4 hover:border-slate-400 shadow-sm transition-all duration-200"
                     >
-                      <LinkIcon className="w-3.5 h-3.5" />
-                      View Portfolio Dashboard
-                    </Link>
+                      <div className="flex gap-4 items-start">
+                        {/* Faculty Profile Image */}
+                        <div className="w-16 h-16 rounded overflow-hidden bg-slate-50 border border-slate-200 flex-shrink-0">
+                          <img
+                            src={fac.imageUrl}
+                            alt={fac.name}
+                            className="w-full h-full object-cover filter saturate-[0.85]"
+                          />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <h4 className="text-sm font-bold text-slate-800 truncate">
+                                {fac.name}
+                              </h4>
+                              <p className="text-[10px] text-accent font-bold uppercase tracking-wider mt-0.5">
+                                {fac.designation}
+                              </p>
+                            </div>
+                            <span className="text-[9px] bg-slate-50 text-slate-600 border border-slate-250 px-2 py-0.5 rounded font-semibold font-sans whitespace-nowrap shrink-0">
+                              {fac.credential}
+                            </span>
+                          </div>
+                          
+                          <div className="text-[11px] text-slate-550 space-y-1 font-sans font-medium">
+                            <p className="line-clamp-1"><strong>Research Area:</strong> {fac.researchArea}</p>
+                            <p className="flex items-center gap-1 text-slate-500 truncate">
+                              <Mail className="w-3 h-3 flex-shrink-0" />
+                              {fac.email}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Link
+                        to={`/faculty/${fac.id}`}
+                        className="inline-flex items-center justify-center gap-1.5 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 font-bold text-[10px] rounded hover:bg-slate-100 hover:text-primary hover:border-slate-350 transition-all duration-200"
+                      >
+                        <LinkIcon className="w-3.5 h-3.5" />
+                        View Portfolio Dashboard
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {totalFacultyPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 pt-6 border-t border-slate-100 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (facultyPage > 1) {
+                          setFacultyPage(facultyPage - 1)
+                          scrollToFacultyHeader()
+                        }
+                      }}
+                      disabled={facultyPage === 1}
+                      className="px-3 py-1.5 border border-slate-200 rounded text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white transition-colors"
+                    >
+                      Previous
+                    </button>
+                    
+                    {Array.from({ length: totalFacultyPages }).map((_, i) => {
+                      const pageNum = i + 1
+                      return (
+                        <button
+                          key={pageNum}
+                          type="button"
+                          onClick={() => {
+                            setFacultyPage(pageNum)
+                            scrollToFacultyHeader()
+                          }}
+                          className={`px-3 py-1.5 rounded text-xs font-semibold transition-colors ${
+                            facultyPage === pageNum
+                              ? 'bg-primary text-white font-bold'
+                              : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      )
+                    })}
+                    
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (facultyPage < totalFacultyPages) {
+                          setFacultyPage(facultyPage + 1)
+                          scrollToFacultyHeader()
+                        }
+                      }}
+                      disabled={facultyPage === totalFacultyPages}
+                      className="px-3 py-1.5 border border-slate-200 rounded text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:hover:bg-white transition-colors"
+                    >
+                      Next
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
-            </div>
-          )}
+            )
+          })()}
 
           {/* ── RESEARCH TAB ── */}
           {activeTab === 'research' && (
@@ -355,9 +472,9 @@ const DepartmentDetail: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                 {[
-                  { sem: 'B.Tech III / V Semester', slot: 'Class Lectures & Labs', url: '#' },
-                  { sem: 'B.Tech VII Semester', slot: 'Project Work Schedule', url: '#' },
-                  { sem: 'M.Tech / PG Modules', slot: 'Lecture Slots & Seminars', url: '#' }
+                  { sem: 'B.Tech III / V Semester', slot: 'Class Lectures & Labs', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+                  { sem: 'B.Tech VII Semester', slot: 'Project Work Schedule', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+                  { sem: 'M.Tech / PG Modules', slot: 'Lecture Slots & Seminars', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
                 ].map((sched, idx) => (
                   <div
                     key={idx}
@@ -371,9 +488,12 @@ const DepartmentDetail: React.FC = () => {
                         {sched.slot}
                       </p>
                     </div>
-                    <button className="w-full py-1.5 bg-slate-50 border border-slate-200 hover:text-primary hover:bg-slate-100 hover:border-slate-350 text-slate-600 font-bold text-[10px] rounded flex items-center justify-center gap-1 shadow-sm transition-all duration-200">
-                      <Download className="w-3 h-3" />
-                      Download PDF
+                    <button 
+                      onClick={() => setPdfViewer({ isOpen: true, url: sched.url, title: `${sched.sem} Timetable` })}
+                      className="w-full py-1.5 bg-slate-50 border border-slate-200 hover:text-primary hover:bg-slate-100 hover:border-slate-350 text-slate-600 font-bold text-[10px] rounded flex items-center justify-center gap-1 shadow-sm transition-all duration-200"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      View Timetable
                     </button>
                   </div>
                 ))}
@@ -471,7 +591,7 @@ const DepartmentDetail: React.FC = () => {
                     key={idx}
                     className="relative aspect-video rounded overflow-hidden border border-slate-200 shadow-sm"
                   >
-                    <img src={img} alt="Dept Event" className="w-full h-full object-cover grayscale opacity-90" />
+                    <img src={img} alt="Dept Event" className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
@@ -537,6 +657,13 @@ const DepartmentDetail: React.FC = () => {
           )}
         </div>
       </section>
+
+      <PdfViewerModal
+        isOpen={pdfViewer.isOpen}
+        onClose={() => setPdfViewer(prev => ({ ...prev, isOpen: false }))}
+        pdfUrl={pdfViewer.url}
+        title={pdfViewer.title}
+      />
     </div>
   )
 }

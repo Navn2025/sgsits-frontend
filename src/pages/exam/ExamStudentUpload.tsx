@@ -55,7 +55,7 @@ const ExamStudentUpload: React.FC = () => {
       {/* Upload Box */}
       <PortalCard>
         <h3 className="text-sm font-bold text-slate-700 mb-4">Upload Student CSV</h3>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 text-xs text-blue-700">
+        <div className="bg-[#0b2545]/5 border border-[#0b2545]/20 rounded-lg p-4 mb-4 text-xs text-[#0b2545]">
           <strong>CSV Format:</strong> enrollment_no, student_name, branch_id, semester, section, email
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
@@ -77,7 +77,7 @@ const ExamStudentUpload: React.FC = () => {
             </button>
           </div>
         </div>
-        {uploaded && <div className="mt-3 bg-green-50 border border-green-200 text-green-700 rounded px-4 py-2.5 text-sm">✓ Student data uploaded successfully!</div>}
+        {uploaded && <div className="mt-3 bg-[#bfa15f]/10 border border-[#bfa15f]/30 text-[#bfa15f] rounded px-4 py-2.5 text-sm">✓ Student data uploaded successfully!</div>}
       </PortalCard>
 
       {/* Student Table */}

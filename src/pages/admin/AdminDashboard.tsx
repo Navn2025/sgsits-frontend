@@ -47,23 +47,23 @@ const AdminDashboard: React.FC = () => {
   }, [])
 
   const cards: StatCard[] = [
-    { label: 'Notices', value: stats.notices, icon: Bell, color: 'bg-blue-50 text-blue-600 border-blue-100', link: '/admin/notices', desc: 'Official notices & circulars' },
-    { label: 'News Items', value: stats.news, icon: Newspaper, color: 'bg-green-50 text-green-600 border-green-100', link: '/admin/news', desc: 'Campus news & updates' },
-    { label: 'Upcoming Events', value: stats.events, icon: Calendar, color: 'bg-purple-50 text-purple-600 border-purple-100', link: '/admin/events', desc: 'Events & programs' },
-    { label: 'Open Tenders', value: stats.tenders, icon: FileSpreadsheet, color: 'bg-orange-50 text-orange-600 border-orange-100', link: '/admin/tenders', desc: 'Active procurement tenders' },
-    { label: 'Faculty Records', value: stats.faculty, icon: Users, color: 'bg-teal-50 text-teal-600 border-teal-100', link: '/admin/faculty', desc: 'Faculty directory entries' },
-    { label: 'Active Alerts', value: stats.alerts, icon: AlertOctagon, color: 'bg-red-50 text-red-600 border-red-100', link: '/admin/alerts', desc: 'Marquee announcements' },
-    { label: 'Gallery Albums', value: stats.albums, icon: ImageIcon, color: 'bg-pink-50 text-pink-600 border-pink-100', link: '/admin/gallery', desc: 'Photo gallery collections' },
-    { label: 'Placement Records', value: '5 Yrs', icon: Briefcase, color: 'bg-slate-50 text-slate-600 border-slate-200', link: '/admin/placement', desc: 'Placement statistics data' },
+    { label: 'Notices', value: stats.notices, icon: Bell, color: 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/20', link: '/dashboard/central-admin/notices', desc: 'Official notices & circulars' },
+    { label: 'News Items', value: stats.news, icon: Newspaper, color: 'bg-[#bfa15f]/10 text-[#bfa15f] border-[#bfa15f]/30', link: '/dashboard/central-admin/news', desc: 'Campus news & updates' },
+    { label: 'Upcoming Events', value: stats.events, icon: Calendar, color: 'bg-[#0b2545]/15 text-[#0b2545] border-[#0b2545]/25', link: '/dashboard/central-admin/events', desc: 'Events & programs' },
+    { label: 'Open Tenders', value: stats.tenders, icon: FileSpreadsheet, color: 'bg-[#bfa15f]/15 text-[#bfa15f] border-[#bfa15f]/30', link: '/dashboard/central-admin/tenders', desc: 'Active procurement tenders' },
+    { label: 'Faculty Records', value: stats.faculty, icon: Users, color: 'bg-[#0b2545]/5 text-[#0b2545] border-[#0b2545]/15', link: '/dashboard/central-admin/faculty', desc: 'Faculty directory entries' },
+    { label: 'Active Alerts', value: stats.alerts, icon: AlertOctagon, color: 'bg-[#bfa15f]/20 text-[#bfa15f] border-[#bfa15f]/40', link: '/dashboard/central-admin/alerts', desc: 'Marquee announcements' },
+    { label: 'Gallery Albums', value: stats.albums, icon: ImageIcon, color: 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/20', link: '/dashboard/central-admin/gallery', desc: 'Photo gallery collections' },
+    { label: 'Placement Records', value: '5 Yrs', icon: Briefcase, color: 'bg-slate-50 text-slate-600 border-slate-200', link: '/dashboard/central-admin/placement', desc: 'Placement statistics data' },
   ]
 
   const quickActions = [
-    { label: 'Add New Notice', link: '/admin/notices', icon: Bell, color: 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100' },
-    { label: 'Add News Article', link: '/admin/news', icon: Newspaper, color: 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100' },
-    { label: 'Add Event', link: '/admin/events', icon: Calendar, color: 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100' },
-    { label: 'Add Tender', link: '/admin/tenders', icon: FileSpreadsheet, color: 'bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100' },
-    { label: 'Update Alerts', link: '/admin/alerts', icon: AlertOctagon, color: 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100' },
-    { label: 'Upload Gallery', link: '/admin/gallery', icon: ImageIcon, color: 'bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100' },
+    { label: 'Add New Notice', link: '/dashboard/central-admin/notices', icon: Bell, color: 'bg-[#0b2545]/10 border-[#0b2545]/25 text-[#0b2545] hover:bg-[#0b2545]/15' },
+    { label: 'Add News Article', link: '/dashboard/central-admin/news', icon: Newspaper, color: 'bg-[#bfa15f]/10 border-[#bfa15f]/30 text-[#bfa15f] hover:bg-[#bfa15f]/15' },
+    { label: 'Add Event', link: '/dashboard/central-admin/events', icon: Calendar, color: 'bg-[#0b2545]/15 border-[#0b2545]/30 text-[#0b2545] hover:bg-[#0b2545]/20' },
+    { label: 'Add Tender', link: '/dashboard/central-admin/tenders', icon: FileSpreadsheet, color: 'bg-[#bfa15f]/15 border-[#bfa15f]/40 text-[#bfa15f] hover:bg-[#bfa15f]/20' },
+    { label: 'Update Alerts', link: '/dashboard/central-admin/alerts', icon: AlertOctagon, color: 'bg-[#0b2545]/5 border-[#0b2545]/20 text-[#0b2545] hover:bg-[#0b2545]/10' },
+    { label: 'Upload Gallery', link: '/dashboard/central-admin/gallery', icon: ImageIcon, color: 'bg-[#bfa15f]/20 border-[#bfa15f]/40 text-[#bfa15f] hover:bg-[#bfa15f]/25' },
   ]
 
   return (
@@ -137,11 +137,11 @@ const AdminDashboard: React.FC = () => {
         <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">System Status</h3>
         <div className="bg-white border border-slate-200 rounded-lg divide-y divide-slate-100">
           {[
-            { label: 'Frontend Application', status: 'Operational', color: 'text-green-600 bg-green-50' },
-            { label: 'Backend API', status: 'Pending Setup', color: 'text-orange-600 bg-orange-50' },
-            { label: 'Database Connection', status: 'Pending Setup', color: 'text-orange-600 bg-orange-50' },
-            { label: 'File Storage (Media)', status: 'Pending Setup', color: 'text-orange-600 bg-orange-50' },
-            { label: 'Email Service', status: 'Pending Setup', color: 'text-orange-600 bg-orange-50' },
+            { label: 'Frontend Application', status: 'Operational', color: 'text-[#bfa15f] bg-[#bfa15f]/10' },
+            { label: 'Backend API', status: 'Pending Setup', color: 'text-[#0b2545] bg-[#0b2545]/10' },
+            { label: 'Database Connection', status: 'Pending Setup', color: 'text-[#0b2545] bg-[#0b2545]/10' },
+            { label: 'File Storage (Media)', status: 'Pending Setup', color: 'text-[#0b2545] bg-[#0b2545]/10' },
+            { label: 'Email Service', status: 'Pending Setup', color: 'text-[#0b2545] bg-[#0b2545]/10' },
           ].map((item) => (
             <div key={item.label} className="flex items-center justify-between px-5 py-3">
               <div className="flex items-center gap-3">
@@ -157,17 +157,17 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       {/* API Integration Notice */}
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-5">
+      <div className="bg-[#bfa15f]/10 border border-[#bfa15f]/30 rounded-lg p-5">
         <div className="flex items-start gap-3">
-          <TrendingUp size={18} className="text-amber-600 shrink-0 mt-0.5" />
+          <TrendingUp size={18} className="text-[#bfa15f] shrink-0 mt-0.5" />
           <div>
-            <h4 className="font-bold text-sm text-amber-800">Backend Integration Ready</h4>
-            <p className="text-xs text-amber-700 mt-1 leading-relaxed">
+            <h4 className="font-bold text-sm text-[#0b2545]">Backend Integration Ready</h4>
+            <p className="text-xs text-[#0b2545] mt-1 leading-relaxed">
               This admin panel is fully wired for backend API integration. All CRUD operations currently use mock data.
-              When your backend is ready, update <code className="font-mono bg-amber-100 px-1 rounded">VITE_API_BASE_URL</code> in{' '}
-              <code className="font-mono bg-amber-100 px-1 rounded">.env.local</code> and replace mock functions in{' '}
-              <code className="font-mono bg-amber-100 px-1 rounded">src/api/index.ts</code>.
-              See <code className="font-mono bg-amber-100 px-1 rounded">BACKEND_API_DOCS.md</code> for the complete API specification.
+              When your backend is ready, update <code className="font-mono bg-[#bfa15f]/20 px-1 rounded">VITE_API_BASE_URL</code> in{' '}
+              <code className="font-mono bg-[#bfa15f]/20 px-1 rounded">.env.local</code> and replace mock functions in{' '}
+              <code className="font-mono bg-[#bfa15f]/20 px-1 rounded">src/api/index.ts</code>.
+              See <code className="font-mono bg-[#bfa15f]/20 px-1 rounded">BACKEND_API_DOCS.md</code> for the complete API specification.
             </p>
           </div>
         </div>

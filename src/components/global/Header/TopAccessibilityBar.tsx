@@ -157,7 +157,7 @@ const TopAccessibilityBar: React.FC = () => {
             {theme === 'light' ? (
               <Moon className="w-3.5 h-3.5 text-slate-300" />
             ) : (
-              <Sun className="w-3.5 h-3.5 text-amber-400" />
+              <Sun className="w-3.5 h-3.5 text-[#bfa15f]" />
             )}
           </button>
         </div>

@@ -8,22 +8,22 @@ const highlights = [
     icon: FlaskConical,
     title: 'Modern Laboratories',
     desc: 'State-of-the-art labs across all departments — CAD/CAM center, high-performance computing cluster, IoT lab, and material testing facilities.',
-    color: 'bg-blue-50 border-blue-100',
-    iconColor: 'text-blue-600',
+    color: 'bg-[#0b2545]/5 border-[#0b2545]/15',
+    iconColor: 'text-[#0b2545]',
   },
   {
     icon: Monitor,
     title: 'Beautiful Campus',
     desc: 'Spread across 52 acres in the heart of Indore, SGSITS features lush green gardens, heritage architecture, and modern academic blocks.',
-    color: 'bg-amber-50 border-amber-100',
-    iconColor: 'text-amber-600',
+    color: 'bg-[#bfa15f]/15 border-[#bfa15f]/30',
+    iconColor: 'text-[#bfa15f]',
   },
   {
     icon: Dumbbell,
     title: 'Sports Facilities',
     desc: 'Dedicated sports complex with cricket ground, basketball court, volleyball, badminton, athletics track, and an indoor gymnasium.',
-    color: 'bg-green-50 border-green-100',
-    iconColor: 'text-green-600',
+    color: 'bg-[#bfa15f]/5 border-[#bfa15f]/20',
+    iconColor: 'text-[#bfa15f]',
   },
 ]
 
@@ -72,7 +72,7 @@ const VideoTourPage: React.FC = () => {
       {/* Intro paragraph */}
       <div className="border-l-4 border-accent pl-5">
         <p className="text-sm text-slate-700 leading-relaxed font-sans">
-          Experience the beauty and infrastructure of <strong>Shri Govindram Seksaria Institute of Technology and Science</strong> through
+          Experience the beauty and infrastructure of <strong>Shri G. S. Institute of Technology & Science</strong> through
           our curated campus videos. From the grand main academic building and central library to annual technical festivals,
           convocation ceremonies, and sports events — discover SGSITS from anywhere in the world.
         </p>
@@ -189,7 +189,7 @@ const VideoTourPage: React.FC = () => {
       {/* Subscribe Banner */}
       <div className="bg-primary text-white rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-red-600 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-[#bfa15f] flex items-center justify-center shrink-0">
             <Video size={24} className="text-white" />
           </div>
           <div>
@@ -201,7 +201,7 @@ const VideoTourPage: React.FC = () => {
           href="https://www.youtube.com/@sgsitsindore"
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-colors shrink-0"
+          className="inline-flex items-center gap-2 bg-[#bfa15f] hover:bg-[#bfa15f]/90 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-colors shrink-0"
         >
           <ExternalLink size={14} />
           Subscribe Now

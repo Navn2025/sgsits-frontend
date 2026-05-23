@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import React, { useState, useEffect, useRef } from 'react'
+import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAdminStore } from '../../store/adminStore'
 import { LayoutDashboard, Menu, X, LogOut, Home, ChevronRight } from 'lucide-react'
 
@@ -13,7 +13,7 @@ interface PortalLayoutProps {
   title: string
   subtitle: string
   navItems: PortalNavItem[]
-  accentClass?: string   // e.g. 'bg-red-700' for exam dept
+  accentClass?: string   // e.g. 'bg-[#0b2545]' for exam dept
 }
 
 const PortalLayout: React.FC<PortalLayoutProps> = ({
@@ -25,6 +25,14 @@ const PortalLayout: React.FC<PortalLayoutProps> = ({
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { user, clearAuth } = useAdminStore()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const mainRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0
+    }
+  }, [pathname])
 
   const handleLogout = () => {
     clearAuth()
@@ -39,7 +47,7 @@ const PortalLayout: React.FC<PortalLayoutProps> = ({
     .toUpperCase()
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 font-sans">
+    <div className="h-screen flex flex-col bg-slate-50 font-sans overflow-hidden">
       {/* Top Header */}
       <header className={`${accentClass} text-white h-14 flex items-center px-4 gap-4 shadow-lg shrink-0 z-40 relative`}>
         {/* Mobile hamburger */}
@@ -90,7 +98,7 @@ const PortalLayout: React.FC<PortalLayoutProps> = ({
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden min-h-0">
         {/* Overlay for mobile */}
         {sidebarOpen && (
           <div
@@ -106,10 +114,10 @@ const PortalLayout: React.FC<PortalLayoutProps> = ({
             w-60 bg-white border-r border-slate-200 shadow-sm
             flex flex-col transition-transform duration-300 ease-out
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-            top-14 lg:top-auto
+            top-14 lg:top-auto h-[calc(100vh-3.5rem)] lg:h-full
           `}
         >
-          <div className="p-4 border-b border-slate-100">
+          <div className="p-4 border-b border-slate-100 shrink-0">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{title}</p>
           </div>
           <nav className="flex-1 overflow-y-auto py-2">
@@ -135,7 +143,7 @@ const PortalLayout: React.FC<PortalLayoutProps> = ({
             })}
           </nav>
 
-          <div className="p-3 border-t border-slate-100">
+          <div className="p-3 border-t border-slate-100 shrink-0">
             <div className="bg-slate-50 rounded-lg px-3 py-2.5">
               <p className="text-[10px] text-slate-500 font-medium">Logged in as</p>
               <p className="text-xs font-bold text-slate-700 truncate mt-0.5">{user?.name ?? 'User'}</p>
@@ -145,7 +153,7 @@ const PortalLayout: React.FC<PortalLayoutProps> = ({
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-auto">
+        <main ref={mainRef} className="flex-1 overflow-y-auto">
           <div className="p-4 lg:p-6 max-w-7xl mx-auto">
             <Outlet />
           </div>
@@ -186,10 +194,10 @@ export const PortalCard: React.FC<PortalCardProps> = ({ children, className = ''
 interface BadgeProps { label: string; variant: 'success' | 'warning' | 'error' | 'info' | 'default' }
 export const Badge: React.FC<BadgeProps> = ({ label, variant }) => {
   const cls = {
-    success: 'bg-green-50 text-green-700 border-green-200',
-    warning: 'bg-amber-50 text-amber-700 border-amber-200',
-    error:   'bg-red-50 text-red-700 border-red-200',
-    info:    'bg-blue-50 text-blue-700 border-blue-200',
+    success: 'bg-[#bfa15f]/10 text-[#bfa15f] border-[#bfa15f]/30',
+    warning: 'bg-[#bfa15f]/15 text-[#bfa15f] border-[#bfa15f]/40',
+    error:   'bg-[#0b2545]/5 text-[#0b2545] border-[#0b2545]/20',
+    info:    'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25',
     default: 'bg-slate-50 text-slate-600 border-slate-200',
   }[variant]
   return (

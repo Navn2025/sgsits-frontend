@@ -1,154 +1,232 @@
-/**
- * Faculty Dashboard — SGSITS Portal
- *
- * This is a placeholder faculty portal page.
- * Full faculty features (timetable, leave management, research portal, etc.)
- * will be implemented when the backend API is ready.
- *
- * Backend endpoints needed:
- *   GET  /api/faculty/me           — Current faculty profile
- *   GET  /api/faculty/timetable    — Class schedule
- *   GET  /api/faculty/notices      — Department notices
- *   POST /api/faculty/leave        — Submit leave application
- */
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAdminStore } from '../../store/adminStore'
+import { PageHeader, PortalCard, SessionBanner } from '../../components/layout/PortalLayout'
 import {
-  User, BookOpen, Calendar, FileText, LogOut,
-  Bell, Settings, ChevronRight, Building2
+  SUBJECTS, MARKS_REQUESTS, CORRECTION_REQUESTS,
+  SESSIONS, FACULTY_MEMBERS,
+} from '../../data/mockPortalData'
+import {
+  LEAVE_APPLICATIONS, TIMETABLE_SLOTS, TIMETABLE_PERIODS, DEPT_NOTICES,
+} from '../../data/mockHodData'
+import {
+  BookOpen, ClipboardList, FileEdit, CalendarDays, FileCheck2,
+  Megaphone, ChevronRight, Clock, AlertTriangle, CheckCircle2,
 } from 'lucide-react'
 
+// Mock current-faculty identity. Replace with `user.id` once auth backend exists.
+const CURRENT_FACULTY_ID = 'F001'
+
+// Get the local day short-code (Mon, Tue, …) to filter today's timetable.
+const DAY_CODES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
+const TODAY = DAY_CODES[new Date().getDay()]
+
 const FacultyDashboard: React.FC = () => {
-  const { user, clearAuth } = useAdminStore()
+  const { user } = useAdminStore()
+  const currentSession = SESSIONS.find(s => s.is_active)
+  const me = FACULTY_MEMBERS.find(f => f.id === CURRENT_FACULTY_ID)
 
-  const handleLogout = () => {
-    clearAuth()
-    window.location.href = '/login'
-  }
+  // Scope every section to the current faculty member.
+  const mySubjects   = SUBJECTS.filter(s => s.facultyId === CURRENT_FACULTY_ID)
+  const myMarks      = MARKS_REQUESTS.filter(r => r.facultyId === CURRENT_FACULTY_ID)
+  const pendingMarks = myMarks.filter(r => r.status === 'pending')
+  const overdueMarks = myMarks.filter(r => r.status === 'overdue')
+  const submittedMarks = myMarks.filter(r => r.status === 'submitted')
+  const myCorrections = CORRECTION_REQUESTS.filter(c => c.facultyId === CURRENT_FACULTY_ID)
+  const myLeaves     = LEAVE_APPLICATIONS.filter(l => l.facultyId === CURRENT_FACULTY_ID)
+  const pendingLeaves = myLeaves.filter(l => l.status === 'pending')
+  const todaySlots   = TIMETABLE_SLOTS
+    .filter(t => t.facultyId === CURRENT_FACULTY_ID && t.day === TODAY)
+    .sort((a, b) => a.period - b.period)
+  const facultyNotices = DEPT_NOTICES
+    .filter(n => n.audience === 'All' || n.audience === 'Faculty')
+    .slice(0, 4)
 
-  const quickLinks = [
-    { label: 'My Profile', desc: 'View and update your faculty profile', icon: User, color: 'bg-blue-50 text-blue-600 border-blue-100' },
-    { label: 'Timetable', desc: 'Your class schedule and lecture hours', icon: Calendar, color: 'bg-green-50 text-green-600 border-green-100' },
-    { label: 'Notices', desc: 'Department and institute notices', icon: Bell, color: 'bg-orange-50 text-orange-600 border-orange-100' },
-    { label: 'Research Portal', desc: 'Publications, projects and funding', icon: BookOpen, color: 'bg-purple-50 text-purple-600 border-purple-100' },
-    { label: 'Leave Application', desc: 'Apply and track leave requests', icon: FileText, color: 'bg-teal-50 text-teal-600 border-teal-100' },
-    { label: 'Department', desc: 'Department info and colleagues', icon: Building2, color: 'bg-slate-50 text-slate-600 border-slate-200' },
+  const stats = [
+    { label: 'Allocated Subjects', value: mySubjects.length,      icon: BookOpen,      color: 'bg-[#0b2545]/5 text-[#0b2545] border-[#0b2545]/15',  link: '/dashboard/teacher/subjects',     desc: 'This session' },
+    { label: 'Pending Marks',      value: pendingMarks.length,    icon: ClipboardList, color: 'bg-[#bfa15f]/15 text-[#bfa15f] border-[#bfa15f]/40', link: '/dashboard/teacher/marks-feed',        desc: 'Awaiting your entry' },
+    { label: 'Overdue Marks',      value: overdueMarks.length,    icon: AlertTriangle, color: 'bg-[#0b2545]/15 text-[#0b2545] border-[#0b2545]/30', link: '/dashboard/teacher/marks-feed',        desc: 'Past due date' },
+    { label: 'Submitted Marks',    value: submittedMarks.length,  icon: CheckCircle2,  color: 'bg-[#bfa15f]/10 text-[#bfa15f] border-[#bfa15f]/30', link: '/dashboard/teacher/marks-feed',        desc: 'This session' },
+    { label: 'Correction Reqs.',   value: myCorrections.length,   icon: FileEdit,      color: 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25', link: '/dashboard/teacher/correction-request',desc: 'Raised by you' },
+    { label: 'Today’s Classes', value: todaySlots.length,    icon: CalendarDays,  color: 'bg-[#bfa15f]/5 text-[#bfa15f] border-[#bfa15f]/25',  link: '/dashboard/teacher/timetable',         desc: TODAY },
+    { label: 'Leave Applications', value: myLeaves.length,        icon: FileCheck2,    color: 'bg-[#0b2545]/5 text-[#0b2545] border-[#0b2545]/15',  link: '/dashboard/teacher/leave',             desc: `${pendingLeaves.length} pending` },
+    { label: 'Department Notices', value: facultyNotices.length,  icon: Megaphone,     color: 'bg-slate-50 text-slate-600 border-slate-200',         link: '/dashboard/teacher/notices',           desc: 'Recent for faculty' },
   ]
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-primary text-white px-6 py-4 flex items-center justify-between shadow-md">
-        <div className="flex items-center gap-3">
-          <img src="/assets/image.png" alt="SGSITS Logo" className="w-10 h-10 object-contain bg-white rounded-full p-0.5" />
-          <div>
-            <h1 className="font-display font-bold text-base">SGSITS Faculty Portal</h1>
-            <p className="text-white/60 text-xs">Shri Govindram Seksaria Institute of Technology and Science</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link to="/" className="text-white/70 hover:text-white text-xs font-medium transition-colors">← Public Site</Link>
-          <button onClick={handleLogout} className="flex items-center gap-1.5 text-white/70 hover:text-white text-xs font-medium transition-colors">
-            <LogOut size={14} />Sign Out
-          </button>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <PageHeader
+        title={`Welcome, ${user?.name ?? me?.name ?? 'Faculty Member'}`}
+        subtitle={`${me?.designation ?? 'Faculty'} · Dept. of ${me?.branch_id ?? user?.department ?? '—'} · ${user?.employeeId ?? me?.employeeId ?? ''}`}
+      />
 
-      <main className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-        {/* Welcome Card */}
-        <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-              <User size={28} className="text-primary" />
-            </div>
-            <div>
-              <h2 className="text-xl font-display font-bold text-slate-800">
-                Welcome, {user?.name || 'Faculty Member'}
-              </h2>
-              <p className="text-sm text-slate-500 mt-0.5">{user?.email}</p>
-              <div className="flex items-center gap-3 mt-2">
-                <span className="text-[10px] bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
-                  {user?.role}
-                </span>
-                {user?.department && (
-                  <span className="text-[10px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded font-bold">
-                    {user.department}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+      {currentSession && <SessionBanner session={currentSession.label} />}
 
-        {/* Quick Links Grid */}
-        <div>
-          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Faculty Services</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {quickLinks.map((item) => {
-              const Icon = item.icon
-              return (
-                <div key={item.label} className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group">
-                  <div className={`w-10 h-10 rounded-lg border flex items-center justify-center mb-3 ${item.color}`}>
-                    <Icon size={18} />
+      {/* Stat cards */}
+      <div>
+        <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">My Workload</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {stats.map(card => {
+            const Icon = card.icon
+            return (
+              <Link
+                key={card.label}
+                to={card.link}
+                className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md hover:border-slate-300 transition-all group"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`w-9 h-9 rounded-lg border flex items-center justify-center ${card.color}`}>
+                    <Icon size={16} />
                   </div>
-                  <h4 className="font-bold text-sm text-slate-800 group-hover:text-primary transition-colors">{item.label}</h4>
-                  <p className="text-xs text-slate-500 mt-1">{item.desc}</p>
+                  <ChevronRight size={14} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
                 </div>
-              )
-            })}
-          </div>
+                <p className="text-2xl font-bold text-slate-800">{card.value}</p>
+                <p className="text-xs font-bold text-slate-600 mt-1">{card.label}</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">{card.desc}</p>
+              </Link>
+            )
+          })}
         </div>
+      </div>
 
-        {/* Coming Soon Notice */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-5">
-          <div className="flex items-start gap-3">
-            <Settings size={18} className="text-amber-600 shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-bold text-sm text-amber-800">Faculty Portal — Under Development</h4>
-              <p className="text-xs text-amber-700 mt-1 leading-relaxed">
-                The full faculty portal features (timetable, attendance, leave management, research tracking, salary slip download)
-                will be available once the backend API is integrated. Currently displaying mock session data.
-              </p>
-              <p className="text-xs text-amber-700 mt-2">
-                <strong>API needed:</strong> <code className="font-mono bg-amber-100 px-1 rounded">GET /api/faculty/me</code>,{' '}
-                <code className="font-mono bg-amber-100 px-1 rounded">GET /api/faculty/timetable</code>, etc.
-                See <code className="font-mono bg-amber-100 px-1 rounded">BACKEND_API_DOCS.md</code> for specifications.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Notices */}
-        <div>
+      {/* Two-column: Today's schedule + Pending marks tasks */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <PortalCard>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Recent Notices</h3>
-            <Link to="/notices" className="text-xs text-accent-blue font-semibold hover:underline flex items-center gap-1">
-              View All <ChevronRight size={12} />
-            </Link>
+            <h3 className="text-sm font-bold text-slate-700">Today&rsquo;s Schedule &mdash; {TODAY}</h3>
+            <Link to="/dashboard/teacher/timetable" className="text-xs text-[#0b2545] hover:underline font-medium">Full week &rarr;</Link>
           </div>
-          <div className="bg-white border border-slate-200 rounded-lg divide-y divide-slate-100">
-            {[
-              { title: 'End Semester Examination Schedule — Even Sem 2025-26', date: 'May 15, 2026', isNew: true },
-              { title: 'Faculty Development Program — June 2026', date: 'May 10, 2026', isNew: false },
-              { title: 'Academic Council Meeting — Minutes Available', date: 'May 5, 2026', isNew: false },
-            ].map((notice, i) => (
-              <div key={i} className="flex items-center justify-between px-5 py-3 hover:bg-slate-50 cursor-pointer transition-colors">
-                <div className="flex items-start gap-3">
-                  <Bell size={14} className="text-slate-400 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-slate-800">{notice.title}</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">{notice.date}</p>
+          {todaySlots.length === 0 ? (
+            <p className="text-xs text-slate-400 py-6 text-center">No classes scheduled today. Enjoy the break.</p>
+          ) : (
+            <div className="space-y-2.5">
+              {todaySlots.map(slot => (
+                <div
+                  key={slot.id}
+                  className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100"
+                >
+                  <div className="shrink-0 w-12 text-center bg-white border border-[#0b2545]/15 rounded px-1 py-1.5">
+                    <p className="text-[9px] text-[#0b2545] font-bold uppercase tracking-wider">P{slot.period + 1}</p>
+                    <p className="text-[10px] text-slate-500 leading-tight mt-0.5">{TIMETABLE_PERIODS[slot.period].split(' - ')[0]}</p>
                   </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-slate-800 truncate">{slot.subjectName}</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      {slot.branch_id} &middot; Sem {slot.semester} &middot; Section {slot.section} &middot; Room {slot.room}
+                    </p>
+                  </div>
+                  <Clock size={13} className="text-slate-400 shrink-0 mt-1.5" />
                 </div>
-                {notice.isNew && (
-                  <span className="text-[9px] bg-red-50 text-red-600 border border-red-200 px-1.5 py-0.5 rounded font-bold shrink-0">NEW</span>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
+          )}
+        </PortalCard>
+
+        <PortalCard>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-slate-700">Pending Marks Tasks</h3>
+            <Link to="/dashboard/teacher/marks-feed" className="text-xs text-[#0b2545] hover:underline font-medium">Open marks feed &rarr;</Link>
           </div>
-        </div>
-      </main>
+          {pendingMarks.length + overdueMarks.length === 0 ? (
+            <p className="text-xs text-slate-400 py-6 text-center">All caught up. No pending marks entries.</p>
+          ) : (
+            <div className="space-y-2.5">
+              {[...overdueMarks, ...pendingMarks].slice(0, 5).map(r => (
+                <div
+                  key={r.id}
+                  className="flex items-start justify-between gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-800 truncate">
+                      {r.subjectId} &middot; {r.subjectName}
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Sem {r.semester} &middot; Section {r.section} &middot; {r.component} / {r.subComponent}
+                    </p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">Due {r.dueDate}</p>
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded border shrink-0 uppercase tracking-wide ${
+                      r.status === 'overdue'
+                        ? 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25'
+                        : 'bg-[#bfa15f]/15 text-[#bfa15f] border-[#bfa15f]/30'
+                    }`}
+                  >
+                    {r.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </PortalCard>
+      </div>
+
+      {/* Corrections + Notices */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <PortalCard>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-slate-700">My Correction Requests</h3>
+            <Link to="/dashboard/teacher/correction-request" className="text-xs text-[#0b2545] hover:underline font-medium">Manage &rarr;</Link>
+          </div>
+          {myCorrections.length === 0 ? (
+            <p className="text-xs text-slate-400 py-6 text-center">No correction requests raised.</p>
+          ) : (
+            <div className="space-y-2.5">
+              {myCorrections.map(c => (
+                <div key={c.id} className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm font-semibold text-slate-800">
+                      {c.subjectId} &middot; {c.subjectName}
+                    </p>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded border shrink-0 uppercase tracking-wide ${
+                        c.status === 'approved' ? 'bg-[#bfa15f]/10 text-[#bfa15f] border-[#bfa15f]/30' :
+                        c.status === 'pending'  ? 'bg-[#bfa15f]/15 text-[#bfa15f] border-[#bfa15f]/40' :
+                        c.status === 'rejected' ? 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25' :
+                                                  'bg-slate-100 text-slate-500 border-slate-200'
+                      }`}
+                    >
+                      {c.status}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    {c.component} / {c.subComponent} &middot; {c.affectedEnrollments.length} student{c.affectedEnrollments.length !== 1 ? 's' : ''}
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">{c.reason}</p>
+                  <p className="text-[10px] text-slate-400 mt-1.5">Submitted {c.submittedOn}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </PortalCard>
+
+        <PortalCard>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-slate-700">Department Notices</h3>
+            <Link to="/dashboard/teacher/notices" className="text-xs text-[#0b2545] hover:underline font-medium">View all &rarr;</Link>
+          </div>
+          {facultyNotices.length === 0 ? (
+            <p className="text-xs text-slate-400 py-6 text-center">No recent notices.</p>
+          ) : (
+            <div className="space-y-2.5">
+              {facultyNotices.map(n => (
+                <div key={n.id} className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm font-semibold text-slate-800">{n.title}</p>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#0b2545]/10 text-[#0b2545] border border-[#0b2545]/20 shrink-0 uppercase tracking-wide">
+                      {n.category}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">{n.body}</p>
+                  <p className="text-[10px] text-slate-400 mt-1.5">
+                    {n.publishedBy} &middot; {n.publishedOn}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </PortalCard>
+      </div>
     </div>
   )
 }

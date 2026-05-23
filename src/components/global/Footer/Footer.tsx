@@ -6,7 +6,7 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="w-full bg-[#0b1f3a] text-slate-350 border-t-4 border-accent pt-16 pb-8 transition-colors duration-300">
+    <footer className="w-full bg-[#0b2545] text-slate-350 border-t-4 border-accent pt-16 pb-8 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
         {/* Column 1: Contact Details & Branding */}
         <div className="space-y-5">
@@ -22,7 +22,7 @@ const Footer: React.FC = () => {
             </div>
           </div>
           <p className="text-xs text-slate-400 leading-relaxed font-sans font-medium">
-            Shri Govindram Seksaria Institute of Technology and Science, Indore is a prestigious autonomous engineering institution of national repute.
+            Shri G. S. Institute of Technology & Science, Indore is a prestigious autonomous engineering institution of national repute.
           </p>
           <div className="space-y-3 pt-2 text-xs font-sans font-medium">
             <div className="flex items-start gap-2.5">

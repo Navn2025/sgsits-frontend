@@ -4,7 +4,7 @@ import { ChevronRight, Copyright } from 'lucide-react';
 const sections = [
   {
     title: '1. Ownership of Content',
-    content: `All content published on the SGSITS website (www.sgsits.ac.in), including but not limited to text, articles, research publications, photographs, graphics, logos, audio-visual materials, database compilations, and software code, is the exclusive intellectual property of Shri Govindram Seksaria Institute of Technology and Science, unless expressly stated otherwise.
+    content: `All content published on the SGSITS website (www.sgsits.ac.in), including but not limited to text, articles, research publications, photographs, graphics, logos, audio-visual materials, database compilations, and software code, is the exclusive intellectual property of Shri G. S. Institute of Technology & Science, unless expressly stated otherwise.
 
 This content is protected under the Copyright Act, 1957 (India), and applicable international copyright conventions and treaties. The SGSITS name, seal, logo, and institutional marks are protected as registered trademarks. Unauthorized use, reproduction, or distribution of these marks is prohibited.`,
   },
@@ -45,7 +45,7 @@ export default function CopyrightPolicy() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-2 text-sm text-blue-200 mb-3">
+          <div className="flex items-center gap-2 text-sm text-white/70 mb-3">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight className="w-4 h-4" />
             <span className="text-white font-medium">Copyright Policy</span>
@@ -56,17 +56,17 @@ export default function CopyrightPolicy() {
             </div>
             <h1 className="text-4xl font-display font-bold">Copyright Policy</h1>
           </div>
-          <p className="text-blue-100 text-lg">
+          <p className="text-white/85 text-lg">
             Information about copyright ownership, permitted uses, and how to request permission for SGSITS content.
           </p>
-          <p className="text-blue-200 text-sm mt-3">Last Updated: January 15, 2025</p>
+          <p className="text-white/70 text-sm mt-3">Last Updated: January 15, 2025</p>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8">
           <p className="text-gray-700 leading-relaxed">
-            © {new Date().getFullYear()} Shri Govindram Seksaria Institute of Technology and Science (SGSITS), Indore. All rights reserved. This Copyright Policy explains the intellectual property rights applicable to content on the SGSITS official website and provides guidance on permitted and prohibited uses.
+            © {new Date().getFullYear()} Shri G. S. Institute of Technology & Science (SGSITS), Indore. All rights reserved. This Copyright Policy explains the intellectual property rights applicable to content on the SGSITS official website and provides guidance on permitted and prohibited uses.
           </p>
         </div>
 
@@ -85,7 +85,7 @@ export default function CopyrightPolicy() {
           ))}
         </div>
 
-        <div className="mt-8 bg-blue-50 rounded-xl border border-blue-100 p-6">
+        <div className="mt-8 bg-[#0b2545]/5 rounded-xl border border-[#0b2545]/15 p-6">
           <h3 className="font-semibold text-primary mb-2">Related Policies</h3>
           <div className="flex flex-wrap gap-3 mt-3">
             <Link to="/policy/privacy" className="text-sm text-primary hover:text-accent transition-colors font-medium underline underline-offset-2">Privacy Policy</Link>

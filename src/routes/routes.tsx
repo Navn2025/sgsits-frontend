@@ -5,7 +5,15 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import MainLayout from '../components/layout/MainLayout'
 import SidebarLayout from '../components/layout/SidebarLayout'
 import AdminLayout from '../components/layout/AdminLayout'
+import HodLayout from '../components/layout/HodLayout'
+import FacultyLayout from '../components/layout/FacultyLayout'
+import ExamLayout from '../components/layout/ExamLayout'
+import PlacementLayout from '../components/layout/PlacementLayout'
 import AdminProtectedRoute from '../components/admin/AdminProtectedRoute'
+import HodProtectedRoute from '../components/admin/HodProtectedRoute'
+import FacultyProtectedRoute from '../components/admin/FacultyProtectedRoute'
+import ExamProtectedRoute from '../components/admin/ExamProtectedRoute'
+import PlacementProtectedRoute from '../components/admin/PlacementProtectedRoute'
 import ErrorBoundary from '../components/global/ErrorBoundary'
 
 // Loading placeholder component (Suspense wrapper)
@@ -66,8 +74,6 @@ const DepartmentDetail = lazy(() => import('../pages/departments/DepartmentDetai
 
 // Faculty Page
 const FacultyProfile = lazy(() => import('../pages/faculty/FacultyProfile'))
-const InstituteProfessors = lazy(() => import('../pages/faculty/InstituteProfessors'))
-const ProfessorProfile = lazy(() => import('../pages/faculty/ProfessorProfile'))
 
 // Students Section Pages
 const Activities = lazy(() => import('../pages/students/Activities'))
@@ -117,6 +123,7 @@ const TeqipPage = lazy(() => import('../pages/teqip/TeqipPage'))
 // Live Feed Category Pages
 const NoticesPage = lazy(() => import('../pages/livefeed/NoticesPage'))
 const NewsPage = lazy(() => import('../pages/livefeed/NewsPage'))
+const NewsDetailPage = lazy(() => import('../pages/livefeed/NewsDetailPage'))
 const EventsPage = lazy(() => import('../pages/livefeed/EventsPage'))
 const TendersPage = lazy(() => import('../pages/livefeed/TendersPage'))
 
@@ -133,8 +140,64 @@ const WebInfoManager = lazy(() => import('../pages/policy/WebInfoManager'))
 const HelpPage = lazy(() => import('../pages/policy/HelpPage'))
 const FeedbackPage = lazy(() => import('../pages/policy/FeedbackPage'))
 
-// Faculty Dashboard
+// Faculty Portal Pages
 const FacultyDashboard = lazy(() => import('../pages/faculty/FacultyDashboard'))
+const TeacherProfile = lazy(() => import('../pages/faculty/TeacherProfile'))
+const TeacherPublications = lazy(() => import('../pages/faculty/TeacherPublications'))
+const TeacherResearch = lazy(() => import('../pages/faculty/TeacherResearch'))
+const TeacherSubjects = lazy(() => import('../pages/faculty/TeacherSubjects'))
+const TeacherQualifications = lazy(() => import('../pages/faculty/TeacherQualifications'))
+const TeacherMarksFeed = lazy(() => import('../pages/faculty/TeacherMarksFeed'))
+const TeacherAtktFeed = lazy(() => import('../pages/faculty/TeacherAtktFeed'))
+const TeacherCorrections = lazy(() => import('../pages/faculty/TeacherCorrections'))
+const TeacherTimetable = lazy(() => import('../pages/faculty/TeacherTimetable'))
+const TeacherLeaves = lazy(() => import('../pages/faculty/TeacherLeaves'))
+const TeacherNotices = lazy(() => import('../pages/faculty/TeacherNotices'))
+
+// HOD Portal Pages
+const HodDashboard = lazy(() => import('../pages/hod/HodDashboard'))
+const HodSubjects = lazy(() => import('../pages/hod/HodSubjects'))
+const HodFaculty = lazy(() => import('../pages/hod/HodFaculty'))
+const HodStudents = lazy(() => import('../pages/hod/HodStudents'))
+const HodTimetable = lazy(() => import('../pages/hod/HodTimetable'))
+const HodLeaves = lazy(() => import('../pages/hod/HodLeaves'))
+const HodDepartmentProfile = lazy(() => import('../pages/hod/HodDepartmentProfile'))
+const HodNotices = lazy(() => import('../pages/hod/HodNotices'))
+const HodDownloads = lazy(() => import('../pages/hod/HodDownloads'))
+const HodEvents = lazy(() => import('../pages/hod/HodEvents'))
+const HodGallery = lazy(() => import('../pages/hod/HodGallery'))
+const HodLabs = lazy(() => import('../pages/hod/HodLabs'))
+const HodAchievements = lazy(() => import('../pages/hod/HodAchievements'))
+const HodMarks = lazy(() => import('../pages/hod/HodMarks'))
+const HodCorrections = lazy(() => import('../pages/hod/HodCorrections'))
+const HodRegistration = lazy(() => import('../pages/hod/HodRegistration'))
+const HodFacultyAllocation = lazy(() => import('../pages/hod/HodFacultyAllocation'))
+const HodElectiveData = lazy(() => import('../pages/hod/HodElectiveData'))
+const HodResults = lazy(() => import('../pages/hod/HodResults'))
+
+// Exam Department Pages
+const ExamDashboard = lazy(() => import('../pages/exam/ExamDashboard'))
+const ExamSessions = lazy(() => import('../pages/exam/ExamSessions'))
+const ExamBranches = lazy(() => import('../pages/exam/ExamBranches'))
+const ExamCourses = lazy(() => import('../pages/exam/ExamCourses'))
+const ExamSubjectUpload = lazy(() => import('../pages/exam/ExamSubjectUpload'))
+const ExamStudentUpload = lazy(() => import('../pages/exam/ExamStudentUpload'))
+const ExamAtktUpload = lazy(() => import('../pages/exam/ExamAtktUpload'))
+const ExamRequests = lazy(() => import('../pages/exam/ExamRequests'))
+const ExamMarksRequest = lazy(() => import('../pages/exam/ExamMarksRequest'))
+const ExamNotices = lazy(() => import('../pages/exam/ExamNotices'))
+const ExamTimetables = lazy(() => import('../pages/exam/ExamTimetables'))
+const ExamControllerResults = lazy(() => import('../pages/exam/ExamResults'))
+const ExamAcademicCalendar = lazy(() => import('../pages/exam/ExamAcademicCalendar'))
+const ExamDownloads = lazy(() => import('../pages/exam/ExamDownloads'))
+
+const PlacementDashboard = lazy(() => import('../pages/placementOfficer/PlacementDashboard'))
+const PlacementNotices = lazy(() => import('../pages/placementOfficer/PlacementNotices'))
+const PlacementCompanyVisits = lazy(() => import('../pages/placementOfficer/PlacementCompanyVisits'))
+const PlacementRecords = lazy(() => import('../pages/placementOfficer/PlacementRecords'))
+const PlacementTrainingPrograms = lazy(() => import('../pages/placementOfficer/PlacementTrainingPrograms'))
+const PlacementInternships = lazy(() => import('../pages/placementOfficer/PlacementInternships'))
+
 
 // ── Admin Pages ───────────────────────────────────────────────────────────
 const AdminLogin = lazy(() => import('../pages/admin/AdminLogin'))
@@ -149,6 +212,9 @@ const AdminFaculty = lazy(() => import('../pages/admin/AdminFaculty'))
 const AdminGallery = lazy(() => import('../pages/admin/AdminGallery'))
 const AdminPlacement = lazy(() => import('../pages/admin/AdminPlacement'))
 const AdminSettings = lazy(() => import('../pages/admin/AdminSettings'))
+const AdminUsers = lazy(() => import('../pages/admin/AdminUsers'))
+const AdminDownloads = lazy(() => import('../pages/admin/AdminDownloads'))
+const AdminStaticPages = lazy(() => import('../pages/admin/AdminStaticPages'))
 
 const router = createBrowserRouter([
   // ── PUBLIC ROUTES ──────────────────────────────────────────
@@ -161,17 +227,6 @@ const router = createBrowserRouter([
         element: <S><Home /></S>,
         handle: bc('Home'),
       },
-      {
-        path: 'institute-professors',
-        element: <S><InstituteProfessors /></S>,
-        handle: bc('Institute Professors'),
-      },
-      {
-        path: 'institute-professors/:slug',
-        element: <S><ProfessorProfile /></S>,
-        handle: bc('Professor Profile'),
-      },
-
       // About (with sidebar)
       {
         path: 'about',
@@ -341,10 +396,39 @@ const router = createBrowserRouter([
       },
 
       // Live Feed category pages
-      { path: 'notices', element: <S><NoticesPage /></S>, handle: bc('Notices') },
-      { path: 'news',    element: <S><NewsPage /></S>,    handle: bc('News') },
-      { path: 'events',  element: <S><EventsPage /></S>,  handle: bc('Events') },
-      { path: 'tenders', element: <S><TendersPage /></S>, handle: bc('Tenders') },
+      {
+        path: 'news',
+        element: <SidebarLayout section="news" />,
+        handle: bc('News'),
+        children: [
+          { index: true, element: <S><NewsPage /></S> },
+          { path: ':id', element: <S><NewsDetailPage /></S>, handle: bc('News Details') },
+        ],
+      },
+      {
+        path: 'notices',
+        element: <SidebarLayout section="notices" />,
+        handle: bc('Notices'),
+        children: [
+          { index: true, element: <S><NoticesPage /></S> },
+        ],
+      },
+      {
+        path: 'events',
+        element: <SidebarLayout section="events" />,
+        handle: bc('Events'),
+        children: [
+          { index: true, element: <S><EventsPage /></S> },
+        ],
+      },
+      {
+        path: 'tenders',
+        element: <SidebarLayout section="tenders" />,
+        handle: bc('Tenders'),
+        children: [
+          { index: true, element: <S><TendersPage /></S> },
+        ],
+      },
 
       // Policy Pages
       {
@@ -377,43 +461,189 @@ const router = createBrowserRouter([
     element: <S><Login /></S>,
   },
 
-  // ── FACULTY ROUTES ─────────────────────────────────────────
-  {
-    path: '/faculty',
-    children: [
-      { path: 'dashboard', element: <S><FacultyDashboard /></S> },
-    ]
-  },
+  // ── ADMIN LOGIN (back-compat alias for /login) ──────────────
+  { path: '/admin/login', element: <S><AdminLogin /></S> },
 
-  // ── ADMIN ROUTES ───────────────────────────────────────────
+  // ── CANONICAL DASHBOARDS — /dashboard/{role}/* per Role-wise Actions doc ──
   {
-    path: '/admin',
+    path: '/dashboard',
     children: [
-      { path: 'login', element: <S><AdminLogin /></S> },
+
+      // ── 1. CENTRAL ADMIN ────────────────────────────────────
       {
-        element: <AdminProtectedRoute />,
+        path: 'central-admin',
         children: [
           {
-            element: <AdminLayout />,
+            element: <AdminProtectedRoute />,
             children: [
-              { index: true, element: <Navigate to="dashboard" replace /> },
-              { path: 'dashboard',   element: <S><AdminDashboard /></S> },
-              { path: 'notices',     element: <S><AdminNotices /></S> },
-              { path: 'news',        element: <S><AdminNews /></S> },
-              { path: 'events',      element: <S><AdminEvents /></S> },
-              { path: 'tenders',     element: <S><AdminTenders /></S> },
-              { path: 'alerts',      element: <S><AdminAlerts /></S> },
-              { path: 'departments', element: <S><AdminDepartments /></S> },
-              { path: 'faculty',     element: <S><AdminFaculty /></S> },
-              { path: 'gallery',     element: <S><AdminGallery /></S> },
-              { path: 'placement',   element: <S><AdminPlacement /></S> },
-              { path: 'settings',    element: <S><AdminSettings /></S> },
+              {
+                element: <AdminLayout />,
+                children: [
+                  { index: true, element: <Navigate to="dashboard" replace /> },
+                  // Doc-required pages
+                  { path: 'dashboard',   element: <S><AdminDashboard /></S> },
+                  { path: 'users',       element: <S><AdminUsers /></S> },
+                  { path: 'departments', element: <S><AdminDepartments /></S> },
+                  { path: 'notices',     element: <S><AdminNotices /></S> },
+                  { path: 'downloads',   element: <S><AdminDownloads /></S> },
+                  { path: 'events',      element: <S><AdminEvents /></S> },
+                  { path: 'gallery',     element: <S><AdminGallery /></S> },
+                  { path: 'pages',       element: <S><AdminStaticPages /></S> },
+                  // Existing CMS modules
+                  { path: 'news',        element: <S><AdminNews /></S> },
+                  { path: 'tenders',     element: <S><AdminTenders /></S> },
+                  { path: 'alerts',      element: <S><AdminAlerts /></S> },
+                  { path: 'faculty',     element: <S><AdminFaculty /></S> },
+                  { path: 'placement',   element: <S><AdminPlacement /></S> },
+                  { path: 'settings',    element: <S><AdminSettings /></S> },
+                ],
+              },
             ],
           },
         ],
       },
+
+      // ── 2. HOD ──────────────────────────────────────────────
+      {
+        path: 'hod',
+        children: [
+          {
+            element: <HodProtectedRoute />,
+            children: [
+              {
+                element: <HodLayout />,
+                children: [
+                  { index: true, element: <Navigate to="dashboard" replace /> },
+                  // Doc-required pages
+                  { path: 'dashboard',           element: <S><HodDashboard /></S> },
+                  { path: 'department-profile',  element: <S><HodDepartmentProfile /></S> },
+                  { path: 'teachers',            element: <S><HodFaculty /></S> },
+                  { path: 'notices',             element: <S><HodNotices /></S> },
+                  { path: 'downloads',           element: <S><HodDownloads /></S> },
+                  { path: 'events',              element: <S><HodEvents /></S> },
+                  { path: 'gallery',             element: <S><HodGallery /></S> },
+                  { path: 'labs',                element: <S><HodLabs /></S> },
+                  { path: 'achievements',        element: <S><HodAchievements /></S> },
+                  // Inherited exam-office workflow pages
+                  { path: 'subjects',            element: <S><HodSubjects /></S> },
+                  { path: 'students',            element: <S><HodStudents /></S> },
+                  { path: 'timetable',           element: <S><HodTimetable /></S> },
+                  { path: 'leaves',              element: <S><HodLeaves /></S> },
+                  { path: 'marks',               element: <S><HodMarks /></S> },
+                  { path: 'corrections',         element: <S><HodCorrections /></S> },
+                  { path: 'registration',        element: <S><HodRegistration /></S> },
+                  { path: 'faculty-allocation',  element: <S><HodFacultyAllocation /></S> },
+                  { path: 'elective-data',       element: <S><HodElectiveData /></S> },
+                  { path: 'results',             element: <S><HodResults /></S> },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+
+      // ── 3. TEACHER (a.k.a. Faculty) ─────────────────────────
+      {
+        path: 'teacher',
+        children: [
+          {
+            element: <FacultyProtectedRoute />,
+            children: [
+              {
+                element: <FacultyLayout />,
+                children: [
+                  { index: true, element: <Navigate to="dashboard" replace /> },
+                  // Doc-required pages
+                  { path: 'dashboard',          element: <S><FacultyDashboard /></S> },
+                  { path: 'profile',            element: <S><TeacherProfile /></S> },
+                  { path: 'publications',       element: <S><TeacherPublications /></S> },
+                  { path: 'research',           element: <S><TeacherResearch /></S> },
+                  { path: 'subjects',           element: <S><TeacherSubjects /></S> },
+                  { path: 'qualifications',     element: <S><TeacherQualifications /></S> },
+                  // Inherited exam-office workflow pages
+                  { path: 'marks-feed',         element: <S><TeacherMarksFeed /></S> },
+                  { path: 'atkt-marks-feed',    element: <S><TeacherAtktFeed /></S> },
+                  { path: 'correction-request', element: <S><TeacherCorrections /></S> },
+                  { path: 'timetable',          element: <S><TeacherTimetable /></S> },
+                  { path: 'leave',              element: <S><TeacherLeaves /></S> },
+                  { path: 'notices',            element: <S><TeacherNotices /></S> },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+
+      // ── 4. EXAM CONTROLLER ──────────────────────────────────
+      {
+        path: 'exam',
+        children: [
+          {
+            element: <ExamProtectedRoute />,
+            children: [
+              {
+                element: <ExamLayout />,
+                children: [
+                  { index: true, element: <Navigate to="dashboard" replace /> },
+                  // Doc-required pages
+                  { path: 'dashboard',           element: <S><ExamDashboard /></S> },
+                  { path: 'notices',             element: <S><ExamNotices /></S> },
+                  { path: 'timetables',          element: <S><ExamTimetables /></S> },
+                  { path: 'results',             element: <S><ExamControllerResults /></S> },
+                  { path: 'academic-calendar',   element: <S><ExamAcademicCalendar /></S> },
+                  { path: 'downloads',           element: <S><ExamDownloads /></S> },
+                  // Inherited exam-office workflow pages
+                  { path: 'session-management',  element: <S><ExamSessions /></S> },
+                  { path: 'branch-management',   element: <S><ExamBranches /></S> },
+                  { path: 'course-management',   element: <S><ExamCourses /></S> },
+                  { path: 'subject-upload',      element: <S><ExamSubjectUpload /></S> },
+                  { path: 'student-upload',      element: <S><ExamStudentUpload /></S> },
+                  { path: 'atkt-upload',         element: <S><ExamAtktUpload /></S> },
+                  { path: 'requests',            element: <S><ExamRequests /></S> },
+                  { path: 'marks-request',       element: <S><ExamMarksRequest /></S> },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+
+      // ── 5. PLACEMENT OFFICER ────────────────────────────────
+      {
+        path: 'placement',
+        children: [
+          {
+            element: <PlacementProtectedRoute />,
+            children: [
+              {
+                element: <PlacementLayout />,
+                children: [
+                  { index: true, element: <Navigate to="dashboard" replace /> },
+                  { path: 'dashboard',          element: <S><PlacementDashboard /></S> },
+                  { path: 'notices',            element: <S><PlacementNotices /></S> },
+                  { path: 'company-visits',     element: <S><PlacementCompanyVisits /></S> },
+                  { path: 'records',            element: <S><PlacementRecords /></S> },
+                  { path: 'training-programs',  element: <S><PlacementTrainingPrograms /></S> },
+                  { path: 'internships',        element: <S><PlacementInternships /></S> },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+
     ],
   },
+
+  // ── BACK-COMPAT REDIRECTS ──────────────────────────────────
+  // Old role-root paths redirect to the canonical /dashboard/{role}/dashboard.
+  { path: '/admin',    element: <Navigate to="/dashboard/central-admin/dashboard" replace /> },
+  { path: '/admin/*',  element: <Navigate to="/dashboard/central-admin/dashboard" replace /> },
+  { path: '/hod',      element: <Navigate to="/dashboard/hod/dashboard" replace /> },
+  { path: '/hod/*',    element: <Navigate to="/dashboard/hod/dashboard" replace /> },
+  { path: '/faculty',  element: <Navigate to="/dashboard/teacher/dashboard" replace /> },
+  { path: '/exam',     element: <Navigate to="/dashboard/exam/dashboard" replace /> },
+  { path: '/exam/*',   element: <Navigate to="/dashboard/exam/dashboard" replace /> },
 ])
 
 export default router

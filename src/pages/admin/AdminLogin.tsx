@@ -36,7 +36,7 @@ const AdminLogin: React.FC = () => {
       // Calls authAPI.adminLogin — replace with real backend when ready
       const res = await authAPI.adminLogin(email, password)
       setAuth(res.token, res.user)
-      navigate('/admin/dashboard', { replace: true })
+      navigate('/dashboard/central-admin/dashboard', { replace: true })
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Login failed. Please check your credentials.'
       setError(msg)
@@ -46,7 +46,7 @@ const AdminLogin: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] flex flex-col justify-center items-center py-12 px-6">
+    <div className="min-h-screen bg-[#f7f8fa] flex flex-col justify-center items-center py-12 px-6">
       <div className="relative w-full max-w-md">
         {/* Back link */}
         <Link to="/" className="absolute -top-12 left-0 inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors">
@@ -69,19 +69,19 @@ const AdminLogin: React.FC = () => {
           </div>
 
           {/* Demo credentials hint */}
-          <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-700">
+          <div className="bg-[#0b2545]/10 border border-[#0b2545]/25 rounded p-3 text-xs text-[#0b2545]">
             <p className="font-bold mb-1">Demo Credentials (Frontend Mock):</p>
             <p>Email: <code className="font-mono">admin@sgsits.ac.in</code></p>
             <p>Password: <code className="font-mono">admin123</code> (min 4 chars)</p>
-            <p className="mt-1 text-blue-500 italic">Replace with real backend API when ready</p>
+            <p className="mt-1 text-[#0b2545]/70 italic">Replace with real backend API when ready</p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="p-3.5 bg-red-50 border border-red-200 rounded flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                <p className="text-[11px] font-semibold text-red-600">{error}</p>
+              <div className="p-3.5 bg-[#bfa15f]/10 border border-[#bfa15f]/30 rounded flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-[#bfa15f] shrink-0 mt-0.5" />
+                <p className="text-[11px] font-semibold text-[#0b2545]">{error}</p>
               </div>
             )}
 

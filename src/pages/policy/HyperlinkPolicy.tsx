@@ -45,7 +45,7 @@ export default function HyperlinkPolicy() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-2 text-sm text-blue-200 mb-3">
+          <div className="flex items-center gap-2 text-sm text-white/70 mb-3">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight className="w-4 h-4" />
             <span className="text-white font-medium">Hyperlink Policy</span>
@@ -56,10 +56,10 @@ export default function HyperlinkPolicy() {
             </div>
             <h1 className="text-4xl font-display font-bold">Hyperlink Policy</h1>
           </div>
-          <p className="text-blue-100 text-lg">
+          <p className="text-white/85 text-lg">
             Guidelines for links to and from the SGSITS website, including external and deep links.
           </p>
-          <p className="text-blue-200 text-sm mt-3">Last Updated: January 15, 2025</p>
+          <p className="text-white/70 text-sm mt-3">Last Updated: January 15, 2025</p>
         </div>
       </div>
 
@@ -85,7 +85,7 @@ export default function HyperlinkPolicy() {
           ))}
         </div>
 
-        <div className="mt-8 bg-blue-50 rounded-xl border border-blue-100 p-6">
+        <div className="mt-8 bg-[#0b2545]/5 rounded-xl border border-[#0b2545]/15 p-6">
           <h3 className="font-semibold text-primary mb-2">Related Policies</h3>
           <div className="flex flex-wrap gap-3 mt-3">
             <Link to="/policy/privacy" className="text-sm text-primary hover:text-accent transition-colors font-medium underline underline-offset-2">Privacy Policy</Link>

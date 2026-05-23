@@ -22,8 +22,8 @@ const startups = [
     founders: 'Rohan Sharma & Priya Mishra (SGSITS Alumni)',
     description: 'AI-powered learning management system that personalizes study paths for engineering students using adaptive algorithms. Currently serving 15,000+ students across 8 colleges in Madhya Pradesh.',
     icon: BookOpen,
-    color: 'bg-blue-50 border-blue-200',
-    badge: 'bg-blue-100 text-blue-700',
+    color: 'bg-[#0b2545]/5 border-[#0b2545]/20',
+    badge: 'bg-[#0b2545]/10 text-[#0b2545]',
   },
   {
     name: 'GreenGrid Solutions',
@@ -34,8 +34,8 @@ const startups = [
     founders: 'Ankit Joshi & Team (SGSITS E&I)',
     description: 'Smart energy management platform for industries and commercial buildings. Uses IoT sensors and ML to reduce energy wastage by up to 35%. Deployed in 20+ manufacturing units across central India.',
     icon: Wifi,
-    color: 'bg-green-50 border-green-200',
-    badge: 'bg-green-100 text-green-700',
+    color: 'bg-[#bfa15f]/10 border-[#bfa15f]/30',
+    badge: 'bg-[#bfa15f]/15 text-[#bfa15f]',
   },
   {
     name: 'MediScan Pro',
@@ -46,8 +46,8 @@ const startups = [
     founders: 'Dr. Kavya Tiwari & Saurabh Patel (SGSITS CS)',
     description: 'Medical imaging AI platform that assists radiologists in detecting abnormalities in X-rays and MRI scans with 94.7% accuracy. Integrated with 12 hospitals across Indore, Bhopal, and Jabalpur.',
     icon: Heart,
-    color: 'bg-red-50 border-red-200',
-    badge: 'bg-red-100 text-red-700',
+    color: 'bg-[#0b2545]/10 border-[#0b2545]/25',
+    badge: 'bg-[#0b2545]/15 text-[#0b2545]',
   },
   {
     name: 'AgroSense',
@@ -58,8 +58,8 @@ const startups = [
     founders: 'Vivek Kumar & Neha Singh (SGSITS EC)',
     description: 'IoT-based precision agriculture solution providing real-time soil health monitoring, weather alerts, and crop advisory for small farmers. Pilot deployed across 400 acres in Malwa region.',
     icon: Sprout,
-    color: 'bg-amber-50 border-amber-200',
-    badge: 'bg-amber-100 text-amber-700',
+    color: 'bg-[#bfa15f]/15 border-[#bfa15f]/40',
+    badge: 'bg-[#bfa15f]/20 text-[#bfa15f]',
   },
 ]
 

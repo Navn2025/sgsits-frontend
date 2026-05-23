@@ -65,8 +65,8 @@ const LogoBanner: React.FC<LogoBannerProps> = ({ onMobileToggle, mobileOpen }) =
           </div>
           <div className="min-w-0">
             <h1 className="font-bold text-[13px] leading-[1.2] tracking-tight sm:text-[22px] lg:text-[25px] text-primary font-display">
-              Shri Govindram Seksaria Institute of{' '}
-              <span className="block sm:inline">Technology and Science</span>
+              Shri G. S. Institute of{' '}
+              <span className="block sm:inline">Technology & Science</span>
             </h1>
             <p className="font-bold text-[10px] sm:text-xs mt-1 uppercase tracking-[0.03em] hidden md:block text-slate-500">
               Govt. Aided Autonomous Institute, Indore (M.P.) - Estd. 1952
@@ -100,7 +100,9 @@ const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose }) => {
   const [navVisible, setNavVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isStuck, setIsStuck] = useState(false)
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const sentinelRef = useRef<HTMLDivElement>(null)
+  const { pathname } = useLocation()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -129,6 +131,17 @@ const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose }) => {
 
   const [expandedMobile, setExpandedMobile] = useState<string | null>(null)
 
+  const isItemActive = (item: { path?: string; children?: { path: string }[] }) => {
+    if (item.path && pathname === item.path) return true
+    if (item.children) {
+      return item.children.some(child => {
+        if (child.path === '/') return pathname === '/'
+        return pathname.startsWith(child.path)
+      })
+    }
+    return false
+  }
+
   return (
     <>
       <div ref={sentinelRef} className="h-[1px] w-full" aria-hidden="true" />
@@ -144,57 +157,78 @@ const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose }) => {
           transition: 'background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
         }}
       >
-        <nav className="w-full px-4 lg:px-12 flex flex-wrap text-[15.5px] font-semibold tracking-wide">
-          {navItems.map((item) => (
-            <div key={item.label} className="relative group cursor-pointer">
-              {item.path && !item.children ? (
-                <Link
-                  to={item.path}
-                  className={`flex items-center py-3 pr-8 transition-colors border-b-[3px] border-transparent group-hover:border-accent ${
-                    isStuck ? 'text-white/80 hover:text-white' : 'text-slate-850 hover:text-primary'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ) : (
-                <div
-                  className={`flex items-center py-3 pr-8 transition-colors border-b-[3px] border-transparent group-hover:border-accent ${
-                    isStuck ? 'text-white/80 hover:text-white' : 'text-slate-850 hover:text-primary'
-                  }`}
-                >
-                  {item.label}
-                  {item.children && <ChevronDown size={14} className="ml-1.5 opacity-60 group-hover:opacity-100 transition-opacity" />}
-                </div>
-              )}
-              {item.children && (
-                <div className="absolute top-[100%] left-0 w-64 bg-white border border-primary/10 shadow-[0_10px_25px_rgba(11,37,69,0.12)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100] rounded-sm">
-                  <div className="h-[3px] bg-accent w-full"></div>
-                  <ul className="py-2 text-[14px] text-primary font-medium tracking-normal max-h-[70vh] overflow-y-auto">
-                    {item.children.map((child) => (
-                      <li key={child.path}>
-                        <Link
-                          to={child.path}
-                          className="block px-5 py-2.5 hover:bg-primary/5 hover:text-primary transition-all border-b border-primary/5 last:border-0 hover:pl-6"
-                        >
-                          {child.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          ))}
-          <div className="relative group cursor-pointer">
-            <Link
-              to="/institute-professors"
-              className={`flex items-center py-3 pr-8 transition-colors border-b-[3px] border-transparent group-hover:border-accent ${
-                isStuck ? 'text-white/80 hover:text-white' : 'text-slate-850 hover:text-primary'
-              }`}
-            >
-              Institute Professors
-            </Link>
-          </div>
+        <nav className="w-full px-4 lg:px-12 flex flex-wrap justify-center gap-x-2 text-[15.5px] font-semibold tracking-wide">
+          {navItems.map((item) => {
+            const isActive = isItemActive(item)
+            return (
+              <div
+                key={item.label}
+                className="relative cursor-pointer"
+                onMouseEnter={() => item.children && setActiveDropdown(item.label)}
+                onMouseLeave={() => setActiveDropdown(null)}
+              >
+                {item.path && !item.children ? (
+                  <Link
+                    to={item.path}
+                    className={`flex items-center py-3 px-4 transition-colors border-b-[3px] hover:border-accent ${
+                      isActive ? 'border-accent' : 'border-transparent'
+                    } ${
+                      isStuck
+                        ? (isActive ? 'text-accent' : 'text-white/80 hover:text-white')
+                        : (isActive ? 'text-accent' : 'text-slate-850 hover:text-primary')
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <Link
+                    to={item.children && item.children.length > 0 ? item.children[0].path : '#'}
+                    onClick={() => setActiveDropdown(null)}
+                    className={`flex items-center py-3 px-4 transition-colors border-b-[3px] hover:border-accent ${
+                      isActive ? 'border-accent' : 'border-transparent'
+                    } ${
+                      isStuck
+                        ? (isActive ? 'text-accent' : 'text-white/80 hover:text-white')
+                        : (isActive ? 'text-accent' : 'text-slate-850 hover:text-primary')
+                    }`}
+                  >
+                    {item.label}
+                    {item.children && <ChevronDown size={14} className="ml-1.5 opacity-60 hover:opacity-100 transition-opacity" />}
+                  </Link>
+                )}
+                {item.children && (
+                  <div
+                    className={`absolute top-[100%] left-0 w-64 bg-white border border-primary/10 shadow-[0_10px_25px_rgba(11,37,69,0.12)] transition-all duration-200 z-[100] rounded-sm ${
+                      activeDropdown === item.label
+                        ? 'opacity-100 visible translate-y-0'
+                        : 'opacity-0 invisible translate-y-2 pointer-events-none'
+                    }`}
+                  >
+                    <div className="h-[3px] bg-accent w-full"></div>
+                    <ul className="py-2 text-[14px] text-primary font-medium tracking-normal max-h-[70vh] overflow-y-auto">
+                      {item.children.map((child) => {
+                        const isChildActive = pathname === child.path
+                        return (
+                          <li key={child.path}>
+                            <Link
+                              to={child.path}
+                              onClick={() => setActiveDropdown(null)}
+                              className={`block px-5 py-2.5 hover:bg-primary/5 hover:text-primary transition-all border-b border-primary/5 last:border-0 hover:pl-6 ${
+                                isChildActive ? 'text-accent font-semibold' : ''
+                              }`}
+                            >
+                              {child.label}
+                            </Link>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+
         </nav>
       </div>
 
@@ -263,15 +297,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose }) => {
                   )}
                 </div>
               ))}
-              <div className="border-b border-gray-200">
-                <Link
-                  to="/institute-professors"
-                  onClick={onMobileClose}
-                  className="flex items-center justify-between px-1 py-4 text-base font-semibold tracking-wide"
-                >
-                  <span>Institute Professors</span>
-                </Link>
-              </div>
+
             </nav>
 
             <div className="border-t border-gray-200 bg-white px-4 py-5 text-slate-850">
@@ -300,54 +326,52 @@ const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose }) => {
   )
 }
 
-// --- COLOR REVEAL BANNER (above footer) ---
-const ColorRevealBanner: React.FC = () => {
-  const ref = useRef<HTMLDivElement>(null)
-  const [revealed, setRevealed] = useState(false)
+
+// --- CAMPUS REVEAL BANNER COMPONENT ---
+const CampusRevealBanner: React.FC = () => {
+  const [isRevealed, setIsRevealed] = useState(false)
+  const elementRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setRevealed(true) },
-      { threshold: 0.35 }
+      ([entry]) => {
+        setIsRevealed(entry.isIntersecting)
+      },
+      {
+        threshold: 0.15,
+      }
     )
-    observer.observe(el)
-    return () => observer.disconnect()
+
+    if (elementRef.current) {
+      observer.observe(elementRef.current)
+    }
+
+    return () => {
+      observer.disconnect()
+    }
   }, [])
 
   return (
     <div
-      ref={ref}
-      className="w-full bg-white border-t border-slate-100 py-14 flex flex-col items-center justify-center gap-5 overflow-hidden"
+      ref={elementRef}
+      className="relative w-full h-[180px] sm:h-[240px] md:h-[300px] lg:h-[360px] overflow-hidden border-t border-slate-200"
+      style={{
+        filter: isRevealed ? 'brightness(1)' : 'brightness(0.85)',
+        transition: 'filter 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+      }}
     >
       <img
-        src="/assets/image.png"
-        alt="SGSITS Indore"
-        className="w-44 h-44 object-contain transition-all duration-[1200ms] ease-out select-none"
+        src="/assets/campus-panorama.png"
+        alt="SGSITS Campus Sunset Panorama"
+        className="w-full h-full object-cover transition-transform duration-[2000ms] ease-out"
         style={{
-          filter: revealed ? 'grayscale(0%) brightness(1)' : 'grayscale(100%) brightness(0.75)',
-          opacity: revealed ? 1 : 0.55,
-          transform: revealed ? 'scale(1)' : 'scale(0.94)',
+          transform: isRevealed ? 'scale(1)' : 'scale(1.05)',
         }}
-        draggable={false}
       />
-      <p
-        className="font-display text-base font-semibold tracking-widest uppercase transition-all duration-[1200ms] ease-out"
-        style={{
-          color: revealed ? '#0b2545' : '#94a3b8',
-          opacity: revealed ? 1 : 0.5,
-          letterSpacing: revealed ? '0.25em' : '0.15em',
-        }}
-      >
-        Shri G.S. Institute of Technology &amp; Science
-      </p>
-      <p
-        className="text-xs tracking-wider transition-all duration-[1400ms] ease-out"
-        style={{ color: revealed ? '#bfa15f' : '#cbd5e1', opacity: revealed ? 1 : 0 }}
-      >
-        Established 1952 &nbsp;·&nbsp; NAAC A++ &nbsp;·&nbsp; Indore, M.P.
-      </p>
+      <div className="absolute inset-0 bg-gradient-to-b from-[#f7f8fa]/20 via-transparent to-[#ffffff]/20 pointer-events-none" />
+      <div className="absolute bottom-4 left-4 lg:left-12 bg-black/40 backdrop-blur-xs text-white px-3 py-1.5 rounded text-xs sm:text-sm font-semibold tracking-wide font-sans select-none pointer-events-none border border-white/10">
+        SGSITS Campus Sunset Panorama
+      </div>
     </div>
   )
 }
@@ -365,11 +389,11 @@ const Footer: React.FC = () => {
             <span>35°C | Scattered clouds</span>
           </div>
           <div className="flex space-x-5 text-slate-600">
-            <a href="#" className="hover:opacity-70 text-blue-700 transition-opacity"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg></a>
-            <a href="#" className="hover:opacity-70 text-blue-800 transition-opacity"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg></a>
-            <a href="#" className="hover:opacity-70 text-sky-500 transition-opacity"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" /></svg></a>
-            <a href="#" className="hover:opacity-70 text-pink-600 transition-opacity"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></svg></a>
-            <a href="#" className="hover:opacity-70 text-red-600 transition-opacity"><svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" /><polygon fill="white" points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" /></svg></a>
+            <a href="#" className="hover:text-accent text-primary transition-colors"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg></a>
+            <a href="#" className="hover:text-accent text-primary transition-colors"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg></a>
+            <a href="#" className="hover:text-accent text-primary transition-colors"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" /></svg></a>
+            <a href="#" className="hover:text-accent text-primary transition-colors"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></svg></a>
+            <a href="#" className="hover:text-accent text-primary transition-colors"><svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" /><polygon fill="white" points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" /></svg></a>
           </div>
         </div>
       </div>
@@ -430,7 +454,7 @@ const Footer: React.FC = () => {
                 श्री गोविंदराम सेकसरिया प्रौद्योगिकी एवं विज्ञान संस्थान
               </h2>
               <p className="text-white font-medium text-xs mt-0.5 tracking-wide">
-                Shri Govindram Seksaria Institute of Technology & Science
+                Shri G. S. Institute of Technology & Science
               </p>
             </div>
           </div>
@@ -459,13 +483,31 @@ const Footer: React.FC = () => {
 
 // --- MAIN LAYOUT (DESKTOP LAYOUT) ---
 const MainLayout: React.FC = () => {
-  const { pathname } = useLocation()
+  const location = useLocation()
+  const { pathname } = location
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  // Scroll to top on pathname changes
+  // Scroll to content container if navigated from LeftSidebar, otherwise scroll to absolute top (e.g. from navbar tabs)
   useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [pathname])
+    const fromSidebar = location.state?.fromSidebar
+
+    if (fromSidebar) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById('sidebar-content-area')
+        if (element) {
+          const offset = 80 // height of sticky nav
+          const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+          window.scrollTo({
+            top: elementPosition - offset,
+            behavior: 'smooth'
+          })
+        }
+      }, 50)
+      return () => clearTimeout(timer)
+    } else {
+      window.scrollTo(0, 0)
+    }
+  }, [pathname, location.state])
 
   // Prevent scroll when mobile menu is open
   useEffect(() => {
@@ -486,21 +528,21 @@ const MainLayout: React.FC = () => {
       <StickyNav mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
 
       {/* Announcements Marquee */}
-      <div className="relative w-full bg-slate-50 text-slate-800 flex items-center border-t border-b border-slate-200">
-        <div className="bg-primary text-white px-4 lg:px-8 py-2.5 font-bold text-[11px] sm:text-[13px] uppercase tracking-wider shrink-0 flex items-center sm:relative absolute inset-y-0 left-0 z-10 border-r border-slate-250">
+      <div className="relative w-full bg-black text-slate-100 flex items-center border-t border-b border-zinc-800">
+        <div className="bg-primary text-white px-4 lg:px-8 py-2.5 font-bold text-[11px] sm:text-[13px] uppercase tracking-wider shrink-0 flex items-center sm:relative absolute inset-y-0 left-0 z-10 border-r-2 border-accent">
           Announcements
         </div>
         <div className="flex-1 overflow-hidden sm:ml-0 ml-[135px] py-2 flex items-center">
           {React.createElement('marquee', {
             scrollamount: '4',
-            className: 'text-[13px] sm:text-[14px] font-medium leading-none m-0 pt-[1px] w-full block text-slate-700'
+            className: 'text-[13px] sm:text-[14px] font-medium leading-none m-0 pt-[1px] w-full block text-slate-200'
           } as any, (
             <>
-              <span className="mr-8 font-semibold text-primary">Institute Day 2025 - Live Streaming</span>
-              <span className="text-slate-300 mx-2">|</span>
-              <span className="mr-8 font-semibold">Rolling Advertisement No SGSITS/R/3/2025 visit https://sgsits.ac.in for applications</span>
-              <span className="text-slate-300 mx-2">|</span>
-              <span className="mr-8 font-semibold">Semester Exams Rescheduled to 30th April</span>
+              <span className="mr-8 font-semibold text-accent">Institute Day 2025 - Live Streaming</span>
+              <span className="text-accent/30 mx-2">|</span>
+              <span className="mr-8 font-semibold text-slate-100">Rolling Advertisement No SGSITS/R/3/2025 visit https://sgsits.ac.in for applications</span>
+              <span className="text-accent/30 mx-2">|</span>
+              <span className="mr-8 font-semibold text-slate-100">Semester Exams Rescheduled to 30th April</span>
             </>
           ))}
         </div>
@@ -510,7 +552,8 @@ const MainLayout: React.FC = () => {
         <Outlet />
       </main>
 
-      <ColorRevealBanner />
+      {pathname === '/' && <CampusRevealBanner />}
+
       <Footer />
       {!mobileOpen && <Chatbot />}
     </div>

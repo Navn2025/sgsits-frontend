@@ -88,12 +88,12 @@ const TendersPage: React.FC = () => {
       {open.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-xs font-bold bg-green-50 text-green-700 border border-green-200 px-2.5 py-0.5 rounded">Active Tenders</span>
+            <span className="text-xs font-bold bg-[#bfa15f]/10 text-[#bfa15f] border border-[#bfa15f]/30 px-2.5 py-0.5 rounded">Active Tenders</span>
             <div className="flex-grow h-px bg-slate-200"></div>
           </div>
           <div className="space-y-3">
             {open.map((tender) => (
-              <div key={tender.ref} className="bg-white rounded border border-slate-200 border-l-4 border-l-green-500 p-4 shadow-sm hover:border-slate-400 transition-colors">
+              <div key={tender.ref} className="bg-white rounded border border-slate-200 border-l-4 border-l-[#bfa15f] p-4 shadow-sm hover:border-slate-400 transition-colors">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3 flex-grow">
                     <FileText size={18} className="text-slate-400 shrink-0 mt-0.5" />
@@ -102,7 +102,7 @@ const TendersPage: React.FC = () => {
                       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs text-slate-500 font-medium">
                         <span>Ref: {tender.ref}</span>
                         <span>Dept: {tender.dept}</span>
-                        <span className="text-red-600 font-bold">Last Date: {tender.lastDate}</span>
+                        <span className="text-[#0b2545] font-bold">Last Date: {tender.lastDate}</span>
                       </div>
                     </div>
                   </div>

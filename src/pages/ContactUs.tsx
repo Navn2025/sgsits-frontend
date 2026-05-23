@@ -5,10 +5,10 @@ const infoCards = [
   {
     icon: MapPin,
     title: 'Visit Us',
-    color: 'bg-blue-50 border-blue-200',
-    iconColor: 'text-blue-600 bg-blue-100',
+    color: 'bg-[#0b2545]/5 border-[#0b2545]/20',
+    iconColor: 'text-[#0b2545] bg-[#0b2545]/10',
     items: [
-      'Shri Govindram Seksaria Institute of Technology and Science',
+      'Shri G. S. Institute of Technology & Science',
       '23, Park Road, Indore',
       'Madhya Pradesh — 452003, India',
     ],
@@ -16,8 +16,8 @@ const infoCards = [
   {
     icon: Phone,
     title: 'Call Us',
-    color: 'bg-green-50 border-green-200',
-    iconColor: 'text-green-600 bg-green-100',
+    color: 'bg-[#bfa15f]/10 border-[#bfa15f]/30',
+    iconColor: 'text-[#bfa15f] bg-[#bfa15f]/15',
     items: [
       '0731-2582100 — Director Office',
       '0731-2582124 — Registrar',
@@ -28,8 +28,8 @@ const infoCards = [
   {
     icon: Mail,
     title: 'Write to Us',
-    color: 'bg-amber-50 border-amber-200',
-    iconColor: 'text-amber-600 bg-amber-100',
+    color: 'bg-[#0b2545]/10 border-[#0b2545]/25',
+    iconColor: 'text-[#0b2545] bg-[#0b2545]/15',
     items: [
       'director@sgsits.ac.in',
       'registrar@sgsits.ac.in',
@@ -127,18 +127,18 @@ const ContactUs: React.FC = () => {
             <h2 className="text-2xl font-display font-bold text-primary mb-6">We'd love to hear from you</h2>
 
             {submitted ? (
-              <div className="bg-green-50 border-2 border-green-200 rounded-xl p-8 text-center">
-                <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle2 size={28} className="text-green-600" />
+              <div className="bg-[#bfa15f]/10 border-2 border-[#bfa15f]/30 rounded-xl p-8 text-center">
+                <div className="w-14 h-14 bg-[#bfa15f]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 size={28} className="text-[#bfa15f]" />
                 </div>
-                <h3 className="font-display font-bold text-green-800 text-xl mb-2">Message Sent Successfully!</h3>
-                <p className="text-green-700 text-sm font-sans leading-relaxed">
+                <h3 className="font-display font-bold text-[#0b2545] text-xl mb-2">Message Sent Successfully!</h3>
+                <p className="text-[#0b2545] text-sm font-sans leading-relaxed">
                   Thank you for reaching out, <strong>{form.name}</strong>. Our team will get back to you at{' '}
                   <strong>{form.email}</strong> within 1–2 working days.
                 </p>
                 <button
                   onClick={() => { setSubmitted(false); setForm({ name: '', email: '', phone: '', subject: '', message: '' }) }}
-                  className="mt-5 text-sm font-bold text-green-700 underline hover:no-underline"
+                  className="mt-5 text-sm font-bold text-[#bfa15f] underline hover:no-underline"
                 >
                   Send another message
                 </button>
@@ -262,7 +262,7 @@ const ContactUs: React.FC = () => {
                 ].map((h) => (
                   <div key={h.day} className="flex items-center justify-between text-sm">
                     <span className="text-slate-600 font-medium">{h.day}</span>
-                    <span className={`font-semibold ${h.open ? 'text-primary' : 'text-red-500'}`}>{h.time}</span>
+                    <span className={`font-semibold ${h.open ? 'text-primary' : 'text-[#bfa15f]'}`}>{h.time}</span>
                   </div>
                 ))}
               </div>

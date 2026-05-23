@@ -110,7 +110,7 @@ const PGCourses: React.FC = () => {
             </div>
             <div className="flex justify-between">
               <span>GATE Scholars (Full-time)</span>
-              <span className="font-semibold text-green-700">₹12,400/month stipend</span>
+              <span className="font-semibold text-[#bfa15f]">₹12,400/month stipend</span>
             </div>
             <p className="text-[11px] text-slate-400 mt-2 italic">*Fee subject to SFRC revision</p>
           </div>

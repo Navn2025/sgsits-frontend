@@ -44,7 +44,7 @@ const AdminSettings: React.FC = () => {
         </div>
         <div className="flex items-center gap-3">
           {saved && (
-            <span className="text-sm text-green-600 font-semibold flex items-center gap-1">
+            <span className="text-sm text-[#bfa15f] font-semibold flex items-center gap-1">
               <CheckCircle2 size={16} />Saved!
             </span>
           )}
@@ -122,9 +122,9 @@ const AdminSettings: React.FC = () => {
       </section>
 
       {/* API Info */}
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-xs text-amber-700">
+      <div className="bg-[#bfa15f]/10 border border-[#bfa15f]/30 rounded-lg p-4 text-xs text-[#0b2545]">
         <p className="font-bold mb-1">Backend Integration Note</p>
-        <p>Settings changes currently apply to mock state only. When backend is ready, this form calls <code className="font-mono bg-amber-100 px-1 rounded">PUT /api/settings</code> and saves to the database.</p>
+        <p>Settings changes currently apply to mock state only. When backend is ready, this form calls <code className="font-mono bg-[#bfa15f]/20 px-1 rounded">PUT /api/settings</code> and saves to the database.</p>
       </div>
     </form>
   )

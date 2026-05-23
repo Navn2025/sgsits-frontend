@@ -162,7 +162,7 @@ const Home: React.FC = () => {
               className="uppercase tracking-[0.18em] text-[10px] sm:text-xs mb-3 font-semibold font-sans"
               style={{ color: C.white80 }}
             >
-              Shri Govindram Seksaria Institute of Technology and Science
+              Shri G. S. Institute of Technology & Science
             </p>
             <h1 className="text-white uppercase font-display font-semibold text-2xl sm:text-4xl md:text-5xl leading-[1.1] tracking-[0.04em] drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)]">
               Welcome To SGSITS<br />
@@ -242,7 +242,7 @@ const Home: React.FC = () => {
                 className="leading-relaxed text-sm mb-6 text-justify font-sans"
                 style={{ color: C.navy70 }}
               >
-                Shri Govindram Seksaria Institute of Technology and Science (SGSITS) is one of the
+                Shri G. S. Institute of Technology & Science (SGSITS) is one of the
                 premier technical institutions created to be Centres of Excellence for training,
                 research and development in science, engineering and technology in India. Established
                 as College of Engineering in 1952, the Institute was later declared an autonomous
@@ -292,13 +292,13 @@ const Home: React.FC = () => {
 
               <div className="flex flex-col sm:flex-row gap-6 items-start">
                 <div
-                  className="w-28 h-[150px] shrink-0 bg-white rounded overflow-hidden shadow-sm border"
+                  className="w-64 sm:w-80 h-[150px] sm:h-[190px] shrink-0 bg-white rounded overflow-hidden shadow-sm border"
                   style={{ borderColor: C.navy15 }}
                 >
                   <img
-                    src="/assets/image copy.png"
+                    src="/director.jpeg"
                     alt="Director Prof. Neetesh Purohit"
-                    className="w-full h-full object-cover grayscale opacity-95 object-top"
+                    className="w-full h-full object-cover object-center"
                   />
                 </div>
                 <div className="text-sm leading-relaxed font-serif" style={{ color: C.navy70 }}>
@@ -504,7 +504,7 @@ const Home: React.FC = () => {
                   <img
                     src={`https://picsum.photos/seed/${card.seed}/400/300`}
                     alt={card.cat}
-                    className="w-full h-full object-cover grayscale opacity-95 group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
                 <div className="p-5 flex flex-col grow">
@@ -857,7 +857,7 @@ const Home: React.FC = () => {
                   <img
                     src={facility.img}
                     alt={facility.title}
-                    className="w-full h-full object-cover grayscale opacity-95 group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   {/* Subtle navy overlay that fades on hover */}
                   <div

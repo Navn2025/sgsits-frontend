@@ -76,7 +76,7 @@ const TNPCell: React.FC = () => {
       </div>
 
       {/* Stats Banner from mockStore */}
-      <div className="bg-gradient-to-r from-primary to-[#134074] rounded-2xl p-6 text-white">
+      <div className="bg-primary rounded-2xl p-6 text-white">
         <p className="text-[10px] uppercase tracking-widest font-bold text-accent/80 mb-3">Placement Statistics {latest?.year}</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
           {[
@@ -162,7 +162,7 @@ const TNPCell: React.FC = () => {
               onClick={() => setActiveStep(activeStep === i ? null : i)}
               className={`rounded-xl border p-5 cursor-pointer transition-all duration-200 ${
                 activeStep === i
-                  ? 'border-accent/40 bg-amber-50/50 shadow-md'
+                  ? 'border-accent/40 bg-[#bfa15f]/10 shadow-md'
                   : 'bg-white border-slate-200 hover:border-accent/30 shadow-sm hover:shadow-md'
               }`}
             >
@@ -187,7 +187,7 @@ const TNPCell: React.FC = () => {
         <h3 className="text-xl font-display font-bold text-slate-900 mb-4">Year-Round Training Programs</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {trainingPrograms.map((prog) => (
-            <div key={prog} className="flex items-start gap-3 bg-white border border-slate-200 rounded-xl p-3.5 text-sm hover:border-accent/30 hover:bg-amber-50/30 transition-all">
+            <div key={prog} className="flex items-start gap-3 bg-white border border-slate-200 rounded-xl p-3.5 text-sm hover:border-accent/30 hover:bg-[#bfa15f]/5 transition-all">
               <CheckCircle2 size={15} className="text-accent shrink-0 mt-0.5" />
               <span className="text-slate-700 font-medium font-sans">{prog}</span>
             </div>
@@ -203,7 +203,7 @@ const TNPCell: React.FC = () => {
           {partners.map((company) => (
             <div
               key={company}
-              className="bg-white border border-slate-200 rounded-xl px-2 py-3 text-center hover:border-accent/40 hover:bg-amber-50/30 hover:shadow-sm transition-all cursor-pointer"
+              className="bg-white border border-slate-200 rounded-xl px-2 py-3 text-center hover:border-accent/40 hover:bg-[#bfa15f]/5 hover:shadow-sm transition-all cursor-pointer"
             >
               <p className="text-[11px] font-bold text-primary font-sans leading-tight">{company}</p>
             </div>

@@ -44,19 +44,19 @@ const Ordinances: React.FC = () => {
         </div>
         <div className="p-5 space-y-3">
           <div className="flex items-start gap-2">
-            <AlertCircle size={15} className="text-red-500 shrink-0 mt-0.5" />
+            <AlertCircle size={15} className="text-[#0b2545] shrink-0 mt-0.5" />
             <span className="text-sm text-slate-700 font-medium"><strong>75% minimum</strong> attendance mandatory to sit for end-semester examinations</span>
           </div>
           <div className="flex items-start gap-2">
-            <AlertCircle size={15} className="text-orange-500 shrink-0 mt-0.5" />
+            <AlertCircle size={15} className="text-[#bfa15f] shrink-0 mt-0.5" />
             <span className="text-sm text-slate-700 font-medium"><strong>65–74%:</strong> Allowed with penalty/fine at discretion of Head of Department</span>
           </div>
           <div className="flex items-start gap-2">
-            <AlertCircle size={15} className="text-red-600 shrink-0 mt-0.5" />
+            <AlertCircle size={15} className="text-[#0b2545] shrink-0 mt-0.5" />
             <span className="text-sm text-slate-700 font-medium"><strong>Below 65%:</strong> Debarred from appearing in examinations — must repeat the semester</span>
           </div>
           <div className="flex items-start gap-2">
-            <CheckCircle2 size={15} className="text-green-600 shrink-0 mt-0.5" />
+            <CheckCircle2 size={15} className="text-[#bfa15f] shrink-0 mt-0.5" />
             <span className="text-sm text-slate-700 font-medium">Medical/sports exemptions for up to 10% attendance with proper documentation</span>
           </div>
         </div>
@@ -78,11 +78,11 @@ const Ordinances: React.FC = () => {
             </thead>
             <tbody>
               {gradeTable.map((row, i) => (
-                <tr key={i} className={`hover:bg-slate-50 transition-colors ${row.grade === 'F' ? 'bg-red-50' : 'bg-white'}`}>
+                <tr key={i} className={`hover:bg-slate-50 transition-colors ${row.grade === 'F' ? 'bg-[#0b2545]/5' : 'bg-white'}`}>
                   <td className="px-4 py-3 border-b border-slate-100 text-center font-display font-bold text-primary text-base">{row.grade}</td>
                   <td className="px-4 py-3 border-b border-slate-100 text-center font-bold text-accent">{row.points}</td>
                   <td className="px-4 py-3 border-b border-slate-100 text-center text-slate-700 font-medium">{row.range}</td>
-                  <td className={`px-4 py-3 border-b border-slate-100 font-medium ${row.grade === 'F' ? 'text-red-600' : 'text-slate-600'}`}>{row.desc}</td>
+                  <td className={`px-4 py-3 border-b border-slate-100 font-medium ${row.grade === 'F' ? 'text-[#0b2545]' : 'text-slate-600'}`}>{row.desc}</td>
                 </tr>
               ))}
             </tbody>

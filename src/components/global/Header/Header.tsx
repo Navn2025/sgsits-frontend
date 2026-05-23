@@ -47,7 +47,7 @@ const Header: React.FC = () => {
                       to={item.path}
                       className={`px-3 py-1.5 rounded-md text-[13.5px] font-medium tracking-wide transition-colors duration-200 flex items-center gap-1 ${
                         isActive
-                          ? 'text-brand-burgundy bg-brand-burgundy/5 font-semibold'
+                          ? 'text-brand-burgundy font-semibold'
                           : 'text-slate-700 hover:text-brand-burgundy hover:bg-slate-50'
                       }`}
                     >
@@ -57,7 +57,7 @@ const Header: React.FC = () => {
                     <button
                       className={`px-3 py-1.5 rounded-md text-[13.5px] font-medium tracking-wide transition-colors duration-200 flex items-center gap-1 cursor-pointer focus:outline-none ${
                         isActive
-                          ? 'text-brand-burgundy bg-brand-burgundy/5 font-semibold'
+                          ? 'text-brand-burgundy font-semibold'
                           : 'text-slate-700 hover:text-brand-burgundy hover:bg-slate-50'
                       }`}
                     >
@@ -65,6 +65,13 @@ const Header: React.FC = () => {
                       <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === item.label ? 'rotate-180 text-brand-burgundy' : 'text-slate-400'}`} />
                     </button>
                   )}
+
+                  {/* Centered active tab underline indicator */}
+                  <span
+                    className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full bg-brand-burgundy transition-all duration-300 ${
+                      isActive ? 'w-3/4 opacity-100' : 'w-0 opacity-0'
+                    }`}
+                  />
 
                   {/* Desktop Mega Dropdown Overlay */}
                   {hasChildren && activeDropdown === item.label && (
@@ -251,7 +258,7 @@ const Header: React.FC = () => {
 
             {/* Drawer bottom info */}
             <div className="p-4 bg-white dark:bg-slate-900/50 border-t border-slate-200/80 dark:border-slate-800 text-[10px] text-center text-slate-400 dark:text-slate-500">
-              Shri Govindram Seksaria Institute • Estd. 1952
+              Shri G. S. Institute • Estd. 1952
             </div>
           </div>
         </div>

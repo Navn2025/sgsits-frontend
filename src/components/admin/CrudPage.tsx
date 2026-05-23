@@ -17,10 +17,10 @@ export interface Column<T> {
 // ── Status badge helper ────────────────────────────────────────────────────
 export const StatusBadge: React.FC<{ label: string; color?: 'green' | 'red' | 'orange' | 'blue' | 'gray' }> = ({ label, color = 'gray' }) => {
   const map = {
-    green: 'bg-green-50 text-green-700 border-green-200',
-    red: 'bg-red-50 text-red-700 border-red-200',
-    orange: 'bg-orange-50 text-orange-700 border-orange-200',
-    blue: 'bg-blue-50 text-blue-700 border-blue-200',
+    green: 'bg-[#bfa15f]/10 text-[#bfa15f] border-[#bfa15f]/30',
+    red: 'bg-[#0b2545]/5 text-[#0b2545] border-[#0b2545]/20',
+    orange: 'bg-[#bfa15f]/15 text-[#bfa15f] border-[#bfa15f]/40',
+    blue: 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25',
     gray: 'bg-slate-50 text-slate-600 border-slate-200',
   }
   return (
@@ -44,8 +44,8 @@ export const DeleteDialog: React.FC<DeleteDialogProps> = ({ isOpen, itemName, on
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg border border-slate-200 shadow-xl p-6 max-w-sm w-full">
-        <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Trash2 size={22} className="text-red-600" />
+        <div className="w-12 h-12 bg-[#0b2545]/5 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Trash2 size={22} className="text-[#0b2545]" />
         </div>
         <h3 className="font-display font-bold text-lg text-slate-800 text-center">Confirm Delete</h3>
         <p className="text-sm text-slate-600 text-center mt-2">
@@ -63,7 +63,7 @@ export const DeleteDialog: React.FC<DeleteDialogProps> = ({ isOpen, itemName, on
           <button
             onClick={onConfirm}
             disabled={isDeleting}
-            className="flex-1 py-2 bg-red-600 text-white rounded font-semibold text-sm hover:bg-red-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+            className="flex-1 py-2 bg-[#0b2545] text-white rounded font-semibold text-sm hover:bg-[#0b2545]/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
           >
             {isDeleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
             Delete
@@ -104,7 +104,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, title, onClose, children, 
 export const FormField: React.FC<{ label: string; required?: boolean; children: React.ReactNode; hint?: string }> = ({ label, required, children, hint }) => (
   <div className="space-y-1.5">
     <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">
-      {label} {required && <span className="text-red-500">*</span>}
+      {label} {required && <span className="text-[#bfa15f]">*</span>}
     </label>
     {children}
     {hint && <p className="text-[11px] text-slate-400">{hint}</p>}
@@ -257,7 +257,7 @@ function CrudPage<T extends { id: string }>({
                           {onDelete && (
                             <button
                               onClick={() => onDelete(row)}
-                              className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                              className="p-1.5 text-slate-500 hover:text-[#0b2545] hover:bg-slate-100 rounded transition-colors"
                               title="Delete"
                             >
                               <Trash2 size={14} />

@@ -37,11 +37,11 @@ const Dispensary: React.FC = () => {
       </div>
 
       {/* Emergency Banner */}
-      <div className="bg-red-50 border border-red-200 rounded p-4 flex items-center gap-3">
-        <AlertCircle size={20} className="text-red-600 shrink-0" />
+      <div className="bg-[#bfa15f]/10 border border-[#bfa15f]/30 rounded p-4 flex items-center gap-3">
+        <AlertCircle size={20} className="text-[#bfa15f] shrink-0" />
         <div>
-          <p className="text-sm font-bold text-red-700">24×7 Emergency Ambulance</p>
-          <p className="text-xs text-red-600 font-medium mt-0.5">Campus emergency helpline: <strong>0731-2582100</strong> (Operator) | Ambulance available round the clock</p>
+          <p className="text-sm font-bold text-[#0b2545]">24×7 Emergency Ambulance</p>
+          <p className="text-xs text-[#0b2545] font-medium mt-0.5">Campus emergency helpline: <strong>0731-2582100</strong> (Operator) | Ambulance available round the clock</p>
         </div>
       </div>
 
@@ -94,7 +94,7 @@ const Dispensary: React.FC = () => {
             </div>
             <div className="flex justify-between">
               <span className="text-slate-600">Emergency (All days)</span>
-              <span className="font-semibold text-red-600">24 × 7</span>
+              <span className="font-semibold text-[#bfa15f]">24 × 7</span>
             </div>
           </div>
         </div>

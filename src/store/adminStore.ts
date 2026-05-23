@@ -20,8 +20,8 @@ export const useAdminStore = create<AdminState>()(
       setAuth: (token, user) => set({ token, user }),
       clearAuth: () => set({ token: null, user: null }),
       isAuthenticated: () => !!get().token,
-      isAdmin: () => ['super_admin', 'editor'].includes(get().user?.role ?? ''),
-      isFaculty: () => get().user?.role === 'faculty',
+      isAdmin: () => ['super_admin', 'central_admin', 'editor'].includes(get().user?.role ?? ''),
+      isFaculty: () => ['faculty', 'teacher'].includes(get().user?.role ?? ''),
     }),
     {
       name: 'sgsits-admin-auth',

@@ -13,11 +13,11 @@ export interface LoginThemeState {
 export const DEFAULT_THEME: LoginThemeState = {
   bgType: 'image',
   bgImage: '/assets/media__1776272596244.png',
-  bgColor: '#1a3a5c',
+  bgColor: '#0b2545',
   overlayOpacity: 0.5,
-  navColor: '#0B1F3A',
-  btnColor: '#0B1F3A',
-  cardAccent: '#D4AF37',
+  navColor: '#0b2545',
+  btnColor: '#0b2545',
+  cardAccent: '#bfa15f',
 };
 
 /* ─── small helper ─── */
@@ -116,7 +116,7 @@ const LoginTheme: React.FC<LoginThemeProps> = ({ theme, setTheme, bgImageBroken 
                     className="flex-1 py-2 transition-all capitalize"
                     style={
                       theme.bgType === type
-                        ? { backgroundColor: '#0B1F3A', color: '#fff' }
+                        ? { backgroundColor: '#0b2545', color: '#fff' }
                         : { backgroundColor: '#fff', color: '#6b7280' }
                     }
                   >
@@ -133,10 +133,10 @@ const LoginTheme: React.FC<LoginThemeProps> = ({ theme, setTheme, bgImageBroken 
                     value={theme.bgImage}
                     onChange={(e) => update('bgImage', e.target.value)}
                     placeholder="https://... or /assets/..."
-                    className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-400 bg-white mb-3"
+                    className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0b2545] bg-white mb-3"
                   />
                   {bgImageBroken && (
-                    <p className="text-[10px] text-red-500 mb-2">Image not found. Check the URL/path or use a quick preset.</p>
+                    <p className="text-[10px] text-[#0b2545] mb-2">Image not found. Check the URL/path or use a quick preset.</p>
                   )}
                   {/* Quick presets */}
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Quick Presets</label>
@@ -151,7 +151,7 @@ const LoginTheme: React.FC<LoginThemeProps> = ({ theme, setTheme, bgImageBroken 
                         onClick={() => update('bgImage', p.url)}
                         className={`text-[10px] font-semibold px-2 py-1.5 rounded-lg border transition-all text-center ${
                           theme.bgImage === p.url
-                            ? 'border-blue-400 bg-blue-50 text-blue-700'
+                            ? 'border-[#0b2545] bg-[#0b2545]/5 text-[#0b2545]'
                             : 'border-gray-200 text-gray-600 hover:border-gray-400'
                         }`}
                       >
@@ -198,7 +198,7 @@ const LoginTheme: React.FC<LoginThemeProps> = ({ theme, setTheme, bgImageBroken 
             {/* ── Reset ── */}
             <button
               onClick={reset}
-              className="w-full text-center text-[11px] font-bold text-red-500 hover:text-red-700 py-2 border border-red-100 rounded-lg hover:bg-red-50 transition-all"
+              className="w-full text-center text-[11px] font-bold text-[#0b2545] hover:text-[#bfa15f] py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all"
             >
               ↺ Reset to Defaults
             </button>

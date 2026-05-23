@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { mockStore } from '../../data/mockStore'
 import { Calendar, User, ArrowRight, Search } from 'lucide-react'
 
@@ -26,20 +27,7 @@ const NewsPage: React.FC = () => {
     new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero */}
-      <div className="bg-primary">
-        <div className="max-w-6xl mx-auto px-6 py-12">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="h-px w-8 bg-accent" />
-            <span className="text-[11px] uppercase font-bold tracking-widest text-accent font-sans">Latest from SGSITS</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">Campus News</h1>
-          <p className="text-slate-300 text-sm font-sans">Achievements, research breakthroughs, events, and stories from the SGSITS community.</p>
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
+    <div className="space-y-6 bg-white">
         {/* Search + Category Filters */}
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <div className="relative flex-1 min-w-0">
@@ -97,9 +85,9 @@ const NewsPage: React.FC = () => {
                     <span className="flex items-center gap-1.5"><Calendar size={12} /> {formatDate(filtered[0].date)}</span>
                     <span className="flex items-center gap-1.5"><User size={12} /> {filtered[0].author}</span>
                   </div>
-                  <button className="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-accent transition-colors">
+                  <Link to={`/news/${filtered[0].id}`} className="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-accent transition-colors">
                     Read More <ArrowRight size={12} />
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -135,9 +123,9 @@ const NewsPage: React.FC = () => {
                       <span className="flex items-center gap-1"><Calendar size={10} /> {formatDate(item.date)}</span>
                       <span className="flex items-center gap-1"><User size={10} /> {item.author}</span>
                     </div>
-                    <button className="flex items-center gap-1 text-[11px] font-bold text-primary hover:text-accent transition-colors shrink-0">
+                    <Link to={`/news/${item.id}`} className="flex items-center gap-1 text-[11px] font-bold text-primary hover:text-accent transition-colors shrink-0">
                       Read More <ArrowRight size={10} />
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -145,7 +133,6 @@ const NewsPage: React.FC = () => {
           </div>
         )}
 
-      </div>
     </div>
   )
 }

@@ -80,5 +80,29 @@ export const sidebarLinks: Record<string, SidebarLink[]> = {
     { label: 'Twinning Arrangement', path: '/teqip/twinning' },
     { label: 'Expenditures List', path: '/teqip/expenditures' },
     { label: 'Vouchers & Forms', path: '/teqip/vouchers' },
+  ],
+  news: [
+    { label: 'Campus News', path: '/news' },
+    { label: 'Latest Notices', path: '/notices' },
+    { label: 'Upcoming Events', path: '/events' },
+    { label: 'Active Tenders', path: '/tenders' },
+  ],
+  notices: [
+    { label: 'Campus News', path: '/news' },
+    { label: 'Latest Notices', path: '/notices' },
+    { label: 'Upcoming Events', path: '/events' },
+    { label: 'Active Tenders', path: '/tenders' },
+  ],
+  events: [
+    { label: 'Campus News', path: '/news' },
+    { label: 'Latest Notices', path: '/notices' },
+    { label: 'Upcoming Events', path: '/events' },
+    { label: 'Active Tenders', path: '/tenders' },
+  ],
+  tenders: [
+    { label: 'Campus News', path: '/news' },
+    { label: 'Latest Notices', path: '/notices' },
+    { label: 'Upcoming Events', path: '/events' },
+    { label: 'Active Tenders', path: '/tenders' },
   ]
 }

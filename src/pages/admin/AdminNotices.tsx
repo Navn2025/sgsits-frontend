@@ -14,10 +14,10 @@ const EMPTY: Omit<Notice, 'id'> = {
 }
 
 const catColor: Record<string, string> = {
-  academic: 'bg-blue-100 text-blue-700',
-  administrative: 'bg-purple-100 text-purple-700',
-  exam: 'bg-orange-100 text-orange-700',
-  tender: 'bg-yellow-100 text-yellow-700',
+  academic: 'bg-[#0b2545]/10 text-[#0b2545]',
+  administrative: 'bg-[#0b2545]/15 text-[#0b2545]',
+  exam: 'bg-[#bfa15f]/15 text-[#bfa15f]',
+  tender: 'bg-[#bfa15f]/20 text-[#bfa15f]',
   general: 'bg-slate-100 text-slate-700',
 }
 
@@ -27,7 +27,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
     return () => clearTimeout(t)
   }, [onClose])
   return (
-    <div className="fixed bottom-4 right-4 z-50 bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 text-sm font-medium">
+    <div className="fixed bottom-4 right-4 z-50 bg-[#bfa15f] text-white px-5 py-3 rounded-lg shadow-lg flex items-center gap-3 text-sm font-medium">
       {message}
       <button onClick={onClose}><X size={14} /></button>
     </div>
@@ -105,7 +105,7 @@ export default function AdminNotices() {
               <tr key={n.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-4 py-3 max-w-xs">
                   <p className="font-medium text-slate-800 line-clamp-2">{n.title}</p>
-                  {n.fileUrl && <a href={n.fileUrl} className="text-xs text-blue-600 hover:underline mt-0.5 block">View File</a>}
+                  {n.fileUrl && <a href={n.fileUrl} className="text-xs text-[#0b2545] hover:underline mt-0.5 block">View File</a>}
                 </td>
                 <td className="px-4 py-3">
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${catColor[n.category]}`}>
@@ -114,14 +114,14 @@ export default function AdminNotices() {
                 </td>
                 <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">{n.date}</td>
                 <td className="px-4 py-3 text-center">
-                  {n.highlight ? <Star size={16} className="text-yellow-500 inline fill-yellow-400" /> : <span className="text-slate-300">—</span>}
+                  {n.highlight ? <Star size={16} className="text-[#bfa15f] inline fill-[#bfa15f]" /> : <span className="text-slate-300">—</span>}
                 </td>
                 <td className="px-4 py-3 text-center">
                   <div className="inline-flex items-center gap-2">
-                    <button onClick={() => openEdit(n)} className="p-1.5 rounded hover:bg-blue-50 text-blue-600 transition-colors" title="Edit">
+                    <button onClick={() => openEdit(n)} className="p-1.5 rounded hover:bg-[#0b2545]/5 text-[#0b2545] transition-colors" title="Edit">
                       <Pencil size={14} />
                     </button>
-                    <button onClick={() => setDeleteTarget(n)} className="p-1.5 rounded hover:bg-red-50 text-red-500 transition-colors" title="Delete">
+                    <button onClick={() => setDeleteTarget(n)} className="p-1.5 rounded hover:bg-slate-100 text-slate-500 transition-colors" title="Delete">
                       <Trash2 size={14} />
                     </button>
                   </div>
@@ -145,18 +145,18 @@ export default function AdminNotices() {
             </div>
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Title <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Title <span className="text-[#bfa15f]">*</span></label>
                 <input required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.title} onChange={e => f('title', e.target.value)} placeholder="Notice title" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Category <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Category <span className="text-[#bfa15f]">*</span></label>
                   <select className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.category} onChange={e => f('category', e.target.value as Notice['category'])}>
                     {CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Date <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Date <span className="text-[#bfa15f]">*</span></label>
                   <input type="date" required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.date} onChange={e => f('date', e.target.value)} />
                 </div>
               </div>
@@ -165,7 +165,7 @@ export default function AdminNotices() {
                 <input type="url" className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.fileUrl ?? ''} onChange={e => f('fileUrl', e.target.value)} placeholder="https://sgsits.ac.in/notices/file.pdf" />
               </div>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={form.highlight} onChange={e => f('highlight', e.target.checked)} className="w-4 h-4 accent-yellow-400" />
+                <input type="checkbox" checked={form.highlight} onChange={e => f('highlight', e.target.checked)} className="w-4 h-4 accent-[#bfa15f]" />
                 <span className="text-sm font-medium text-slate-700">Mark as Highlighted</span>
               </label>
               <div className="flex gap-3 pt-2 border-t border-slate-100">
@@ -183,14 +183,14 @@ export default function AdminNotices() {
       {deleteTarget && (
         <div className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 text-center">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Trash2 size={22} className="text-red-600" />
+            <div className="w-12 h-12 bg-[#0b2545]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Trash2 size={22} className="text-[#0b2545]" />
             </div>
             <h3 className="font-bold text-slate-800 text-lg mb-1">Delete Notice?</h3>
             <p className="text-slate-500 text-sm mb-5 line-clamp-2">"{deleteTarget.title}"</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteTarget(null)} className="flex-1 py-2 border border-slate-300 text-slate-700 rounded font-semibold text-sm hover:bg-slate-50">Cancel</button>
-              <button onClick={handleDelete} className="flex-1 py-2 bg-red-600 text-white rounded font-semibold text-sm hover:bg-red-700">Delete</button>
+              <button onClick={handleDelete} className="flex-1 py-2 bg-[#0b2545] text-white rounded font-semibold text-sm hover:bg-[#0b2545]/90">Delete</button>
             </div>
           </div>
         </div>

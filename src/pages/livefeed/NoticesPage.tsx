@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { mockStore } from '../../data/mockStore'
-import { Download, Search, FileText, ChevronLeft, ChevronRight, Tag } from 'lucide-react'
+import { Search, FileText, ChevronLeft, ChevronRight, Tag, Eye } from 'lucide-react'
+import PdfViewerModal from '../../components/global/PdfViewerModal'
 
 type CategoryFilter = 'all' | 'academic' | 'administrative' | 'exam' | 'tender' | 'general'
 
@@ -14,11 +15,11 @@ const categoryLabels: Record<CategoryFilter, string> = {
 }
 
 const categoryColors: Record<string, string> = {
-  academic: 'bg-blue-100 text-blue-700 border-blue-200',
-  administrative: 'bg-purple-100 text-purple-700 border-purple-200',
-  exam: 'bg-orange-100 text-orange-700 border-orange-200',
-  tender: 'bg-amber-100 text-amber-700 border-amber-200',
-  general: 'bg-green-100 text-green-700 border-green-200',
+  academic: 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25',
+  administrative: 'bg-[#0b2545]/15 text-[#0b2545] border-[#0b2545]/30',
+  exam: 'bg-[#bfa15f]/15 text-[#bfa15f] border-[#bfa15f]/40',
+  tender: 'bg-[#bfa15f]/20 text-[#bfa15f] border-[#bfa15f]/45',
+  general: 'bg-[#bfa15f]/10 text-[#bfa15f] border-[#bfa15f]/30',
 }
 
 const ITEMS_PER_PAGE = 10
@@ -28,6 +29,15 @@ const NoticesPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<CategoryFilter>('all')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [pdfViewer, setPdfViewer] = useState<{
+    isOpen: boolean
+    url: string
+    title: string
+  }>({
+    isOpen: false,
+    url: '',
+    title: ''
+  })
 
   const filtered = useMemo(() => {
     let result = notices
@@ -135,13 +145,12 @@ const NoticesPage: React.FC = () => {
                     <h3 className="font-semibold text-primary text-sm leading-snug">{notice.title}</h3>
                     <p className="text-xs text-slate-500 mt-1.5 font-medium">{formatDate(notice.date)}</p>
                   </div>
-                  <a
-                    href={notice.fileUrl || '#'}
-                    onClick={e => !notice.fileUrl && e.preventDefault()}
+                  <button
+                    onClick={() => setPdfViewer({ isOpen: true, url: notice.fileUrl || '', title: notice.title })}
                     className="flex items-center gap-1.5 shrink-0 text-xs font-bold text-primary border border-primary/20 px-3 py-1.5 rounded-lg hover:bg-primary hover:text-white transition-colors"
                   >
-                    <Download size={12} /> Download
-                  </a>
+                    <Eye size={12} /> View Notice
+                  </button>
                 </div>
               </div>
             ))
@@ -185,6 +194,13 @@ const NoticesPage: React.FC = () => {
         </p>
 
       </div>
+
+      <PdfViewerModal
+        isOpen={pdfViewer.isOpen}
+        onClose={() => setPdfViewer(prev => ({ ...prev, isOpen: false }))}
+        pdfUrl={pdfViewer.url}
+        title={pdfViewer.title}
+      />
     </div>
   )
 }

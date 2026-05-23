@@ -32,6 +32,7 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ section }) => {
             <Link
               key={link.path}
               to={link.path}
+              state={{ fromSidebar: true }}
               className={`flex items-center px-4 py-2.5 rounded-md text-sm font-semibold transition-colors duration-200 border-l-4 ${
                 isActive
                   ? 'bg-slate-50 text-primary border-accent font-bold'

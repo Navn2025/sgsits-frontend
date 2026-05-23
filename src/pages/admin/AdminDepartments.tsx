@@ -41,7 +41,7 @@ const AdminDepartments: React.FC = () => {
             <h2 className="font-display text-2xl font-bold text-slate-800">Departments</h2>
             <p className="text-xs text-slate-500 mt-0.5">View and update department HOD details — {filtered.length} departments</p>
           </div>
-          <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-3 py-1.5 font-medium">
+          <div className="text-xs text-[#bfa15f] bg-[#bfa15f]/10 border border-[#bfa15f]/30 rounded px-3 py-1.5 font-medium">
             ℹ️ Department structure is managed via codebase. HOD details can be updated here.
           </div>
         </div>
@@ -74,7 +74,7 @@ const AdminDepartments: React.FC = () => {
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1">
                         {dept.programsOffered.map(p => (
-                          <span key={p} className="text-[9px] bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded font-bold">{p}</span>
+                          <span key={p} className="text-[9px] bg-[#0b2545]/10 text-[#0b2545] border border-[#0b2545]/25 px-1.5 py-0.5 rounded font-bold">{p}</span>
                         ))}
                       </div>
                       <div className="flex items-center gap-1 mt-1 text-[11px] text-slate-400"><Users size={10} /><span>{dept.facultyCount} faculty</span></div>
@@ -101,7 +101,7 @@ const AdminDepartments: React.FC = () => {
 
       <Modal isOpen={!!editDept} title={`Update HOD — ${editDept?.name}`} onClose={() => setEditDept(null)} width="max-w-lg">
         <form onSubmit={handleSave} className="space-y-4">
-          <div className="bg-amber-50 border border-amber-200 rounded p-3 text-xs text-amber-700">
+          <div className="bg-[#bfa15f]/10 border border-[#bfa15f]/30 rounded p-3 text-xs text-[#0b2545]">
             Changes are saved locally (mock). When backend is ready, this calls <code className="font-mono">PATCH /api/departments/{editDept?.slug}</code>
           </div>
           <FormField label="HOD Name" required><Input required value={form.hodName} onChange={e => setForm(f => ({ ...f, hodName: e.target.value }))} /></FormField>

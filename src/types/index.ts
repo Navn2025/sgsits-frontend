@@ -6,7 +6,16 @@
 // ─────────────────────────────────────────────
 
 // ── Auth ──────────────────────────────────────
-export type UserRole = 'super_admin' | 'editor' | 'faculty' | 'student'
+export type UserRole =
+  | 'super_admin'           // alias for central_admin in the existing CMS — full institute control
+  | 'central_admin'         // doc terminology — manages users, departments, global content
+  | 'editor'                // CMS sub-role with content CRUD but no settings
+  | 'hod'                   // Head of Department — branch-scoped
+  | 'faculty'               // alias for teacher in code; the doc uses "teacher"
+  | 'teacher'               // doc terminology — own-profile, publications, research, subjects
+  | 'exam_controller'       // exam dept — sessions, timetables, results, calendar
+  | 'placement_officer'     // placement cell — notices, company visits, records, training
+  | 'student'               // ERP redirect target only
 
 export interface AuthUser {
   id: string

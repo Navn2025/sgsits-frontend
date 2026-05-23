@@ -90,7 +90,7 @@ export default function UGAdmission() {
       {/* Hero */}
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-2 text-sm text-blue-200 mb-3">
+          <div className="flex items-center gap-2 text-sm text-white/70 mb-3">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight className="w-4 h-4" />
             <span>Admissions</span>
@@ -98,12 +98,12 @@ export default function UGAdmission() {
             <span className="text-white font-medium">UG Admission</span>
           </div>
           <h1 className="text-4xl font-display font-bold mb-3">Undergraduate Admissions</h1>
-          <p className="text-blue-100 text-lg max-w-2xl">
+          <p className="text-white/85 text-lg max-w-2xl">
             Join SGSITS – one of Madhya Pradesh's premier engineering institutes. Admissions to B.Tech and B.Pharm programs are conducted through MPDTE counselling based on JEE Main scores.
           </p>
           <a
             href="#"
-            className="mt-6 inline-flex items-center gap-2 bg-accent text-primary font-semibold px-6 py-3 rounded-lg hover:bg-yellow-400 transition-colors"
+            className="mt-6 inline-flex items-center gap-2 bg-accent text-primary font-semibold px-6 py-3 rounded-lg hover:bg-[#bfa15f]/90 transition-colors"
           >
             Apply Now <ChevronRight className="w-4 h-4" />
           </a>
@@ -216,7 +216,7 @@ export default function UGAdmission() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {documents.map((doc, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                  <CheckCircle className="w-5 h-5 text-[#bfa15f] shrink-0 mt-0.5" />
                   <span className="text-gray-700 text-sm">{doc}</span>
                 </div>
               ))}
@@ -229,20 +229,20 @@ export default function UGAdmission() {
           <div className="bg-primary rounded-xl p-8 text-white flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
               <h2 className="text-xl font-display font-bold mb-2">Admission Office – SGSITS</h2>
-              <p className="text-blue-100 text-sm mb-4">For queries related to UG admissions, contact our dedicated admission office.</p>
+              <p className="text-white/85 text-sm mb-4">For queries related to UG admissions, contact our dedicated admission office.</p>
               <div className="flex flex-col gap-2 text-sm">
-                <div className="flex items-center gap-2 text-blue-100">
+                <div className="flex items-center gap-2 text-white/85">
                   <Phone className="w-4 h-4" />
                   <span>+91-731-2570 5714 / 5715</span>
                 </div>
-                <div className="flex items-center gap-2 text-blue-100">
+                <div className="flex items-center gap-2 text-white/85">
                   <Mail className="w-4 h-4" />
                   <span>admission@sgsits.ac.in</span>
                 </div>
               </div>
             </div>
             <div className="flex flex-col gap-3 shrink-0">
-              <a href="#" className="bg-accent text-primary font-semibold px-6 py-3 rounded-lg text-center hover:bg-yellow-400 transition-colors text-sm">
+              <a href="#" className="bg-accent text-primary font-semibold px-6 py-3 rounded-lg text-center hover:bg-[#bfa15f]/90 transition-colors text-sm">
                 MPDTE Counselling Portal
               </a>
               <Link to="/admission/prospectus" className="border border-white text-white font-semibold px-6 py-3 rounded-lg text-center hover:bg-white/10 transition-colors text-sm">

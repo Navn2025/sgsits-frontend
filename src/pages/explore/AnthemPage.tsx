@@ -50,7 +50,7 @@ const AnthemPage: React.FC = () => {
       </div>
 
       {/* Anthem Info Card */}
-      <div className="bg-gradient-to-br from-primary to-[#134074] rounded-2xl p-6 text-white">
+      <div className="bg-primary rounded-2xl p-6 text-white">
         <div className="flex items-center gap-4 mb-4">
           <div className="w-16 h-16 rounded-2xl bg-accent/20 border border-accent/30 flex items-center justify-center">
             <Music size={28} className="text-accent" />
@@ -170,7 +170,7 @@ const AnthemPage: React.FC = () => {
               key={i}
               className={`rounded-xl border p-5 cursor-pointer transition-all duration-200 ${
                 activeStanza === i
-                  ? 'border-accent/40 bg-amber-50/50 shadow-md'
+                  ? 'border-accent/40 bg-[#bfa15f]/10 shadow-md'
                   : 'border-slate-200 bg-white hover:border-accent/30 hover:bg-slate-50'
               }`}
               onClick={() => setActiveStanza(activeStanza === i ? null : i)}

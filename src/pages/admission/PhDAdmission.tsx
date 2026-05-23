@@ -87,7 +87,7 @@ export default function PhDAdmission() {
       {/* Hero */}
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-2 text-sm text-blue-200 mb-3">
+          <div className="flex items-center gap-2 text-sm text-white/70 mb-3">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight className="w-4 h-4" />
             <span>Admissions</span>
@@ -95,12 +95,12 @@ export default function PhDAdmission() {
             <span className="text-white font-medium">PhD Admission</span>
           </div>
           <h1 className="text-4xl font-display font-bold mb-3">PhD Admissions</h1>
-          <p className="text-blue-100 text-lg max-w-2xl">
+          <p className="text-white/85 text-lg max-w-2xl">
             Pursue doctoral research at SGSITS under experienced faculty. We offer research opportunities across 7 departments with excellent infrastructure and GATE fellowships.
           </p>
           <a
             href="#"
-            className="mt-6 inline-flex items-center gap-2 bg-accent text-primary font-semibold px-6 py-3 rounded-lg hover:bg-yellow-400 transition-colors"
+            className="mt-6 inline-flex items-center gap-2 bg-accent text-primary font-semibold px-6 py-3 rounded-lg hover:bg-[#bfa15f]/90 transition-colors"
           >
             Apply for PhD <ChevronRight className="w-4 h-4" />
           </a>
@@ -118,10 +118,10 @@ export default function PhDAdmission() {
                 <BookOpen className="w-5 h-5 text-accent" /> Academic Qualification
               </h3>
               <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> M.Tech / M.E. / M.Sc. (Engg.) with minimum 60% marks or 6.5 CGPA</li>
-                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> MBA (for Management PhD) with minimum 60% marks</li>
-                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> M.Pharm / M.Sc. Pharmacy (for Pharmacy PhD) with minimum 60%</li>
-                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> SC/ST candidates: 55% or 6.0 CGPA</li>
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-[#bfa15f] shrink-0 mt-0.5" /> M.Tech / M.E. / M.Sc. (Engg.) with minimum 60% marks or 6.5 CGPA</li>
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-[#bfa15f] shrink-0 mt-0.5" /> MBA (for Management PhD) with minimum 60% marks</li>
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-[#bfa15f] shrink-0 mt-0.5" /> M.Pharm / M.Sc. Pharmacy (for Pharmacy PhD) with minimum 60%</li>
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-[#bfa15f] shrink-0 mt-0.5" /> SC/ST candidates: 55% or 6.0 CGPA</li>
               </ul>
             </div>
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
@@ -129,10 +129,10 @@ export default function PhDAdmission() {
                 <Award className="w-5 h-5 text-accent" /> Fellowship (JRF/SRF)
               </h3>
               <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> GATE qualified candidates are eligible for MHRD fellowship</li>
-                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> JRF: ₹37,000/month (first 2 years)</li>
-                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> SRF: ₹42,000/month (subsequent years)</li>
-                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" /> HRA and medical allowance as per MHRD norms</li>
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-[#bfa15f] shrink-0 mt-0.5" /> GATE qualified candidates are eligible for MHRD fellowship</li>
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-[#bfa15f] shrink-0 mt-0.5" /> JRF: ₹37,000/month (first 2 years)</li>
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-[#bfa15f] shrink-0 mt-0.5" /> SRF: ₹42,000/month (subsequent years)</li>
+                <li className="flex gap-2"><CheckCircle className="w-4 h-4 text-[#bfa15f] shrink-0 mt-0.5" /> HRA and medical allowance as per MHRD norms</li>
               </ul>
             </div>
           </div>
@@ -153,7 +153,7 @@ export default function PhDAdmission() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {dept.areas.map((area, j) => (
-                    <span key={j} className="bg-blue-50 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">
+                    <span key={j} className="bg-[#0b2545]/10 text-[#0b2545] text-xs px-3 py-1 rounded-full font-medium">
                       {area}
                     </span>
                   ))}
@@ -200,7 +200,7 @@ export default function PhDAdmission() {
                   <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                     <td className="px-4 py-3 font-medium text-primary">{v.dept}</td>
                     <td className="px-4 py-3 text-center">
-                      <span className="bg-green-100 text-green-800 font-bold px-3 py-1 rounded-full text-xs">
+                      <span className="bg-[#bfa15f]/20 text-[#bfa15f] font-bold px-3 py-1 rounded-full text-xs">
                         {v.vacancies} open
                       </span>
                     </td>
@@ -234,15 +234,15 @@ export default function PhDAdmission() {
           <div className="bg-primary rounded-xl p-8 text-white flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
               <h2 className="text-xl font-display font-bold mb-2">Research & Development Cell</h2>
-              <p className="text-blue-100 text-sm mb-4">For PhD admission queries, contact the R&D office or the respective department supervisor.</p>
-              <div className="space-y-1 text-sm text-blue-100">
+              <p className="text-white/85 text-sm mb-4">For PhD admission queries, contact the R&D office or the respective department supervisor.</p>
+              <div className="space-y-1 text-sm text-white/85">
                 <div className="flex items-center gap-2"><Phone className="w-4 h-4" /><span>+91-731-2570-5725</span></div>
                 <div className="flex items-center gap-2"><Mail className="w-4 h-4" /><span>phd.admission@sgsits.ac.in</span></div>
                 <div className="flex items-center gap-2"><Users className="w-4 h-4" /><span>Dean (R&D), SGSITS, Indore – 452003</span></div>
               </div>
             </div>
             <div className="flex flex-col gap-3 shrink-0">
-              <a href="#" className="bg-accent text-primary font-semibold px-6 py-3 rounded-lg text-center hover:bg-yellow-400 transition-colors text-sm">
+              <a href="#" className="bg-accent text-primary font-semibold px-6 py-3 rounded-lg text-center hover:bg-[#bfa15f]/90 transition-colors text-sm">
                 Download PhD Brochure
               </a>
               <a href="#" className="border border-white text-white font-semibold px-6 py-3 rounded-lg text-center hover:bg-white/10 transition-colors text-sm">

@@ -46,7 +46,7 @@ export default function Disclaimer() {
       {/* Hero */}
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-2 text-sm text-blue-200 mb-3">
+          <div className="flex items-center gap-2 text-sm text-white/70 mb-3">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight className="w-4 h-4" />
             <span className="text-white font-medium">Disclaimer</span>
@@ -57,17 +57,17 @@ export default function Disclaimer() {
             </div>
             <h1 className="text-4xl font-display font-bold">Disclaimer</h1>
           </div>
-          <p className="text-blue-100 text-lg">
+          <p className="text-white/85 text-lg">
             Important notices regarding the use of information published on the SGSITS website.
           </p>
-          <p className="text-blue-200 text-sm mt-3">Last Updated: January 15, 2025</p>
+          <p className="text-white/70 text-sm mt-3">Last Updated: January 15, 2025</p>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-8 flex gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-          <p className="text-amber-800 text-sm leading-relaxed">
+        <div className="bg-[#bfa15f]/10 border border-[#bfa15f]/30 rounded-xl p-5 mb-8 flex gap-3">
+          <AlertTriangle className="w-5 h-5 text-[#bfa15f] shrink-0 mt-0.5" />
+          <p className="text-[#0b2545] text-sm leading-relaxed">
             The information on this website is for general informational purposes only. SGSITS makes no warranties about the accuracy, completeness, or suitability of information on this site. Please verify all critical information with the relevant administrative office.
           </p>
         </div>
@@ -87,7 +87,7 @@ export default function Disclaimer() {
           ))}
         </div>
 
-        <div className="mt-8 bg-blue-50 rounded-xl border border-blue-100 p-6">
+        <div className="mt-8 bg-[#0b2545]/5 rounded-xl border border-[#0b2545]/15 p-6">
           <h3 className="font-semibold text-primary mb-2">Related Policies</h3>
           <div className="flex flex-wrap gap-3 mt-3">
             <Link to="/policy/privacy" className="text-sm text-primary hover:text-accent transition-colors font-medium underline underline-offset-2">Privacy Policy</Link>

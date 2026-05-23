@@ -73,7 +73,7 @@ const ExamBranches: React.FC = () => {
               </div>
               <button
                 onClick={() => deleteBranch(branch.id)}
-                className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-all"
+                className="p-1.5 text-slate-300 hover:text-[#0b2545] hover:bg-slate-100 rounded opacity-0 group-hover:opacity-100 transition-all"
                 title="Delete branch"
               >
                 <Trash2 size={14} />

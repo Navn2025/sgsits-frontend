@@ -9,11 +9,11 @@ export default {
     extend: {
       colors: {
         brand: {
-          burgundy: 'hsl(345, 75%, 25%)',
-          gold: 'hsl(45, 80%, 48%)',
-          dark: 'hsl(222, 47%, 11%)',
-          card: 'hsl(223, 47%, 16%)',
-          light: 'hsl(210, 20%, 98%)',
+          burgundy: '#0b2545',
+          gold: '#bfa15f',
+          dark: '#0b2545',
+          card: '#ffffff',
+          light: '#f7f8fa',
         }
       },
       fontFamily: {

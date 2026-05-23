@@ -7,21 +7,21 @@
   --color-sgsits-bg: #ffffff;
   --color-sgsits-section-bg: #f7f8fa;
   --color-accent: #bfa15f;
-  --color-accent-blue: #134074;
-  --color-heading: #0f172a;
+  --color-accent-blue: #0b2545;
+  --color-heading: #0b2545;
   --hero-img-url: url("/assets/media__1776272596244.png");
   --hero-overlay-opacity: 0.45;
   --nav-bg-default: #ffffff;
   --nav-bg-sticky: #ffffff;
-  --nav-text-default: #0f172a;
+  --nav-text-default: #0b2545;
   --nav-text-sticky: #0b2545;
   --login-panel-bg: #ffffff;
-  --login-panel-text: #0f172a;
+  --login-panel-text: #0b2545;
   --login-form-bg: #ffffff;
   --login-btn-bg: #0b2545;
   --prof-card-bg: #f8fafc;
   --prof-name-color: #0b2545;
-  --prof-year-color: #134074;
+  --prof-year-color: #0b2545;
   --prof-dept-color: #334155;
   --prof-link-color: #0b2545;
   --prof-ribbon-color: #bfa15f;
@@ -38,12 +38,12 @@
   --color-slate-450: #94a3b8;
   --color-slate-550: #64748b;
   --color-slate-650: #475569;
-  --color-slate-850: #0f172a;
+  --color-slate-850: #0b2545;
 
   /* Brand Palette overrides */
   --color-brand-burgundy: #0b2545;
   --color-brand-gold: #bfa15f;
-  --color-brand-dark: #0f172a;
+  --color-brand-dark: #0b2545;
   --color-brand-card: #ffffff;
   --color-brand-light: #f7f8fa;
 }

@@ -8,9 +8,9 @@ const NotFound: React.FC = () => {
       {/* 404 Compass Graphic */}
       <div className="relative mb-8 group">
         <div className="absolute inset-0 bg-slate-100 rounded-full filter blur-xl"></div>
-        <div className="relative w-36 h-36 bg-white border border-slate-200 rounded-full flex items-center justify-center shadow-sm group-hover:border-[#154273] transition-colors duration-500">
+        <div className="relative w-36 h-36 bg-white border border-slate-200 rounded-full flex items-center justify-center shadow-sm group-hover:border-[#0b2545] transition-colors duration-500">
           <svg
-            className="w-20 h-20 text-slate-400 group-hover:text-[#154273] transition-colors duration-500 transform group-hover:rotate-45 duration-700"
+            className="w-20 h-20 text-slate-400 group-hover:text-[#0b2545] transition-colors duration-500 transform group-hover:rotate-45 duration-700"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -42,7 +42,7 @@ const NotFound: React.FC = () => {
       <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center w-full max-w-sm">
         <Link
           to="/"
-          className="px-6 py-2.5 bg-[#154273] hover:bg-[#0f3460] text-white rounded font-medium text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
+          className="px-6 py-2.5 bg-[#0b2545] hover:bg-[#0b2545]/90 text-white rounded font-medium text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
         >
           <Home className="w-4 h-4" />
           Return Home
@@ -58,18 +58,18 @@ const NotFound: React.FC = () => {
 
       {/* Help Disclosures */}
       <div className="mt-12 p-5 bg-[#f7f8fa] border border-slate-200 rounded-md max-w-md flex items-start gap-3 text-left shadow-sm">
-        <ShieldQuestion className="w-5 h-5 text-[#154273] flex-shrink-0 mt-0.5" />
+        <ShieldQuestion className="w-5 h-5 text-[#0b2545] flex-shrink-0 mt-0.5" />
         <div>
           <h4 className="text-xs font-bold text-slate-850 font-display">
             Need immediate administrative assistance?
           </h4>
           <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
             Please search our official{' '}
-            <Link to="/about/telephone-directory" className="text-[#154273] hover:underline font-semibold">
+            <Link to="/about/telephone-directory" className="text-[#0b2545] hover:underline font-semibold">
               Telephone Directory
             </Link>{' '}
             to contact the respective academic department, or file a notice report with the{' '}
-            <Link to="/policy/web-info-manager" className="text-[#154273] hover:underline font-semibold">
+            <Link to="/policy/web-info-manager" className="text-[#0b2545] hover:underline font-semibold">
               Web Info Manager
             </Link>
             .

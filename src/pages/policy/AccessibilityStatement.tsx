@@ -44,7 +44,7 @@ export default function AccessibilityStatement() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-2 text-sm text-blue-200 mb-3">
+          <div className="flex items-center gap-2 text-sm text-white/70 mb-3">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight className="w-4 h-4" />
             <span className="text-white font-medium">Accessibility Statement</span>
@@ -55,10 +55,10 @@ export default function AccessibilityStatement() {
             </div>
             <h1 className="text-4xl font-display font-bold">Accessibility Statement</h1>
           </div>
-          <p className="text-blue-100 text-lg">
+          <p className="text-white/85 text-lg">
             SGSITS is committed to making this website accessible to all users, including those with disabilities.
           </p>
-          <p className="text-blue-200 text-sm mt-3">Last Updated: January 15, 2025 | WCAG 2.1 Level AA Target</p>
+          <p className="text-white/70 text-sm mt-3">Last Updated: January 15, 2025 | WCAG 2.1 Level AA Target</p>
         </div>
       </div>
 
@@ -87,7 +87,7 @@ export default function AccessibilityStatement() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {features.map((f, i) => (
               <div key={i} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex gap-3 hover:shadow-md transition-shadow">
-                <CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+                <CheckCircle className="w-5 h-5 text-[#bfa15f] shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-semibold text-primary text-sm mb-1">{f.title}</h3>
                   <p className="text-gray-500 text-xs leading-relaxed">{f.desc}</p>
@@ -113,7 +113,7 @@ export default function AccessibilityStatement() {
           ))}
         </div>
 
-        <div className="bg-blue-50 rounded-xl border border-blue-100 p-6">
+        <div className="bg-[#0b2545]/5 rounded-xl border border-[#0b2545]/15 p-6">
           <h3 className="font-semibold text-primary mb-2">Report an Accessibility Issue</h3>
           <p className="text-gray-600 text-sm mb-3">Found a barrier? We want to hear from you so we can fix it.</p>
           <Link to="/feedback" className="inline-flex items-center gap-2 bg-primary text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-accent-blue transition-colors">

@@ -22,13 +22,13 @@ const CaptchaCanvas: React.FC<CaptchaCanvasProps> = ({ text }) => {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     const W = canvas.width, H = canvas.height
-    ctx.fillStyle = '#e8f5e9'
+    ctx.fillStyle = '#f7f8fa'
     ctx.fillRect(0, 0, W, H)
     for (let i = 0; i < 6; i++) {
       ctx.beginPath()
       ctx.moveTo(0, (H / 6) * i)
       ctx.lineTo(W, (H / 6) * i)
-      ctx.strokeStyle = 'rgba(0,100,50,0.12)'
+      ctx.strokeStyle = 'rgba(11,37,69,0.12)'
       ctx.lineWidth = 1
       ctx.stroke()
     }
@@ -39,7 +39,7 @@ const CaptchaCanvas: React.FC<CaptchaCanvasProps> = ({ text }) => {
       ctx.translate(10 + i * spacing + spacing / 2, H / 2 + 5)
       ctx.rotate((Math.random() - 0.5) * 0.45)
       ctx.font = `bold ${16 + Math.random() * 7}px ${fonts[i % fonts.length]}`
-      ctx.fillStyle = `hsl(${130 + Math.random() * 40},60%,${18 + Math.random() * 10}%)`
+      ctx.fillStyle = '#0b2545'
       ctx.fillText(text[i], -5, 5)
       ctx.restore()
     }
@@ -49,7 +49,7 @@ const CaptchaCanvas: React.FC<CaptchaCanvasProps> = ({ text }) => {
 }
 
 /* ── Login Page ──────────────────────────────────────────── */
-type LoginTab = 'student' | 'faculty' | 'admin'
+type LoginTab = 'student' | 'hod' | 'faculty' | 'admin' | 'exam' | 'placement'
 
 const Login: React.FC = () => {
   const navigate = useNavigate()
@@ -94,20 +94,32 @@ const Login: React.FC = () => {
 
     try {
       if (loginType === 'admin') {
-        // Admin login — authenticate and redirect to admin dashboard
         const res = await authAPI.adminLogin(username, password)
         setAuth(res.token, res.user)
-        navigate('/admin/dashboard', { replace: true })
+        navigate('/dashboard/central-admin/dashboard', { replace: true })
 
       } else if (loginType === 'faculty') {
-        // Faculty login — authenticate and redirect to faculty dashboard
         const res = await authAPI.facultyLogin(username, password)
         setAuth(res.token, res.user)
-        navigate('/faculty/dashboard', { replace: true })
+        navigate('/dashboard/teacher/dashboard', { replace: true })
+
+      } else if (loginType === 'hod') {
+        const res = await authAPI.hodLogin(username, password)
+        setAuth(res.token, res.user)
+        navigate('/dashboard/hod/dashboard', { replace: true })
+
+      } else if (loginType === 'exam') {
+        const res = await authAPI.examLogin(username, password)
+        setAuth(res.token, res.user)
+        navigate('/dashboard/exam/dashboard', { replace: true })
+
+      } else if (loginType === 'placement') {
+        const res = await authAPI.placementLogin(username, password)
+        setAuth(res.token, res.user)
+        navigate('/dashboard/placement/dashboard', { replace: true })
 
       } else {
         // Student login — redirect to ERP portal (external)
-        // In production: authenticate via student portal API then redirect
         window.open('https://erp.sgsits.ac.in', '_blank')
       }
     } catch (err: unknown) {
@@ -120,15 +132,21 @@ const Login: React.FC = () => {
   }
 
   const tabs: { key: LoginTab; label: string }[] = [
-    { key: 'student', label: 'Student' },
-    { key: 'faculty', label: 'Faculty' },
-    { key: 'admin', label: 'Admin' },
+    { key: 'student',   label: 'Student' },
+    { key: 'hod',       label: 'HOD' },
+    { key: 'faculty',   label: 'Teacher' },
+    { key: 'admin',     label: 'Admin' },
+    { key: 'exam',      label: 'Exam Dept' },
+    { key: 'placement', label: 'Placement' },
   ]
 
-  const placeholders: Record<LoginTab, { username: string; hint: string }> = {
-    student: { username: 'Enrollment Number (e.g. 0801CS211001)', hint: 'Use your enrollment number and ERP password' },
-    faculty: { username: 'Employee ID (e.g. SGS-CE-001)', hint: 'Use your employee ID and institute password' },
-    admin: { username: 'Admin Email (e.g. admin@sgsits.ac.in)', hint: 'Use your official email and admin password' },
+  const placeholders: Record<LoginTab, { username: string; hint: string; fieldLabel: string }> = {
+    student:   { username: 'Enrollment Number (e.g. 0801CS211001)', hint: 'Use your enrollment number and ERP password',           fieldLabel: 'Enrollment Number' },
+    hod:       { username: 'Employee ID (e.g. SGS-CE-HOD)',         hint: 'Use your HOD employee ID and institute password',       fieldLabel: 'Employee ID' },
+    faculty:   { username: 'Employee ID (e.g. SGS-CE-001)',         hint: 'Use your teacher employee ID and institute password',   fieldLabel: 'Employee ID' },
+    admin:     { username: 'Admin Email (e.g. admin@sgsits.ac.in)', hint: 'Use your official email and admin password',            fieldLabel: 'Email Address' },
+    exam:      { username: 'Exam Cell ID (e.g. SGS-EXAM-001)',      hint: 'Use your Exam Department ID and institute password',    fieldLabel: 'Exam Cell ID' },
+    placement: { username: 'T&P Cell ID (e.g. SGS-TNP-001)',        hint: 'Use your Placement Cell ID and institute password',     fieldLabel: 'T&P Cell ID' },
   }
 
   const resolvedBgImage = `${import.meta.env.BASE_URL?.replace(/\/$/, '') ?? ''}/assets/media__1776272596244.png`
@@ -151,7 +169,7 @@ const Login: React.FC = () => {
         <Link to="/" className="flex items-center gap-3">
           <img src="/assets/image.png" alt="SGSITS" className="w-10 h-10 object-contain bg-white rounded-full p-0.5 shrink-0" />
           <div className="hidden sm:block text-left">
-            <p className="text-white font-bold text-sm leading-tight">Shri Govindram Seksaria Institute</p>
+            <p className="text-white font-bold text-sm leading-tight">Shri G. S. Institute</p>
             <p className="text-white/50 text-[11px]">of Technology and Science, Indore</p>
           </div>
         </Link>
@@ -173,16 +191,16 @@ const Login: React.FC = () => {
               <div className="flex flex-col items-center mb-6 text-center">
                 <img src="/assets/image.png" alt="SGSITS Logo" className="w-14 h-14 object-contain mb-3" />
                 <h1 className="text-xl font-display font-bold text-gray-800">SGSITS Portal Login</h1>
-                <p className="text-xs text-slate-500 mt-0.5">Shri Govindram Seksaria Institute of Technology and Science</p>
+                <p className="text-xs text-slate-500 mt-0.5">Shri G. S. Institute of Technology & Science</p>
               </div>
 
               {/* Tab Switcher */}
-              <div className="flex rounded border border-gray-200 overflow-hidden mb-5 text-[13px] font-semibold">
+              <div className="grid grid-cols-3 sm:grid-cols-6 rounded border border-gray-200 overflow-hidden mb-5 text-[11px] font-semibold divide-x divide-gray-200 sm:divide-y-0 divide-y">
                 {tabs.map((t) => (
                   <button
                     key={t.key}
                     onClick={() => handleTabChange(t.key)}
-                    className="flex-1 py-2.5 transition-all cursor-pointer"
+                    className="py-2.5 px-1 transition-all cursor-pointer truncate"
                     style={
                       loginType === t.key
                         ? { backgroundColor: 'var(--color-primary)', color: '#fff' }
@@ -201,7 +219,7 @@ const Login: React.FC = () => {
 
               {/* Error */}
               {error && (
-                <div className="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-2.5 rounded flex items-center gap-2">
+                <div className="mb-4 bg-[#bfa15f]/10 border border-[#bfa15f]/30 text-[#0b2545] text-sm px-4 py-2.5 rounded flex items-center gap-2">
                   <span className="shrink-0">⚠</span>
                   <span>{error}</span>
                 </div>
@@ -211,7 +229,7 @@ const Login: React.FC = () => {
                 {/* Username */}
                 <div>
                   <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1">
-                    {loginType === 'admin' ? 'Email Address' : loginType === 'faculty' ? 'Employee ID' : 'Enrollment Number'}
+                    {placeholders[loginType].fieldLabel}
                   </label>
                   <input
                     type={loginType === 'admin' ? 'email' : 'text'}
@@ -283,7 +301,7 @@ const Login: React.FC = () => {
                       Signing In...
                     </>
                   ) : (
-                    `Sign In as ${loginType.charAt(0).toUpperCase() + loginType.slice(1)}`
+                    `Sign In as ${tabs.find(t => t.key === loginType)?.label ?? loginType}`
                   )}
                 </button>
               </form>

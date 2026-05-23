@@ -93,31 +93,213 @@ export interface PlacementRecord {
 // ─── Seed data ───────────────────────────────────────────────────────────────
 
 const seed_notices: Notice[] = [
-  { id: 'n1',  title: 'Information Bulletin regarding B.Tech Admissions 2025-26',         category: 'academic',        date: '2025-05-20', highlight: true },
-  { id: 'n2',  title: 'Result of MBA (Financial Administration) II Sem Examination',      category: 'exam',            date: '2025-05-10', highlight: false },
-  { id: 'n3',  title: 'Revised Academic Calendar for UG & PG classes 2024-25',            category: 'academic',        date: '2025-05-08', highlight: false },
-  { id: 'n4',  title: 'Schedule of Internal Assessment Tests — Even Semester 2025',       category: 'exam',            date: '2025-05-02', highlight: false },
-  { id: 'n5',  title: 'Instructions for students regarding uniform and general discipline', category: 'administrative', date: '2025-04-28', highlight: false },
-  { id: 'n6',  title: 'Tender notice for laboratory equipment procurement batch 2025',    category: 'tender',          date: '2025-04-20', highlight: false },
-  { id: 'n7',  title: 'Notice regarding hostel fee payment deadlines for current session', category: 'administrative', date: '2025-04-15', highlight: false },
-  { id: 'n8',  title: 'Ph.D. Admissions open for 2025-26 — apply before June 15',         category: 'academic',        date: '2025-04-10', highlight: true  },
-  { id: 'n9',  title: 'National Conference on Emerging Technologies — Call for Papers',    category: 'general',         date: '2025-04-05', highlight: false },
-  { id: 'n10', title: 'Scholarship application portal open for SC/ST/OBC students',       category: 'general',         date: '2025-03-28', highlight: false },
-  { id: 'n11', title: 'Fee payment deadline for odd semester 2025-26 — July 31',          category: 'administrative',  date: '2025-03-20', highlight: false },
-  { id: 'n12', title: 'Postponement of end semester examination — new schedule notified', category: 'exam',            date: '2025-03-15', highlight: false },
-  { id: 'n13', title: 'Convocation 2025 registration form — fill by April 25',            category: 'academic',        date: '2025-03-10', highlight: false },
-  { id: 'n14', title: 'Anti-ragging policy 2025 — mandatory acknowledgment form',         category: 'administrative',  date: '2025-03-01', highlight: false },
+  { id: 'n1',  title: 'Information Bulletin regarding B.Tech Admissions 2025-26',         category: 'academic',        date: '2025-05-20', highlight: true, fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+  { id: 'n2',  title: 'Result of MBA (Financial Administration) II Sem Examination',      category: 'exam',            date: '2025-05-10', highlight: false, fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+  { id: 'n3',  title: 'Revised Academic Calendar for UG & PG classes 2024-25',            category: 'academic',        date: '2025-05-08', highlight: false, fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+  { id: 'n4',  title: 'Schedule of Internal Assessment Tests — Even Semester 2025',       category: 'exam',            date: '2025-05-02', highlight: false, fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+  { id: 'n5',  title: 'Instructions for students regarding uniform and general discipline', category: 'administrative', date: '2025-04-28', highlight: false, fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+  { id: 'n6',  title: 'Tender notice for laboratory equipment procurement batch 2025',    category: 'tender',          date: '2025-04-20', highlight: false, fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+  { id: 'n7',  title: 'Notice regarding hostel fee payment deadlines for current session', category: 'administrative', date: '2025-04-15', highlight: false, fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+  { id: 'n8',  title: 'Ph.D. Admissions open for 2025-26 — apply before June 15',         category: 'academic',        date: '2025-04-10', highlight: true, fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'  },
+  { id: 'n9',  title: 'National Conference on Emerging Technologies — Call for Papers',    category: 'general',         date: '2025-04-05', highlight: false, fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+  { id: 'n10', title: 'Scholarship application portal open for SC/ST/OBC students',       category: 'general',         date: '2025-03-28', highlight: false, fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+  { id: 'n11', title: 'Fee payment deadline for odd semester 2025-26 — July 31',          category: 'administrative',  date: '2025-03-20', highlight: false, fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+  { id: 'n12', title: 'Postponement of end semester examination — new schedule notified', category: 'exam',            date: '2025-03-15', highlight: false, fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+  { id: 'n13', title: 'Convocation 2025 registration form — fill by April 25',            category: 'academic',        date: '2025-03-10', highlight: false, fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+  { id: 'n14', title: 'Anti-ragging policy 2025 — mandatory acknowledgment form',         category: 'administrative',  date: '2025-03-01', highlight: false, fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
 ]
 
 const seed_news: NewsItem[] = [
-  { id: 'nw1', title: 'SGSITS secures ₹2.4 Cr DST-SERB grant for renewable energy grid research', category: 'Research',     excerpt: 'Prof. R.K. Nema and team receive prestigious DST-SERB funding to develop intelligent power distribution grids.', content: '', image: 'https://picsum.photos/seed/sgsfeature/800/500',  date: '2025-05-15', author: 'SGSITS PR Cell' },
-  { id: 'nw2', title: 'AI Lab launches NVIDIA Jetson-based autonomous robot research program',       category: 'Achievement',  excerpt: 'Students can now build and deploy edge-computing robots for real-world applications.', content: '', image: 'https://picsum.photos/seed/sgsai25/800/500',     date: '2025-05-18', author: 'Dept. of CE' },
-  { id: 'nw3', title: 'Record ₹45 LPA package at Microsoft — highest in state for batch 2025',     category: 'Achievement',  excerpt: 'A final-year CE student secured the highest campus placement in MP.', content: '', image: 'https://picsum.photos/seed/sgspl25/800/500',     date: '2025-05-12', author: 'T&P Cell' },
-  { id: 'nw4', title: 'SGSITS cricket team wins inter-university championship 2nd consecutive year', category: 'Event',       excerpt: 'The team defeated rival institutes in a hard-fought final at DAVV ground, Indore.', content: '', image: 'https://picsum.photos/seed/sgssp25/800/500',     date: '2025-05-05', author: 'Sports Committee' },
-  { id: 'nw5', title: 'Pharmacy breakthrough: Novel drug carrier approved for oncology trials',     category: 'Research',     excerpt: 'Bio-compatibility study paves new avenues for highly target-specific cancer treatments.', content: '', image: 'https://picsum.photos/seed/sgsbio25/800/500',    date: '2025-04-28', author: 'Dept. of Pharmacy' },
-  { id: 'nw6', title: 'New ₹8 Cr central instrumentation lab inaugurated by Hon. Governor',         category: 'Achievement',  excerpt: 'Facility will support advanced research in materials science and nano-technology.', content: '', image: 'https://picsum.photos/seed/sgsinf25/800/500',    date: '2025-04-15', author: 'SGSITS PR Cell' },
-  { id: 'nw7', title: 'SGSITS ranked #1 in M.P. in NIRF 2025 engineering rankings',                 category: 'Achievement',  excerpt: 'SGSITS ranked first among all engineering institutions in Madhya Pradesh.', content: '', image: 'https://picsum.photos/seed/sgsawd25/800/500',    date: '2025-04-05', author: 'Academic Section' },
-  { id: 'nw8', title: 'MoU signed with Tata Technologies for student training programs',             category: 'Industry',     excerpt: '3-year partnership to provide 500+ students with hands-on automotive and manufacturing training.', content: '', image: 'https://picsum.photos/seed/sgsmou25/800/500', date: '2025-03-20', author: 'Industry Liaison Cell' },
+  {
+    id: 'nw1',
+    title: 'SGSITS secures ₹2.4 Cr DST-SERB grant for renewable energy grid research',
+    category: 'Research',
+    excerpt: 'Prof. R.K. Nema and team receive prestigious DST-SERB funding to develop intelligent power distribution grids.',
+    content: `Shri Govindram Seksaria Institute of Technology and Science (SGSITS), Indore has achieved a significant milestone in academic research. The Department of Electrical Engineering has been awarded a prestigious research grant of ₹2.4 Crores by the Science and Engineering Research Board (SERB), a statutory body of the Department of Science and Technology (DST), Government of India.
+
+The project, titled "Development of Intelligent and Resilient Power Distribution Grids for Renewable Energy Integration", is led by Principal Investigator Prof. R.K. Nema and his dedicated team of researchers. The primary focus of the research is to build smart power grids capable of seamlessly managing fluctuational inputs from solar, wind, and other renewable sources without compromising grid stability.
+
+### Advancing Smart Grid Infrastructure
+
+The funding will be utilized to set up a state-of-the-art Smart Grid Simulation and Emulation Laboratory at the campus. This facility will host advanced hardware-in-the-loop (HIL) simulators, high-precision power analyzers, and energy storage modeling systems.
+
+Speaking on the occasion, Prof. R.K. Nema stated:
+
+> "As the world transitions to green energy, distribution grids face unprecedented challenges with bidirectional power flows and high harmonics. Our goal is to develop machine learning algorithms that can predict grid instability and automatically reroute power in real-time."
+
+### Collaborative Scope and Outcomes
+
+The project will collaborate with industry partners and leading global laboratories. Over the next three years, the department intends to register multiple patent-pending technologies and train dozens of postgraduate and doctoral scholars, bolstering SGSITS's stature as a premier research hub in Central India.`,
+    image: 'https://picsum.photos/seed/sgsfeature/800/500',
+    date: '2025-05-15',
+    author: 'SGSITS PR Cell'
+  },
+  {
+    id: 'nw2',
+    title: 'AI Lab launches NVIDIA Jetson-based autonomous robot research program',
+    category: 'Achievement',
+    excerpt: 'Students can now build and deploy edge-computing robots for real-world applications.',
+    content: `The Department of Computer Engineering at SGSITS has officially inaugurated its advanced Robotics and Edge Computing initiative with the launch of the NVIDIA Jetson-based autonomous robot research program. The initiative aims to equip undergraduate and postgraduate students with hands-on experience in training neural networks for computer vision, localization, and navigation on physical machines.
+
+Thanks to a generous research grant and strategic partnerships, the department has acquired a suite of Jetson Orin Nano and Jetson AGX Xavier developer kits. These units will serve as the artificial "brains" for custom-built quadrupedal and wheeled robotic platforms engineered on campus.
+
+### Bridging Simulation and Reality
+
+Students participating in the program will work on a variety of cutting-edge applications, including autonomous agricultural monitoring, warehouse logistics automation, and search-and-rescue navigation. The lab features a localized motion capture system that allows students to validate their algorithms in a controlled environment before real-world testing.
+
+Dr. Urjita Thakar, Head of Computer Engineering, commented on the deployment:
+
+> "Theoretical understanding of deep learning is only half the battle. By deploying models on physical edge hardware where power, thermal, and compute constraints are very real, our students gain invaluable industrial skills that are highly sought after by deep-tech employers globally."
+
+### Future Milestones
+
+The program's curriculum will be integrated into the elective courses for final-year B.Tech and M.Tech students. In addition, the Robotics Club plans to field an autonomous drone team for the national collegiate robotics competition next spring.`,
+    image: 'https://picsum.photos/seed/sgsai25/800/500',
+    date: '2025-05-18',
+    author: 'Dept. of CE'
+  },
+  {
+    id: 'nw3',
+    title: 'Record ₹45 LPA package at Microsoft — highest in state for batch 2025',
+    category: 'Achievement',
+    excerpt: 'A final-year CE student secured the highest campus placement in MP.',
+    content: `In a historic moment for the Training & Placement (T&P) Cell and the entire institute, a final-year Computer Engineering student has secured an extraordinary placement package of ₹45 Lakhs Per Annum (LPA) at Microsoft. This marks the highest campus placement offer received by any student in the state of Madhya Pradesh for the graduation batch of 2025.
+
+The student, Ayush Saxena, cleared a rigorous multi-stage selection process including competitive programming rounds, technical system design interviews, and behavioral assessments to secure the software engineering role at Microsoft's Hyderabad campus.
+
+### Highlighting Academic Excellence
+
+Ayush, who has been an active open-source contributor and leader of the campus coding club, credited his success to the robust curriculum and supportive ecosystem at SGSITS Indore.
+
+> "The mentorship of my professors and the competitive coding environment fostered by my seniors were instrumental. SGSITS provided me with the technical foundation and the confidence to compete with the best minds in the country. The rigorous lab sessions and data structures curriculum helped me ace the Microsoft rounds."
+
+### Overall Placement Success
+
+This record-breaking offer highlights a phenomenal placement season for the institute, with an average package of B.Tech students rising to ₹6.8 LPA. Over 240 companies visited the campus this year, recruiting more than 1,800 students across various disciplines. T&P Officer noted that demand for skills in Cloud Computing, AI/ML, and VLSI Design has seen a dramatic surge, positioning SGSITS as a prime recruitment destination in the region.`,
+    image: 'https://picsum.photos/seed/sgspl25/800/500',
+    date: '2025-05-12',
+    author: 'T&P Cell'
+  },
+  {
+    id: 'nw4',
+    title: 'SGSITS cricket team wins inter-university championship 2nd consecutive year',
+    category: 'Event',
+    excerpt: 'The team defeated rival institutes in a hard-fought final at DAVV ground, Indore.',
+    content: `The SGSITS Indore Cricket Team has etched its name in the history books by clinching the Inter-University Cricket Championship for the second consecutive year. In a high-stakes final played at the DAVV Ground under lights, the SGSITS team displayed exemplary sportsmanship and tactical brilliance to defeat their formidable rivals, the Indore Institute of Science and Technology (IIST).
+
+Choosing to bat first, SGSITS put up a massive total of 185 runs in 20 overs, powered by a blistering century from opening batsman and team captain, Rohan Mehta. Mehta hit 8 sixes and 10 boundaries in a masterclass performance that put the opposition on the back foot from the first over.
+
+### Strong Bowling Line-up
+
+Defending the total, the SGSITS bowling attack showed immaculate discipline. Spinner Amit Patel took a crucial 4-wicket haul for just 18 runs in his 4 overs, dismantling the opponent's middle order. IIST was eventually bowled out for 132 runs in 17.4 overs, securing a comfortable 53-run victory for SGSITS.
+
+Speaking at the post-match ceremony, Rohan Mehta said:
+
+> "This victory is a testament to the hard work the boys put in over the last six months. We practiced under tough conditions, and every single member of the squad contributed to this title defense. I want to thank the sports department and our coach for their unwavering faith in us."
+
+### Celebrations on Campus
+
+Upon their return to campus, the team was greeted with a grand reception by Director Dr. R.K. Khare, faculty, and hundreds of students. The institute sports committee announced a special cash prize of ₹1 Lakh for the team in recognition of their outstanding achievement.`,
+    image: 'https://picsum.photos/seed/sgssp25/800/500',
+    date: '2025-05-05',
+    author: 'Sports Committee'
+  },
+  {
+    id: 'nw5',
+    title: 'Pharmacy breakthrough: Novel drug carrier approved for oncology trials',
+    category: 'Research',
+    excerpt: 'Bio-compatibility study paves new avenues for highly target-specific cancer treatments.',
+    content: `The Department of Pharmacy at SGSITS Indore has announced a major scientific breakthrough with the development and regulatory approval of a novel lipid-based nanocarrier for highly targeted cancer chemotherapy. The project, funded by the Council of Scientific and Industrial Research (CSIR), has successfully passed initial preclinical trials and has been approved for translational oncology research.
+
+The research centers on creating biocompatible, biodegradable nanoparticles that encapsulate potent chemotherapeutic agents. These nanocarriers are functionalized with specific ligands that bind exclusively to receptors overexpressed on cancer cells, thereby minimizing side effects on healthy tissues.
+
+### Revolutionizing Chemotherapy Administration
+
+Traditional chemotherapy often suffers from poor bioavailability and systemic toxicity. By localizing drug release, the new carrier increases drug concentration at the tumor site by up to 10 times compared to standard delivery methods.
+
+Leading researcher Dr. Ananya Sen explained the significance:
+
+> "Our nanoparticles remain stable in the blood circulation but rapidly disintegrate to release the drug once inside the acidic environment of the cancer cell. This targeted mechanism significantly reduces cardiac and renal toxicity, which are the main limiting factors in patient tolerance during chemotherapy."
+
+### Clinical Trajectory
+
+With IND (Investigational New Drug) clearance from national regulators, the department is preparing to collaborate with regional oncology research centers for clinical trials. The milestone positions SGSITS at the forefront of pharmaceutical nanotechnology research in Central India.`,
+    image: 'https://picsum.photos/seed/sgsbio25/800/500',
+    date: '2025-04-28',
+    author: 'Dept. of Pharmacy'
+  },
+  {
+    id: 'nw6',
+    title: 'New ₹8 Cr central instrumentation lab inaugurated by Hon. Governor',
+    category: 'Achievement',
+    excerpt: 'Facility will support advanced research in materials science and nano-technology.',
+    content: `A new chapter in advanced research has begun at SGSITS Indore with the formal inauguration of the state-of-the-art Central Instrumentation Laboratory (CIL). Built at a cost of ₹8 Crores, the multi-disciplinary facility was inaugurated by the Honorable Governor of Madhya Pradesh in a prestigious ceremony attended by leading educationists, scientists, and industry leaders.
+
+The lab is equipped with world-class, high-end scientific equipment including Field Emission Scanning Electron Microscopes (FE-SEM), X-ray Diffractometers (XRD), High-Performance Liquid Chromatographs (HPLC), and Gas Chromatography-Mass Spectrometers (GC-MS). This centralized pool of sophisticated instruments will be accessible to research scholars across Civil, Mechanical, Pharmacy, Applied Physics, and Chemistry departments.
+
+### Elevating Research Capabilities
+
+Previously, research scholars had to send samples to external institutions in other states, leading to long delays and high costs. The local availability of these instruments is expected to accelerate research projects and double the publication output of the institute.
+
+During his address, the Honorable Governor remarked:
+
+> "Facilities like this Central Instrumentation Lab are crucial for realizing our national vision of self-reliance in science and technology. I urge the researchers and students of SGSITS to use these instruments to solve local agricultural, industrial, and environmental challenges facing our state."
+
+### Access and Training
+
+The laboratory will operate on a subsidized model for academic scholars and will also offer commercial testing services to local industries, making the facility self-sustainable. The institute will also conduct regular hands-on training workshops for operating these advanced machines starting next month.`,
+    image: 'https://picsum.photos/seed/sgsinf25/800/500',
+    date: '2025-04-15',
+    author: 'SGSITS PR Cell'
+  },
+  {
+    id: 'nw7',
+    title: 'SGSITS ranked #1 in M.P. in NIRF 2025 engineering rankings',
+    category: 'Achievement',
+    excerpt: 'SGSITS ranked first among all engineering institutions in Madhya Pradesh.',
+    content: `Shri Govindram Seksaria Institute of Technology and Science (SGSITS), Indore has once again proven its academic supremacy by securing the #1 position in Madhya Pradesh in the prestigious National Institutional Ranking Framework (NIRF) 2025 engineering rankings released by the Ministry of Education, Government of India.
+
+The rankings, which evaluate institutions across five broad parameters—Teaching, Learning and Resources (TLR), Research and Professional Practice (RP), Graduation Outcomes (GO), Outreach and Inclusivity (OI), and Perception—placed SGSITS in the top tier nationally, reaffirming its reputation as the premier engineering college in Central India.
+
+### Strong Academic Performance
+
+SGSITS scored exceptionally high in Graduation Outcomes, driven by its stellar placement records, and Teaching & Learning Resources, owing to its highly qualified faculty and smart campus infrastructure. The institute's research publication count and patent filings have also seen a steady 20% year-on-year increase.
+
+Reacting to the achievement, Director Dr. R.K. Khare expressed his gratitude:
+
+> "This top ranking is a reflection of the collective effort of our exceptional faculty, hard-working students, and supportive alumni. Our commitment to academic rigor, industrial integration, and research excellence has consistently borne fruit, and we will continue to strive for higher milestones on the national stage."
+
+### Looking Ahead
+
+The institute has planned several new infrastructural additions, including a smart library complex and virtual classroom networks, to further strengthen its learning resources and push for a top-50 national ranking in the coming years.`,
+    image: 'https://picsum.photos/seed/sgsawd25/800/500',
+    date: '2025-04-05',
+    author: 'Academic Section'
+  },
+  {
+    id: 'nw8',
+    title: 'MoU signed with Tata Technologies for student training programs',
+    category: 'Industry',
+    excerpt: '3-year partnership to provide 500+ students with hands-on automotive and manufacturing training.',
+    content: `In a major push towards enhancing student employability and industry readiness, SGSITS Indore has signed a historic Memorandum of Understanding (MoU) with Tata Technologies. The three-year strategic partnership will establish a state-of-the-art Center for Invention, Innovation, Incubation, and Training (CIIIT) at the campus, aimed at providing students with advanced training in automotive, aerospace, and industrial manufacturing engineering.
+
+Under this agreement, Tata Technologies will set up laboratories with cutting-edge software suites (such as CATIA, SolidWorks, and Siemens PLM) and hardware platforms including industrial robotic arms, CNC machines, and 3D printers.
+
+### Bridging the Industry-Academia Gap
+
+The curriculum of the center has been co-developed by academic professors and industry experts from Tata Technologies. Over 500 students will be trained annually across engineering streams, with a focus on Product Lifecycle Management (PLM), Electric Vehicle (EV) technology, and Smart Manufacturing (Industry 4.0).
+
+A senior representative of Tata Technologies commented on the scope of training:
+
+> "We want to ensure that engineering graduates are ready for the shop floor from day one. By exposing SGSITS students to the exact same software, hardware, and methodologies used by top global manufacturers, we are bridging the critical skills gap between academia and the industrial workforce."
+
+### Placement and Internships
+
+As part of the MoU, Tata Technologies will also offer direct internships and placement opportunities to top-performing students trained at the center, significantly boosting high-end engineering careers for SGSITS graduates.`,
+    image: 'https://picsum.photos/seed/sgsmou25/800/500',
+    date: '2025-03-20',
+    author: 'Industry Liaison Cell'
+  },
 ]
 
 const seed_events: EventItem[] = [

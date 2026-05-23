@@ -46,11 +46,11 @@ const GoverningBody: React.FC = () => {
                 <td className="px-4 py-3 border-b border-gray-100 text-gray-700">{m.name}</td>
                 <td className="px-4 py-3 border-b border-gray-100">
                   <span className={`px-2.5 py-0.5 rounded text-xs font-semibold ${
-                    m.category === 'Government' ? 'border border-blue-200 text-blue-700 bg-white' :
-                    m.category === 'University' ? 'border border-purple-200 text-purple-700 bg-white' :
-                    m.category === 'Industry' ? 'border border-green-200 text-green-700 bg-white' :
-                    m.category === 'Regulatory' ? 'border border-orange-200 text-orange-700 bg-white' :
-                    m.category === 'Faculty' ? 'border border-teal-200 text-teal-700 bg-white' :
+                    m.category === 'Government' ? 'border border-[#0b2545]/30 text-[#0b2545] bg-white' :
+                    m.category === 'University' ? 'border border-[#0b2545]/40 text-[#0b2545] bg-white' :
+                    m.category === 'Industry' ? 'border border-[#bfa15f]/40 text-[#bfa15f] bg-white' :
+                    m.category === 'Regulatory' ? 'border border-[#bfa15f]/50 text-[#bfa15f] bg-white' :
+                    m.category === 'Faculty' ? 'border border-slate-300 text-slate-700 bg-white' :
                     'border border-slate-200 text-gray-700 bg-white'
                   }`}>{m.category}</span>
                 </td>

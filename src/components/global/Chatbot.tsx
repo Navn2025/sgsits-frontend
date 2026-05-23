@@ -145,9 +145,9 @@ const Chatbot: React.FC = () => {
   const QUICK_QUESTIONS = ['Admissions', 'Placements', 'Fee Structure', 'Departments']
 
   // Button colors: change when near footer so it's visible against the dark footer
-  const btnBg = nearFooter ? '#D4AF37' : 'var(--color-primary)'
+  const btnBg = nearFooter ? '#bfa15f' : 'var(--color-primary)'
   const btnShadow = nearFooter
-    ? '0 8px 30px rgba(212,175,55,0.5)'
+    ? '0 8px 30px rgba(191,161,95,0.5)'
     : '0 8px 30px rgba(0,0,0,0.2)'
 
   return (
@@ -163,7 +163,7 @@ const Chatbot: React.FC = () => {
         <div className="flex items-center gap-3 px-4 py-3.5 rounded-t-2xl shrink-0" style={{ background: 'var(--color-primary)' }}>
           <div className="relative shrink-0">
             <img src={BOT_AVATAR} alt="Bot" className="w-10 h-10 rounded-full object-contain bg-white p-0.5 border-2 border-white/30" />
-            <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white" />
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#bfa15f] rounded-full border-2 border-white" />
           </div>
           <div className="flex-1">
             <p className="text-white font-bold text-sm leading-tight">{BOT_NAME}</p>

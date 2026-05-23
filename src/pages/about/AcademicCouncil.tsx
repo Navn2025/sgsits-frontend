@@ -49,10 +49,10 @@ const AcademicCouncil: React.FC = () => {
                   <td className="px-4 py-3 border-b border-gray-100 text-gray-700">{m.name}</td>
                   <td className="px-4 py-3 border-b border-gray-100">
                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                      m.category === 'Ex-Officio' ? 'border border-blue-200 text-blue-700 bg-white shadow-sm' :
-                      m.category === 'External' ? 'border border-green-200 text-green-700 bg-white shadow-sm' :
-                      m.category === 'Nominated' ? 'border border-purple-200 text-purple-700 bg-white shadow-sm' :
-                      'border border-orange-200 text-orange-700 bg-white shadow-sm'
+                      m.category === 'Ex-Officio' ? 'border border-[#0b2545]/30 text-[#0b2545] bg-white shadow-sm' :
+                      m.category === 'External' ? 'border border-[#bfa15f]/40 text-[#bfa15f] bg-white shadow-sm' :
+                      m.category === 'Nominated' ? 'border border-[#0b2545]/40 text-[#0b2545] bg-white shadow-sm' :
+                      'border border-[#bfa15f]/50 text-[#bfa15f] bg-white shadow-sm'
                     }`}>{m.category}</span>
                   </td>
                 </tr>

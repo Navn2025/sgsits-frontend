@@ -17,15 +17,15 @@ const DirectorMessage: React.FC = () => {
 
       <div className="flex flex-col lg:flex-row gap-10 items-start">
         {/* Director Photo & Info Card */}
-        <div className="w-full lg:w-72 shrink-0 mx-auto max-w-sm lg:max-w-none">
+        <div className="w-full lg:w-96 shrink-0 mx-auto max-w-sm lg:max-w-none lg:sticky lg:top-24">
           <div className="bg-white rounded-md border border-gray-200 shadow-sm overflow-hidden">
             {/* Clean elegant academic image container */}
             <div className="bg-white flex items-center justify-center p-4 border-b border-gray-150">
-              <div className="w-full aspect-[3/4] overflow-hidden rounded border border-gray-200">
+              <div className="w-full aspect-[3/2] overflow-hidden rounded border border-gray-200">
                 <img 
-                  src="/assets/image copy.png" 
+                  src="/director.jpeg" 
                   alt="Prof. Neetesh Purohit" 
-                  className="w-full h-full object-cover object-top"
+                  className="w-full h-full object-cover object-center"
                   onError={(e) => {
                     e.currentTarget.src = "/assets/image.png";
                   }}
@@ -78,7 +78,7 @@ const DirectorMessage: React.FC = () => {
               Dear Students, Colleagues, Alumni, and Partners,
             </p>
             <p>
-              It is an absolute honor to welcome you to the web portal of <strong>Shri Govindram Seksaria Institute of Technology and Science (SGSITS), Indore</strong>. 
+              It is an absolute honor to welcome you to the web portal of <strong>Shri G. S. Institute of Technology & Science (SGSITS), Indore</strong>. 
               As one of Central India's oldest and most prestigious engineering institutions, our legacy since <strong>1952</strong> is built upon a firm commitment to academic rigour, engineering excellence, and national service.
             </p>
             <p>
@@ -99,7 +99,7 @@ const DirectorMessage: React.FC = () => {
                 Prof. Neetesh Purohit
               </p>
               <p className="text-xs font-semibold text-accent">Director, SGSITS Indore</p>
-              <p className="text-[11px] text-slate-500 font-medium">Shri Govindram Seksaria Institute of Technology & Science</p>
+              <p className="text-[11px] text-slate-500 font-medium">Shri G. S. Institute of Technology & Science</p>
             </div>
           </div>
         </div>

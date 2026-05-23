@@ -8,37 +8,37 @@ const campusLocations = [
     icon: Building2,
     name: 'Main Academic Building',
     desc: 'The iconic heritage building housing the Director\'s office, administrative block, and key departments. Built in 1952, it stands as a symbol of SGSITS legacy.',
-    color: 'text-blue-600 bg-blue-50 border-blue-100',
+    color: 'text-[#0b2545] bg-[#0b2545]/5 border-[#0b2545]/15',
   },
   {
     icon: Library,
     name: 'Central Library',
     desc: 'Fully air-conditioned library with 80,000+ volumes, 200+ journals, DELNET access, e-library terminals, and dedicated reading zones for 500+ students.',
-    color: 'text-amber-600 bg-amber-50 border-amber-100',
+    color: 'text-[#bfa15f] bg-[#bfa15f]/10 border-[#bfa15f]/20',
   },
   {
     icon: Cpu,
     name: 'Computer Center',
     desc: 'Central computing facility with 300+ workstations, high-speed fiber internet, server cluster, software licensing for MATLAB, AutoCAD, ANSYS, and more.',
-    color: 'text-purple-600 bg-purple-50 border-purple-100',
+    color: 'text-[#0b2545] bg-[#0b2545]/10 border-[#0b2545]/25',
   },
   {
     icon: Home,
     name: 'Boys Hostels',
     desc: '5 hostel blocks accommodating 1,200+ students with furnished rooms, 24×7 water & power supply, Wi-Fi, study rooms, and a well-equipped mess.',
-    color: 'text-green-600 bg-green-50 border-green-100',
+    color: 'text-[#bfa15f] bg-[#bfa15f]/5 border-[#bfa15f]/15',
   },
   {
     icon: Users,
     name: 'Girls Hostel',
     desc: 'Secure residential facility for 400+ girl students with modern amenities, in-house mess, common rooms, and dedicated 24×7 security personnel.',
-    color: 'text-pink-600 bg-pink-50 border-pink-100',
+    color: 'text-[#0b2545] bg-[#0b2545]/15 border-[#0b2545]/30',
   },
   {
     icon: Dumbbell,
     name: 'Sports Complex',
     desc: 'Multi-sport complex featuring cricket ground, basketball & volleyball courts, badminton hall, table tennis, athletics track, and an indoor gymnasium.',
-    color: 'text-orange-600 bg-orange-50 border-orange-100',
+    color: 'text-[#bfa15f] bg-[#bfa15f]/15 border-[#bfa15f]/30',
   },
 ]
 

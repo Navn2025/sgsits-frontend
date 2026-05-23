@@ -76,7 +76,7 @@ const ExamCourses: React.FC = () => {
                   <td className="px-4 py-3 text-sm text-slate-700 font-medium">{c.semesters}</td>
                   <td className="px-4 py-3">
                     <button onClick={() => deleteCourse(c.id)}
-                      className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors">
+                      className="p-1.5 text-slate-400 hover:text-[#0b2545] hover:bg-slate-100 rounded transition-colors">
                       <Trash2 size={14} />
                     </button>
                   </td>

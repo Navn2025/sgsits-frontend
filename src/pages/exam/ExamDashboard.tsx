@@ -12,25 +12,25 @@ const ExamDashboard: React.FC = () => {
   const overdueRequests = MARKS_REQUESTS.filter(r => r.status === 'overdue').length
 
   const stats = [
-    { label: 'Active Session', value: currentSession?.label ?? '—', icon: Calendar, color: 'bg-blue-50 text-blue-600 border-blue-100', link: '/exam/session-management' },
-    { label: 'Branches', value: BRANCHES.length, icon: Building2, color: 'bg-purple-50 text-purple-600 border-purple-100', link: '/exam/branch-management' },
-    { label: 'Courses', value: COURSES.length, icon: BookOpen, color: 'bg-teal-50 text-teal-600 border-teal-100', link: '/exam/course-management' },
-    { label: 'Subjects', value: SUBJECTS.length, icon: FileText, color: 'bg-indigo-50 text-indigo-600 border-indigo-100', link: '/exam/subject-upload' },
-    { label: 'Students', value: STUDENTS.length, icon: Users, color: 'bg-green-50 text-green-600 border-green-100', link: '/exam/student-upload' },
-    { label: 'Pending Marks', value: pendingRequests, icon: Clock, color: 'bg-amber-50 text-amber-600 border-amber-100', link: '/exam/marks-request' },
-    { label: 'Overdue Marks', value: overdueRequests, icon: AlertTriangle, color: 'bg-red-50 text-red-600 border-red-100', link: '/exam/marks-request' },
-    { label: 'Submitted', value: MARKS_REQUESTS.filter(r => r.status === 'submitted').length, icon: CheckCircle, color: 'bg-emerald-50 text-emerald-600 border-emerald-100', link: '/exam/marks-request' },
+    { label: 'Active Session', value: currentSession?.label ?? '—', icon: Calendar, color: 'bg-[#0b2545]/5 text-[#0b2545] border-[#0b2545]/15', link: '/dashboard/exam/session-management' },
+    { label: 'Branches', value: BRANCHES.length, icon: Building2, color: 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25', link: '/dashboard/exam/branch-management' },
+    { label: 'Courses', value: COURSES.length, icon: BookOpen, color: 'bg-[#bfa15f]/5 text-[#bfa15f] border-[#bfa15f]/20', link: '/dashboard/exam/course-management' },
+    { label: 'Subjects', value: SUBJECTS.length, icon: FileText, color: 'bg-[#0b2545]/15 text-[#0b2545] border-[#0b2545]/30', link: '/dashboard/exam/subject-upload' },
+    { label: 'Students', value: STUDENTS.length, icon: Users, color: 'bg-[#bfa15f]/10 text-[#bfa15f] border-[#bfa15f]/30', link: '/dashboard/exam/student-upload' },
+    { label: 'Pending Marks', value: pendingRequests, icon: Clock, color: 'bg-[#bfa15f]/15 text-[#bfa15f] border-[#bfa15f]/40', link: '/dashboard/exam/marks-request' },
+    { label: 'Overdue Marks', value: overdueRequests, icon: AlertTriangle, color: 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25', link: '/dashboard/exam/marks-request' },
+    { label: 'Submitted', value: MARKS_REQUESTS.filter(r => r.status === 'submitted').length, icon: CheckCircle, color: 'bg-[#bfa15f]/20 text-[#bfa15f] border-[#bfa15f]/40', link: '/dashboard/exam/marks-request' },
   ]
 
   const quickLinks = [
-    { label: 'Session Management', path: '/exam/session-management', desc: 'Create and manage academic sessions' },
-    { label: 'Branch Management', path: '/exam/branch-management', desc: 'Add and configure branches' },
-    { label: 'Course Management', path: '/exam/course-management', desc: 'Manage degree programs' },
-    { label: 'Upload Subjects', path: '/exam/subject-upload', desc: 'Upload subject data via CSV' },
-    { label: 'Upload Students', path: '/exam/student-upload', desc: 'Upload student enrollment data' },
-    { label: 'Upload ATKT Data', path: '/exam/atkt-upload', desc: 'Upload ATKT eligible students' },
-    { label: 'Address Requests', path: '/exam/requests', desc: 'Review faculty correction requests' },
-    { label: 'Marks Requests', path: '/exam/marks-request', desc: 'Generate marks entry requests' },
+    { label: 'Session Management', path: '/dashboard/exam/session-management', desc: 'Create and manage academic sessions' },
+    { label: 'Branch Management', path: '/dashboard/exam/branch-management', desc: 'Add and configure branches' },
+    { label: 'Course Management', path: '/dashboard/exam/course-management', desc: 'Manage degree programs' },
+    { label: 'Upload Subjects', path: '/dashboard/exam/subject-upload', desc: 'Upload subject data via CSV' },
+    { label: 'Upload Students', path: '/dashboard/exam/student-upload', desc: 'Upload student enrollment data' },
+    { label: 'Upload ATKT Data', path: '/dashboard/exam/atkt-upload', desc: 'Upload ATKT eligible students' },
+    { label: 'Address Requests', path: '/dashboard/exam/requests', desc: 'Review faculty correction requests' },
+    { label: 'Marks Requests', path: '/dashboard/exam/marks-request', desc: 'Generate marks entry requests' },
   ]
 
   return (
@@ -91,7 +91,7 @@ const ExamDashboard: React.FC = () => {
       <PortalCard>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-bold text-slate-700">Recent Marks Requests</h3>
-          <Link to="/exam/marks-request" className="text-xs text-primary hover:underline font-medium">View all →</Link>
+          <Link to="/dashboard/exam/marks-request" className="text-xs text-primary hover:underline font-medium">View all →</Link>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -115,9 +115,9 @@ const ExamDashboard: React.FC = () => {
                   <td className="px-3 py-2.5 text-xs text-slate-600">{r.dueDate}</td>
                   <td className="px-3 py-2.5">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wide ${
-                      r.status === 'submitted' ? 'bg-green-50 text-green-700 border-green-200' :
-                      r.status === 'overdue'   ? 'bg-red-50 text-red-700 border-red-200' :
-                      'bg-amber-50 text-amber-700 border-amber-200'
+                      r.status === 'submitted' ? 'bg-[#bfa15f]/10 text-[#bfa15f] border-[#bfa15f]/30' :
+                      r.status === 'overdue'   ? 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25' :
+                      'bg-[#bfa15f]/15 text-[#bfa15f] border-[#bfa15f]/40'
                     }`}>{r.status}</span>
                   </td>
                 </tr>

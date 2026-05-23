@@ -59,6 +59,26 @@ const sectionDetails: Record<string, { title: string; subtitle: string; icon: Re
     title: 'TEQIP Initiatives',
     subtitle: 'Technical Education Quality Improvement Programme of the Government of India.',
     icon: Award
+  },
+  news: {
+    title: 'Campus News & Stories',
+    subtitle: 'Achievements, research breakthroughs, events, and stories from the SGSITS community.',
+    icon: BookOpen
+  },
+  notices: {
+    title: 'Official Notices',
+    subtitle: 'Academic announcements, exams schedules, and administrative notifications.',
+    icon: Info
+  },
+  events: {
+    title: 'Campus Events',
+    subtitle: 'Conferences, technical festivals, sports events, and cultural programs at SGSITS.',
+    icon: Compass
+  },
+  tenders: {
+    title: 'Active Tenders',
+    subtitle: 'Procurement notices, bids, and active contract opportunities of the institute.',
+    icon: FileCheck2
   }
 }
 
@@ -87,7 +107,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ section }) => {
       <div className="w-full bg-[#f7f8fa] text-slate-900 py-8 px-4 lg:px-12 relative border-b-2 border-slate-200">
         <div className="max-w-[1400px] mx-auto relative z-10">
           <div className="max-w-3xl">
-            <span className="text-[#154273] font-semibold text-[11px] font-bold uppercase tracking-widest block mb-2">
+            <span className="text-[#0b2545] font-semibold text-[11px] font-bold uppercase tracking-widest block mb-2">
               {activeSection} Portal
             </span>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 font-display">
@@ -100,8 +120,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ section }) => {
         </div>
       </div>
 
-      {/* Main Column Layout — sidebar fixed, content scrolls */}
-      <div className="w-full max-w-[1400px] mx-auto px-4 lg:px-12 flex-grow">
+      <div id="sidebar-content-area" className="w-full max-w-[1400px] mx-auto px-4 lg:px-12 flex-grow">
         <div className="flex flex-col md:flex-row gap-8 items-start">
 
           {/* LEFT SIDEBAR — sticky on desktop, stacks on mobile */}

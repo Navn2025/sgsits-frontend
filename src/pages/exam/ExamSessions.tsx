@@ -81,7 +81,7 @@ const ExamSessions: React.FC = () => {
                       {!s.is_active && (
                         <button
                           onClick={() => setActive(s.id)}
-                          className="flex items-center gap-1 text-xs text-green-700 hover:bg-green-50 px-2 py-1 rounded border border-green-200 transition-colors font-medium"
+                          className="flex items-center gap-1 text-xs text-[#bfa15f] hover:bg-[#bfa15f]/10 px-2 py-1 rounded border border-[#bfa15f]/30 transition-colors font-medium"
                           title="Set as active session"
                         >
                           <CheckCircle size={12} /> Set Active
@@ -90,7 +90,7 @@ const ExamSessions: React.FC = () => {
                       {!s.is_active && (
                         <button
                           onClick={() => deleteSession(s.id)}
-                          className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                          className="p-1.5 text-slate-400 hover:text-[#0b2545] hover:bg-slate-100 rounded transition-colors"
                           title="Delete session"
                         >
                           <Trash2 size={14} />

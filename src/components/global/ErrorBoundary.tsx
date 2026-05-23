@@ -15,7 +15,7 @@ const ErrorBoundary: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f7fa] flex flex-col justify-between p-6">
+    <div className="min-h-screen bg-[#f7f8fa] flex flex-col justify-between p-6">
       <header className="max-w-7xl mx-auto w-full flex items-center justify-between py-4 border-b border-gray-200">
         <Logo />
       </header>
@@ -68,7 +68,7 @@ const ErrorBoundary: React.FC = () => {
       </main>
 
       <footer className="text-center text-xs text-gray-500 border-t border-gray-200 py-4 max-w-7xl mx-auto w-full">
-        &copy; {new Date().getFullYear()} Shri Govindram Seksaria Institute of Technology and Science (SGSITS). All rights reserved.
+        &copy; {new Date().getFullYear()} Shri G. S. Institute of Technology & Science (SGSITS). All rights reserved.
       </footer>
     </div>
   )

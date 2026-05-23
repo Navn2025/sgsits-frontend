@@ -8,8 +8,8 @@ const accreditations = [
     grade: 'Grade A',
     status: 'Valid',
     validTill: '2026',
-    color: '#16a34a',
-    bgColor: '#f0fdf4',
+    color: '#0b2545',
+    bgColor: '#ffffff',
     desc: 'National Assessment and Accreditation Council has accredited SGSITS with Grade A, recognizing the institute\'s commitment to quality education.'
   },
   {
@@ -18,8 +18,8 @@ const accreditations = [
     grade: 'Accredited',
     status: 'Active',
     validTill: '2025-2027',
-    color: '#2563eb',
-    bgColor: '#eff6ff',
+    color: '#bfa15f',
+    bgColor: '#ffffff',
     desc: 'Multiple programs accredited by the National Board of Accreditation (NBA) under the Washington Accord.'
   },
   {
@@ -28,8 +28,8 @@ const accreditations = [
     grade: 'Top 200',
     status: 'Engineering',
     validTill: '2024',
-    color: '#9333ea',
-    bgColor: '#faf5ff',
+    color: '#0b2545',
+    bgColor: '#f7f8fa',
     desc: 'Ranked among the top engineering institutes in India by the National Institutional Ranking Framework (NIRF), MHRD.'
   },
 ]

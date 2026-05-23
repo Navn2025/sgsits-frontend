@@ -47,7 +47,7 @@ export default function Prospectus() {
       {/* Hero */}
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-2 text-sm text-blue-200 mb-3">
+          <div className="flex items-center gap-2 text-sm text-white/70 mb-3">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight className="w-4 h-4" />
             <span>Admissions</span>
@@ -55,8 +55,8 @@ export default function Prospectus() {
             <span className="text-white font-medium">Prospectus</span>
           </div>
           <h1 className="text-4xl font-display font-bold mb-3">SGSITS Prospectus 2025–26</h1>
-          <p className="text-blue-100 text-lg max-w-2xl">
-            Your complete guide to programs, admissions, fees, facilities, and campus life at Shri Govindram Seksaria Institute of Technology and Science, Indore.
+          <p className="text-white/85 text-lg max-w-2xl">
+            Your complete guide to programs, admissions, fees, facilities, and campus life at Shri G. S. Institute of Technology & Science, Indore.
           </p>
         </div>
       </div>
@@ -82,7 +82,7 @@ export default function Prospectus() {
               {/* Info */}
               <div className="col-span-2 p-8 flex flex-col justify-center">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">Latest Edition</span>
+                  <span className="bg-[#bfa15f]/20 text-[#bfa15f] text-xs font-semibold px-3 py-1 rounded-full">Latest Edition</span>
                   <span className="text-gray-400 text-xs">Published: March 2025</span>
                 </div>
                 <h2 className="text-2xl font-display font-bold text-primary mb-2">
@@ -100,7 +100,7 @@ export default function Prospectus() {
                   </a>
                   <a
                     href="#"
-                    className="inline-flex items-center gap-2 bg-accent text-primary font-semibold px-6 py-3 rounded-lg hover:bg-yellow-400 transition-colors text-sm justify-center"
+                    className="inline-flex items-center gap-2 bg-accent text-primary font-semibold px-6 py-3 rounded-lg hover:bg-[#bfa15f]/90 transition-colors text-sm justify-center"
                   >
                     <Download className="w-4 h-4" /> Download PDF (Hindi)
                   </a>

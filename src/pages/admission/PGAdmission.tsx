@@ -92,7 +92,7 @@ export default function PGAdmission() {
       {/* Hero */}
       <div className="bg-primary text-white py-14 px-4">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-2 text-sm text-blue-200 mb-3">
+          <div className="flex items-center gap-2 text-sm text-white/70 mb-3">
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight className="w-4 h-4" />
             <span>Admissions</span>
@@ -100,12 +100,12 @@ export default function PGAdmission() {
             <span className="text-white font-medium">PG Admission</span>
           </div>
           <h1 className="text-4xl font-display font-bold mb-3">Postgraduate Admissions</h1>
-          <p className="text-blue-100 text-lg max-w-2xl">
+          <p className="text-white/85 text-lg max-w-2xl">
             Advance your career with M.Tech, M.E., MBA, or MCA programs at SGSITS. Admissions are based on GATE, MPGET, CAT, MAT, or NIMCET scores.
           </p>
           <a
             href="#"
-            className="mt-6 inline-flex items-center gap-2 bg-accent text-primary font-semibold px-6 py-3 rounded-lg hover:bg-yellow-400 transition-colors"
+            className="mt-6 inline-flex items-center gap-2 bg-accent text-primary font-semibold px-6 py-3 rounded-lg hover:bg-[#bfa15f]/90 transition-colors"
           >
             Apply Now <ChevronRight className="w-4 h-4" />
           </a>
@@ -205,7 +205,7 @@ export default function PGAdmission() {
                 <p className="text-2xl font-bold text-accent mb-2">{s.amount}</p>
                 <p className="text-gray-600 text-sm mb-3">{s.desc}</p>
                 <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
-                  <CheckCircle className="w-3 h-3 text-green-500" />
+                  <CheckCircle className="w-3 h-3 text-[#bfa15f]" />
                   {s.eligibility}
                 </div>
               </div>
