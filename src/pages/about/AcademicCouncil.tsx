@@ -1,21 +1,21 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { aboutService, academicCouncilDefault, type AcademicCouncilData } from '../../services/aboutService'
 
-const councilMembers = [
-  { role: 'Chairman', name: 'Director, SGSITS', category: 'Ex-Officio' },
-  { role: 'Member', name: 'Deputy Director', category: 'Ex-Officio' },
-  { role: 'Member', name: 'Dean (Academics)', category: 'Ex-Officio' },
-  { role: 'Member', name: 'Dean (R&D)', category: 'Ex-Officio' },
-  { role: 'Member', name: 'All Heads of Departments', category: 'Ex-Officio' },
-  { role: 'Member', name: 'Controller of Examinations', category: 'Ex-Officio' },
-  { role: 'Member', name: 'Registrar', category: 'Ex-Officio' },
-  { role: 'Member', name: 'Three Senior Professors (Nominated)', category: 'Nominated' },
-  { role: 'Member', name: 'Two External Experts from Academia', category: 'External' },
-  { role: 'Member', name: 'One Industry Expert', category: 'External' },
-  { role: 'Member', name: 'RGPV Nominee', category: 'University' },
-  { role: 'Member Secretary', name: 'Dean (Academics)', category: 'Ex-Officio' },
-]
+const categoryClass = (cat: string): string => {
+  if (cat === 'Ex-Officio') return 'border border-[#0b2545]/30 text-[#0b2545] bg-white shadow-sm'
+  if (cat === 'External')   return 'border border-[#bfa15f]/40 text-[#bfa15f] bg-white shadow-sm'
+  if (cat === 'Nominated')  return 'border border-[#0b2545]/40 text-[#0b2545] bg-white shadow-sm'
+  if (cat === 'Industry')   return 'border border-[#bfa15f]/40 text-[#bfa15f] bg-white shadow-sm'
+  return 'border border-[#bfa15f]/50 text-[#bfa15f] bg-white shadow-sm'
+}
 
 const AcademicCouncil: React.FC = () => {
+  const [data, setData] = useState<AcademicCouncilData>(academicCouncilDefault)
+
+  useEffect(() => {
+    aboutService.getAcademicCouncil().then(setData)
+  }, [])
+
   return (
     <div className="space-y-8">
       <div className="border-b border-gray-200 pb-4">
@@ -23,11 +23,7 @@ const AcademicCouncil: React.FC = () => {
         <p className="text-sm text-gray-500 mt-1">Apex academic body of the institute</p>
       </div>
 
-      <p className="text-gray-700 text-[15px] leading-relaxed">
-        The <strong>Academic Council</strong> is the apex academic body responsible for maintaining standards of instruction, 
-        education, and examination within the institute. Being an autonomous institution, the Academic Council has the 
-        authority to approve new programs, modify curricula, set examination standards, and ensure academic quality.
-      </p>
+      <p className="text-gray-700 text-[15px] leading-relaxed">{data.description}</p>
 
       <div>
         <h3 className="text-xl font-bold mb-4" style={{ color: 'var(--color-primary)' }}>Council Composition</h3>
@@ -42,18 +38,15 @@ const AcademicCouncil: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {councilMembers.map((m, i) => (
+              {data.members.map((m, i) => (
                 <tr key={i} className="bg-white hover:bg-slate-50 transition-colors duration-150">
-                  <td className="px-4 py-3 border-b border-gray-100 text-gray-500">{i + 1}</td>
-                  <td className="px-4 py-3 border-b border-gray-100 font-medium" style={{ color: 'var(--color-primary)' }}>{m.role}</td>
+                  <td className="px-4 py-3 border-b border-gray-100 text-gray-500">{m.sno}</td>
+                  <td className="px-4 py-3 border-b border-gray-100 font-medium" style={{ color: 'var(--color-primary)' }}>{m.designation}</td>
                   <td className="px-4 py-3 border-b border-gray-100 text-gray-700">{m.name}</td>
                   <td className="px-4 py-3 border-b border-gray-100">
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                      m.category === 'Ex-Officio' ? 'border border-[#0b2545]/30 text-[#0b2545] bg-white shadow-sm' :
-                      m.category === 'External' ? 'border border-[#bfa15f]/40 text-[#bfa15f] bg-white shadow-sm' :
-                      m.category === 'Nominated' ? 'border border-[#0b2545]/40 text-[#0b2545] bg-white shadow-sm' :
-                      'border border-[#bfa15f]/50 text-[#bfa15f] bg-white shadow-sm'
-                    }`}>{m.category}</span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${categoryClass(m.category)}`}>
+                      {m.category}
+                    </span>
                   </td>
                 </tr>
               ))}

@@ -1,95 +1,39 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Search, ExternalLink } from 'lucide-react'
+import {
+  placementService,
+  leadingCompaniesDefault, type LeadingCompany,
+} from '../../services/placementService'
 
 type Sector = 'All' | 'IT' | 'Core' | 'PSU' | 'Consulting' | 'Product' | 'Startup'
 
-interface Company {
-  name: string
-  sector: Sector
-  highlight?: boolean
-}
-
-const companies: Company[] = [
-  // IT
-  { name: 'TCS', sector: 'IT', highlight: true },
-  { name: 'Infosys', sector: 'IT', highlight: true },
-  { name: 'Wipro', sector: 'IT', highlight: true },
-  { name: 'Accenture', sector: 'IT', highlight: true },
-  { name: 'Cognizant', sector: 'IT' },
-  { name: 'HCL Technologies', sector: 'IT' },
-  { name: 'Tech Mahindra', sector: 'IT' },
-  { name: 'Capgemini', sector: 'IT' },
-  { name: 'Mphasis', sector: 'IT' },
-  { name: 'Hexaware', sector: 'IT' },
-  { name: 'Zensar Technologies', sector: 'IT' },
-  { name: 'Persistent Systems', sector: 'IT' },
-  // Product / FAANG
-  { name: 'Amazon', sector: 'Product', highlight: true },
-  { name: 'Microsoft', sector: 'Product', highlight: true },
-  { name: 'Google', sector: 'Product', highlight: true },
-  { name: 'Oracle', sector: 'Product' },
-  { name: 'SAP', sector: 'Product' },
-  { name: 'IBM', sector: 'Product' },
-  { name: 'Qualcomm', sector: 'Product' },
-  { name: 'Texas Instruments', sector: 'Product' },
-  // Core Engineering
-  { name: 'L&T', sector: 'Core', highlight: true },
-  { name: 'BHEL', sector: 'Core', highlight: true },
-  { name: 'Bosch', sector: 'Core' },
-  { name: 'Siemens', sector: 'Core' },
-  { name: 'ABB', sector: 'Core' },
-  { name: 'Honeywell', sector: 'Core' },
-  { name: 'Emerson', sector: 'Core' },
-  { name: 'Schneider Electric', sector: 'Core' },
-  { name: 'Mahindra & Mahindra', sector: 'Core' },
-  { name: 'Bajaj Auto', sector: 'Core' },
-  { name: 'Cummins India', sector: 'Core' },
-  { name: 'John Deere', sector: 'Core' },
-  // PSU
-  { name: 'NTPC', sector: 'PSU', highlight: true },
-  { name: 'ONGC', sector: 'PSU', highlight: true },
-  { name: 'ISRO', sector: 'PSU' },
-  { name: 'DRDO', sector: 'PSU' },
-  { name: 'BARC', sector: 'PSU' },
-  { name: 'HAL', sector: 'PSU' },
-  { name: 'BEL', sector: 'PSU' },
-  { name: 'GAIL', sector: 'PSU' },
-  { name: 'IOCL', sector: 'PSU' },
-  // Consulting
-  { name: 'Deloitte', sector: 'Consulting', highlight: true },
-  { name: 'KPMG', sector: 'Consulting', highlight: true },
-  { name: 'PwC', sector: 'Consulting' },
-  { name: 'EY', sector: 'Consulting' },
-  { name: 'ZS Associates', sector: 'Consulting' },
-  { name: 'Aon', sector: 'Consulting' },
-  // Startups
-  { name: 'PhonePe', sector: 'Startup' },
-  { name: 'Razorpay', sector: 'Startup' },
-  { name: 'Flipkart', sector: 'Startup' },
-  { name: 'Zomato', sector: 'Startup' },
-  { name: 'BrowserStack', sector: 'Startup' },
-]
-
 const sectorConfig: Record<string, { color: string; bg: string; border: string; badge: string }> = {
-  IT:          { color: 'text-[#0b2545]',   bg: 'bg-[#0b2545]/5',   border: 'border-[#0b2545]/20',   badge: 'bg-[#0b2545]/10 text-[#0b2545]' },
-  Product:     { color: 'text-[#0b2545]', bg: 'bg-[#0b2545]/10', border: 'border-[#0b2545]/25', badge: 'bg-[#0b2545]/15 text-[#0b2545]' },
-  Core:        { color: 'text-[#bfa15f]', bg: 'bg-[#bfa15f]/10', border: 'border-[#bfa15f]/30', badge: 'bg-[#bfa15f]/15 text-[#bfa15f]' },
-  PSU:         { color: 'text-slate-700',  bg: 'bg-slate-50',  border: 'border-slate-300',  badge: 'bg-slate-200 text-slate-700' },
-  Consulting:  { color: 'text-[#bfa15f]',  bg: 'bg-[#bfa15f]/5',  border: 'border-[#bfa15f]/25',  badge: 'bg-[#bfa15f]/10 text-[#bfa15f]' },
-  Startup:     { color: 'text-[#bfa15f]',   bg: 'bg-[#bfa15f]/15',   border: 'border-[#bfa15f]/40',   badge: 'bg-[#bfa15f]/20 text-[#bfa15f]' },
+  IT:         { color: 'text-[#0b2545]',   bg: 'bg-[#0b2545]/5',    border: 'border-[#0b2545]/20',   badge: 'bg-[#0b2545]/10 text-[#0b2545]' },
+  Product:    { color: 'text-[#0b2545]',   bg: 'bg-[#0b2545]/10',   border: 'border-[#0b2545]/25',   badge: 'bg-[#0b2545]/15 text-[#0b2545]' },
+  Core:       { color: 'text-[#bfa15f]',   bg: 'bg-[#bfa15f]/10',   border: 'border-[#bfa15f]/30',   badge: 'bg-[#bfa15f]/15 text-[#bfa15f]' },
+  PSU:        { color: 'text-slate-700',   bg: 'bg-slate-50',       border: 'border-slate-300',       badge: 'bg-slate-200 text-slate-700' },
+  Consulting: { color: 'text-[#bfa15f]',   bg: 'bg-[#bfa15f]/5',    border: 'border-[#bfa15f]/25',   badge: 'bg-[#bfa15f]/10 text-[#bfa15f]' },
+  Startup:    { color: 'text-[#bfa15f]',   bg: 'bg-[#bfa15f]/15',   border: 'border-[#bfa15f]/40',   badge: 'bg-[#bfa15f]/20 text-[#bfa15f]' },
 }
 
 const SECTORS: Sector[] = ['All', 'IT', 'Product', 'Core', 'PSU', 'Consulting', 'Startup']
 
 const LeadingCompanies: React.FC = () => {
-  const [activeSector, setActiveSector] = useState<Sector>('All')
-  const [search, setSearch] = useState('')
+  const [companies,     setCompanies]     = useState<LeadingCompany[]>(leadingCompaniesDefault)
+  const [activeSector,  setActiveSector]  = useState<Sector>('All')
+  const [search,        setSearch]        = useState('')
+
+  useEffect(() => {
+    placementService.getLeadingCompanies().then(setCompanies)
+  }, [])
 
   const filtered = companies.filter(c => {
     const matchSector = activeSector === 'All' || c.sector === activeSector
     const matchSearch = c.name.toLowerCase().includes(search.toLowerCase())
     return matchSector && matchSearch
   })
+
+  const uniqueSectors = Array.from(new Set(companies.map(c => c.sector)))
 
   return (
     <div className="space-y-8">
@@ -107,7 +51,7 @@ const LeadingCompanies: React.FC = () => {
       <div className="grid grid-cols-3 gap-4">
         {[
           { value: `${companies.length}+`, label: 'Recruiting Companies' },
-          { value: '6', label: 'Industry Sectors' },
+          { value: `${uniqueSectors.length}`, label: 'Industry Sectors' },
           { value: '₹48 LPA', label: 'Highest Package' },
         ].map((s) => (
           <div key={s.label} className="bg-white border border-slate-200 rounded-xl p-5 text-center shadow-sm hover:shadow-md transition-all">
@@ -128,7 +72,6 @@ const LeadingCompanies: React.FC = () => {
 
       {/* Filter Controls */}
       <div className="flex flex-col sm:flex-row gap-3">
-        {/* Search */}
         <div className="relative flex-grow max-w-xs">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -139,8 +82,6 @@ const LeadingCompanies: React.FC = () => {
             className="w-full pl-8 pr-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-accent/50 font-sans"
           />
         </div>
-
-        {/* Sector Filter */}
         <div className="flex items-center gap-2 flex-wrap">
           {SECTORS.map(sector => (
             <button
@@ -149,7 +90,7 @@ const LeadingCompanies: React.FC = () => {
               className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
                 activeSector === sector
                   ? 'bg-primary text-white border-primary shadow-sm'
-                  : `border-slate-200 text-slate-600 hover:border-primary/40 hover:text-primary ${sector !== 'All' && sectorConfig[sector] ? 'hover:' + sectorConfig[sector].bg : ''}`
+                  : `border-slate-200 text-slate-600 hover:border-primary/40 hover:text-primary`
               }`}
             >
               {sector}
@@ -168,7 +109,7 @@ const LeadingCompanies: React.FC = () => {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {filtered.map((company) => {
-            const cfg = sectorConfig[company.sector]
+            const cfg = sectorConfig[company.sector] ?? sectorConfig['IT']
             return (
               <div
                 key={company.name}
@@ -178,7 +119,6 @@ const LeadingCompanies: React.FC = () => {
                     : 'bg-white border-slate-200 hover:border-slate-300'
                 }`}
               >
-                {/* Company Initial */}
                 <div className={`w-10 h-10 rounded-xl mx-auto mb-2.5 flex items-center justify-center font-display font-black text-sm ${
                   company.highlight ? `bg-white ${cfg.color} shadow-sm` : 'bg-primary/5 text-primary'
                 }`}>

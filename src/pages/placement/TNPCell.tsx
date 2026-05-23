@@ -1,69 +1,37 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Briefcase, Award, TrendingUp, Building2, CheckCircle2, ArrowRight,
   Phone, Mail, Users, Star
 } from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
-
-const processSteps = [
-  { num: '01', title: 'Company Registration', desc: 'Companies register on the T&P portal and submit JD, package details, and eligibility criteria.' },
-  { num: '02', title: 'Pre-Placement Talk', desc: 'Company HR team visits or conducts virtual PPT to brief students about roles and culture.' },
-  { num: '03', title: 'Aptitude Test', desc: 'Written or online screening — quant, logical reasoning, verbal ability, and coding (if applicable).' },
-  { num: '04', title: 'Group Discussion', desc: 'For communication-heavy roles — case studies, topic-based GD and extempore sessions.' },
-  { num: '05', title: 'Technical Interview', desc: 'Final technical depth assessment — DSA, core subjects, projects, and domain expertise.' },
-  { num: '06', title: 'Offer Letter', desc: 'Selected students receive official offer letters. Joining formalities coordinated by T&P Cell.' },
-]
-
-const trainingPrograms = [
-  'Quantitative Aptitude & Logical Reasoning (AMCAT, Cocubes pattern)',
-  'Verbal Ability & Communication Skills Enhancement',
-  'Technical Interview Preparation (DSA, DBMS, OS, Networks)',
-  'Resume Building & LinkedIn Profile Optimization Workshops',
-  'Mock Interviews with Industry Professionals',
-  'Soft Skills and Professional Etiquette Training',
-  'Group Discussion Facilitation and Practice Sessions',
-  'GATE & Higher Education Guidance Programs',
-]
-
-const partners = [
-  'TCS', 'Infosys', 'Wipro', 'Accenture', 'L&T', 'BHEL', 'Amazon', 'Microsoft',
-  'Google', 'IBM', 'HCL', 'Cognizant', 'Tech Mahindra', 'Capgemini', 'Oracle', 'Deloitte',
-]
-
-const team = [
-  {
-    name: 'Prof. V.K. Sharma',
-    title: 'Training & Placement Officer (TPO)',
-    dept: 'Department of Computer Engineering',
-    phone: '0731-2582150',
-    email: 'tpo@sgsits.ac.in',
-    img: 'https://picsum.photos/seed/tpo_sharma/200/200',
-    exp: '20 years',
-  },
-  {
-    name: 'Dr. Anjali Mehta',
-    title: 'UG Placement Coordinator',
-    dept: 'T&P Cell',
-    phone: '0731-2582151',
-    email: 'placement.ug@sgsits.ac.in',
-    img: 'https://picsum.photos/seed/tpo_anjali/200/200',
-    exp: '12 years',
-  },
-  {
-    name: 'Mr. Rahul Patidar',
-    title: 'PG & Corporate Relations',
-    dept: 'T&P Cell',
-    phone: '0731-2582152',
-    email: 'placement.pg@sgsits.ac.in',
-    img: 'https://picsum.photos/seed/tpo_rahul/200/200',
-    exp: '8 years',
-  },
-]
+import {
+  placementService,
+  placementRecordsDefault, type PlacementRecord,
+  tnpTeamDefault,          type TNPTeamMember,
+  placementProcessDefault, type PlacementProcessStep,
+  trainingProgramsDefault,
+  recruitingPartnersDefault,
+  tnpCellInfoDefault,      type TNPCellInfo,
+} from '../../services/placementService'
 
 const TNPCell: React.FC = () => {
-  const placement = mockStore.getPlacement()
-  const latest = placement[0]
+  const [records,    setRecords]    = useState<PlacementRecord[]>(placementRecordsDefault)
+  const [team,       setTeam]       = useState<TNPTeamMember[]>(tnpTeamDefault)
+  const [process,    setProcess]    = useState<PlacementProcessStep[]>(placementProcessDefault)
+  const [training,   setTraining]   = useState<string[]>(trainingProgramsDefault)
+  const [partners,   setPartners]   = useState<string[]>(recruitingPartnersDefault)
+  const [cellInfo,   setCellInfo]   = useState<TNPCellInfo>(tnpCellInfoDefault)
   const [activeStep, setActiveStep] = useState<number | null>(null)
+
+  useEffect(() => {
+    placementService.getPlacementRecords().then(setRecords)
+    placementService.getTNPTeam().then(setTeam)
+    placementService.getPlacementProcess().then(setProcess)
+    placementService.getTrainingPrograms().then(setTraining)
+    placementService.getRecruitingPartners().then(setPartners)
+    placementService.getTNPCellInfo().then(setCellInfo)
+  }, [])
+
+  const latest = records[0]
 
   return (
     <div className="space-y-10">
@@ -75,39 +43,35 @@ const TNPCell: React.FC = () => {
         <p className="text-sm text-slate-500 font-medium font-sans">Career Development & Campus Recruitment — SGSITS Indore</p>
       </div>
 
-      {/* Stats Banner from mockStore */}
-      <div className="bg-primary rounded-2xl p-6 text-white">
-        <p className="text-[10px] uppercase tracking-widest font-bold text-accent/80 mb-3">Placement Statistics {latest?.year}</p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-          {[
-            { icon: Users, value: `${latest?.studentsPlaced}+`, label: 'Students Placed' },
-            { icon: Building2, value: `${latest?.companies}+`, label: 'Companies Visited' },
-            { icon: Award, value: latest?.highestPackage, label: 'Highest Package' },
-            { icon: TrendingUp, value: latest?.averagePackage, label: 'Average Package' },
-          ].map((stat) => {
-            const Icon = stat.icon
-            return (
-              <div key={stat.label} className="text-center">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-2">
-                  <Icon size={18} className="text-accent" />
+      {/* Stats Banner */}
+      {latest && (
+        <div className="bg-primary rounded-2xl p-6 text-white">
+          <p className="text-[10px] uppercase tracking-widest font-bold text-accent/80 mb-3">Placement Statistics {latest.year}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+            {[
+              { icon: Users,    value: `${latest.studentsPlaced}+`, label: 'Students Placed' },
+              { icon: Building2, value: `${latest.companies}+`,    label: 'Companies Visited' },
+              { icon: Award,    value: latest.highestPackage,       label: 'Highest Package' },
+              { icon: TrendingUp, value: latest.averagePackage,     label: 'Average Package' },
+            ].map((stat) => {
+              const Icon = stat.icon
+              return (
+                <div key={stat.label} className="text-center">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-2">
+                    <Icon size={18} className="text-accent" />
+                  </div>
+                  <p className="text-2xl font-display font-bold text-white">{stat.value}</p>
+                  <p className="text-[10px] text-white/60 uppercase tracking-wider font-bold mt-1">{stat.label}</p>
                 </div>
-                <p className="text-2xl font-display font-bold text-white">{stat.value}</p>
-                <p className="text-[10px] text-white/60 uppercase tracking-wider font-bold mt-1">{stat.label}</p>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* About T&P Cell */}
       <div className="border-l-4 border-accent pl-5">
-        <p className="text-sm text-slate-700 leading-relaxed font-sans">
-          The <strong>Training & Placement (T&P) Cell</strong> of SGSITS is the dedicated interface between the institute and industry.
-          It coordinates campus recruitment drives, summer internships, pre-placement offers (PPOs), and career development programs
-          throughout the academic year. The cell maintains strong industry connections with <strong>180+ organizations</strong> — 
-          ranging from Fortune 500 MNCs to high-growth startups. The recruitment season runs from <strong>August to March</strong> every year.
-          In the last decade, the T&P Cell has facilitated placements for over 10,000 students across all branches.
-        </p>
+        <p className="text-sm text-slate-700 leading-relaxed font-sans">{cellInfo.aboutText}</p>
       </div>
 
       {/* T&P Team */}
@@ -156,7 +120,7 @@ const TNPCell: React.FC = () => {
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Process</span>
         <h3 className="text-xl font-display font-bold text-slate-900 mb-4">Campus Recruitment Process</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {processSteps.map((step, i) => (
+          {process.map((step, i) => (
             <div
               key={step.num}
               onClick={() => setActiveStep(activeStep === i ? null : i)}
@@ -172,7 +136,7 @@ const TNPCell: React.FC = () => {
               {activeStep === i && (
                 <div className="mt-3 pt-3 border-t border-slate-200">
                   <div className="flex items-center gap-1 text-[10px] text-accent font-bold">
-                    <CheckCircle2 size={11} /> Step {step.num} of 06
+                    <CheckCircle2 size={11} /> Step {step.num} of {String(process.length).padStart(2, '0')}
                   </div>
                 </div>
               )}
@@ -186,7 +150,7 @@ const TNPCell: React.FC = () => {
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Training</span>
         <h3 className="text-xl font-display font-bold text-slate-900 mb-4">Year-Round Training Programs</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {trainingPrograms.map((prog) => (
+          {training.map((prog) => (
             <div key={prog} className="flex items-start gap-3 bg-white border border-slate-200 rounded-xl p-3.5 text-sm hover:border-accent/30 hover:bg-[#bfa15f]/5 transition-all">
               <CheckCircle2 size={15} className="text-accent shrink-0 mt-0.5" />
               <span className="text-slate-700 font-medium font-sans">{prog}</span>
@@ -216,22 +180,22 @@ const TNPCell: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <Briefcase size={18} className="text-accent" />
-            <h4 className="font-bold font-display text-base">Register Your Company for Campus Drive</h4>
+            <h4 className="font-bold font-display text-base">{cellInfo.ctaLabel}</h4>
           </div>
           <p className="text-sm text-slate-300 font-sans">We welcome companies from all sectors for on-campus and virtual recruitment drives.</p>
           <div className="flex flex-wrap gap-5 mt-3 text-sm">
             <div className="flex items-center gap-1.5">
               <Phone size={13} className="text-accent" />
-              <span>0731-2582150</span>
+              <span>{cellInfo.phone}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Mail size={13} className="text-accent" />
-              <a href="mailto:tpo@sgsits.ac.in" className="hover:underline">tpo@sgsits.ac.in</a>
+              <a href={`mailto:${cellInfo.email}`} className="hover:underline">{cellInfo.email}</a>
             </div>
           </div>
         </div>
         <a
-          href="mailto:tpo@sgsits.ac.in"
+          href={`mailto:${cellInfo.ctaEmail}`}
           className="inline-flex items-center gap-2 bg-accent text-primary px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-accent/90 transition-colors shrink-0"
         >
           Contact T&P Cell <ArrowRight size={14} />

@@ -1,6 +1,15 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { mockStore } from '../../data/mockStore'
 
 const ScholarshipGovt: React.FC = () => {
+  const [data, setData] = useState<any>(null)
+
+  useEffect(() => {
+    setData(mockStore.getScholarshipGovt())
+  }, [])
+
+  if (!data) return null
+
   return (
     <div className="space-y-8">
       <div className="border-b border-gray-200 pb-4">
@@ -8,24 +17,26 @@ const ScholarshipGovt: React.FC = () => {
         <p className="text-sm text-gray-500 mt-1">State and central government scholarship schemes</p>
       </div>
 
-      <p className="text-gray-700 text-[15px] leading-relaxed">Various government scholarship schemes are available for eligible students of SGSITS. The scholarship cell assists students with application process and documentation.</p>
+      <p className="text-gray-700 text-[15px] leading-relaxed">{data.intro}</p>
+
       <div className="grid gap-4 md:grid-cols-2">
-      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:bg-slate-50/50 transition-all duration-200">
-        <h3 className="font-bold text-[15px]" style={{ color: 'var(--color-primary)' }}>Post-Matric Scholarship (SC/ST)</h3>
-        <p className="text-sm text-gray-600 mt-2 leading-relaxed">For SC/ST students. Covers tuition fee, maintenance allowance, and book grant. Apply through the State Scholarship Portal.</p>
+        {(data.scholarships || []).map((s: any, i: number) => (
+          <div key={i} className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:bg-slate-50/50 transition-all duration-200">
+            <h3 className="font-bold text-[15px]" style={{ color: 'var(--color-primary)' }}>{s.title}</h3>
+            <p className="text-sm text-gray-600 mt-2 leading-relaxed">{s.description}</p>
+            {s.eligibility && (
+              <p className="text-xs text-slate-500 mt-1 font-semibold">Eligibility: {s.eligibility}</p>
+            )}
+            {s.portalUrl && (
+              <a href={s.portalUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline mt-1 block">Apply: {s.portalUrl}</a>
+            )}
+          </div>
+        ))}
       </div>
-      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:bg-slate-50/50 transition-all duration-200">
-        <h3 className="font-bold text-[15px]" style={{ color: 'var(--color-primary)' }}>Post-Matric Scholarship (OBC)</h3>
-        <p className="text-sm text-gray-600 mt-2 leading-relaxed">For OBC students with family income below ₹8 lakh per annum. Partial fee waiver and maintenance allowance.</p>
-      </div>
-      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:bg-slate-50/50 transition-all duration-200">
-        <h3 className="font-bold text-[15px]" style={{ color: 'var(--color-primary)' }}>National Scholarship Portal (NSP)</h3>
-        <p className="text-sm text-gray-600 mt-2 leading-relaxed">Central government scholarships through the National Scholarship Portal. Multiple schemes based on category, income, and merit.</p>
-      </div>
-      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:bg-slate-50/50 transition-all duration-200">
-        <h3 className="font-bold text-[15px]" style={{ color: 'var(--color-primary)' }}>State Merit Scholarship</h3>
-        <p className="text-sm text-gray-600 mt-2 leading-relaxed">For meritorious students from MP who scored above 85% in board examinations. Merit-based monthly stipend.</p>
-      </div>
+
+      <div className="text-sm text-slate-600 flex flex-wrap gap-4">
+        {data.contactEmail && <span>📧 {data.contactEmail}</span>}
+        {data.contactPhone && <span>📞 {data.contactPhone}</span>}
       </div>
     </div>
   )

@@ -7,6 +7,7 @@ import {
   Briefcase,
   GraduationCap,
   Award,
+  Settings
 } from 'lucide-react'
 
 const navItems: PortalNavItem[] = [
@@ -16,6 +17,7 @@ const navItems: PortalNavItem[] = [
   { label: 'Placement Records',  path: '/dashboard/placement/records',            icon: Award },
   { label: 'Training Programs',  path: '/dashboard/placement/training-programs',  icon: GraduationCap },
   { label: 'Internships',        path: '/dashboard/placement/internships',        icon: Briefcase },
+  { label: 'Placements CMS',     path: '/dashboard/placement/cms',                icon: Settings },
 ]
 
 const PlacementLayout: React.FC = () => (

@@ -9,19 +9,29 @@ import {
   Cloud
 } from 'lucide-react'
 import Chatbot from '../global/Chatbot'
-import { navItems } from '../../constants/navItems'
 import { departmentsList } from '../../constants/departmentsList'
+import { settingsService, footerDefaults, siteSettingsDefaults, topBarDefaults } from '../../services/settingsService'
+import type { FooterData, TopBarData } from '../../mock/settings/settingsData'
+import type { SiteSettings } from '../../types'
+import { navService, navItemsDefault } from '../../services/navService'
 
 // --- TOP BAR COMPONENT ---
-const TopBar: React.FC = () => {
+interface TopBarProps {
+  topBar: TopBarData
+}
+
+const TopBar: React.FC<TopBarProps> = ({ topBar }) => {
   return (
     <div className="bg-primary text-white/80 text-xs md:text-sm py-2 border-b border-white/10 w-full relative z-30 font-sans font-medium">
       <div className="w-full px-4 lg:px-12 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-between sm:items-center">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 md:gap-x-6">
-          <a href="#" className="hover:text-white transition-colors">Students</a>
-          <a href="#" className="hover:text-white transition-colors">Faculty</a>
-          <a href="#" className="hover:text-white transition-colors">Alumni</a>
-          <a href="#" className="hover:text-white transition-colors">Contact</a>
+          <Link to="/students/activities" className="hover:text-white transition-colors">Students</Link>
+          <Link to="/about/administration" className="hover:text-white transition-colors">Faculty</Link>
+          <Link to="/about/institute" className="hover:text-white transition-colors">Alumni</Link>
+          <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
+          {topBar.helpline && (
+            <span className="hidden lg:inline text-white/50">| Helpline: {topBar.helpline}</span>
+          )}
         </div>
         <div className="flex items-center justify-between gap-2 sm:justify-end sm:gap-4">
           <div className="flex items-center gap-3 sm:gap-4">
@@ -34,6 +44,14 @@ const TopBar: React.FC = () => {
               <span className="hidden sm:inline">A- / A / A+</span>
             </button>
           </div>
+          <a
+            href={topBar.erpPortalUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1.5 bg-transparent hover:bg-white/10 border border-accent text-accent px-3 py-1.5 rounded-full font-semibold text-xs transition-all shrink-0"
+          >
+            <span>{topBar.erpPortalLabel}</span>
+          </a>
           <Link
             to="/login"
             className="flex items-center gap-1.5 bg-transparent hover:bg-white/10 border border-accent text-accent px-3 py-1.5 rounded-full font-semibold text-xs transition-all shrink-0"
@@ -53,9 +71,10 @@ const TopBar: React.FC = () => {
 interface LogoBannerProps {
   onMobileToggle: () => void
   mobileOpen: boolean
+  settings: SiteSettings
 }
 
-const LogoBanner: React.FC<LogoBannerProps> = ({ onMobileToggle, mobileOpen }) => {
+const LogoBanner: React.FC<LogoBannerProps> = ({ onMobileToggle, mobileOpen, settings }) => {
   return (
     <div className="w-full border-b sticky top-0 z-50 lg:static lg:z-20 bg-white border-slate-100 shadow-sm">
       <div className="w-full px-4 lg:px-12 py-3 flex items-center justify-between gap-3 sm:gap-4">
@@ -75,7 +94,7 @@ const LogoBanner: React.FC<LogoBannerProps> = ({ onMobileToggle, mobileOpen }) =
         </div>
         <div className="hidden lg:flex items-center space-x-6 shrink-0">
           <div className="border border-accent/30 px-4 py-1.5 text-accent font-bold text-[12px] bg-accent/5 hidden xl:block uppercase tracking-wider rounded-sm">
-            An Institute of National Standing
+            {settings.tagline}
           </div>
         </div>
         <button
@@ -94,9 +113,10 @@ const LogoBanner: React.FC<LogoBannerProps> = ({ onMobileToggle, mobileOpen }) =
 interface StickyNavProps {
   mobileOpen: boolean
   onMobileClose: () => void
+  navItemsList: any[]
 }
 
-const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose }) => {
+const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose, navItemsList }) => {
   const [navVisible, setNavVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isStuck, setIsStuck] = useState(false)
@@ -158,7 +178,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose }) => {
         }}
       >
         <nav className="w-full px-4 lg:px-12 flex flex-wrap justify-center gap-x-2 text-[15.5px] font-semibold tracking-wide">
-          {navItems.map((item) => {
+          {navItemsList.map((item) => {
             const isActive = isItemActive(item)
             return (
               <div
@@ -206,7 +226,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose }) => {
                   >
                     <div className="h-[3px] bg-accent w-full"></div>
                     <ul className="py-2 text-[14px] text-primary font-medium tracking-normal max-h-[70vh] overflow-y-auto">
-                      {item.children.map((child) => {
+                      {item.children.map((child: any) => {
                         const isChildActive = pathname === child.path
                         return (
                           <li key={child.path}>
@@ -256,7 +276,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose }) => {
             </div>
 
             <nav className="flex-1 px-4 py-3 text-slate-850 bg-white">
-              {navItems.map((item) => (
+              {navItemsList.map((item) => (
                 <div key={item.label} className="border-b border-gray-200 last:border-0">
                   {item.children ? (
                     <>
@@ -269,7 +289,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose }) => {
                       </button>
                       {expandedMobile === item.label && (
                         <div className="pb-3 pl-4 space-y-0.5 animate-in slide-in-from-top-1 duration-200">
-                          {item.children.map((child) => (
+                          {item.children.map((child: any) => (
                             <Link
                               key={child.path}
                               to={child.path}
@@ -377,7 +397,12 @@ const CampusRevealBanner: React.FC = () => {
 }
 
 // --- FOOTER COMPONENT ---
-const Footer: React.FC = () => {
+interface FooterProps {
+  footerData: FooterData
+  settings: SiteSettings
+}
+
+const Footer: React.FC<FooterProps> = ({ footerData, settings }) => {
   return (
     <>
       {/* Weather & Social Bar */}
@@ -389,11 +414,21 @@ const Footer: React.FC = () => {
             <span>35°C | Scattered clouds</span>
           </div>
           <div className="flex space-x-5 text-slate-600">
-            <a href="#" className="hover:text-accent text-primary transition-colors"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg></a>
-            <a href="#" className="hover:text-accent text-primary transition-colors"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg></a>
-            <a href="#" className="hover:text-accent text-primary transition-colors"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" /></svg></a>
-            <a href="#" className="hover:text-accent text-primary transition-colors"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></svg></a>
-            <a href="#" className="hover:text-accent text-primary transition-colors"><svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" /><polygon fill="white" points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" /></svg></a>
+            {settings.socialLinks?.facebook && (
+              <a href={settings.socialLinks.facebook} target="_blank" rel="noreferrer" className="hover:text-accent text-primary transition-colors"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg></a>
+            )}
+            {settings.socialLinks?.linkedin && (
+              <a href={settings.socialLinks.linkedin} target="_blank" rel="noreferrer" className="hover:text-accent text-primary transition-colors"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg></a>
+            )}
+            {settings.socialLinks?.twitter && (
+              <a href={settings.socialLinks.twitter} target="_blank" rel="noreferrer" className="hover:text-accent text-primary transition-colors"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" /></svg></a>
+            )}
+            {settings.socialLinks?.instagram && (
+              <a href={settings.socialLinks.instagram} target="_blank" rel="noreferrer" className="hover:text-accent text-primary transition-colors"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></svg></a>
+            )}
+            {settings.socialLinks?.youtube && (
+              <a href={settings.socialLinks.youtube} target="_blank" rel="noreferrer" className="hover:text-accent text-primary transition-colors"><svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" /><polygon fill="white" points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" /></svg></a>
+            )}
           </div>
         </div>
       </div>
@@ -402,24 +437,32 @@ const Footer: React.FC = () => {
         <div className="max-w-[1400px] mx-auto px-4 lg:px-12">
           {/* Section 1: Top Links */}
           <div className="flex flex-wrap gap-x-8 gap-y-3 font-semibold pb-5 border-b border-white/10 text-sm">
-            <Link to="/students/activities" className="hover:text-white transition-colors">Students</Link>
-            <Link to="/about/administration" className="hover:text-white transition-colors">Faculty & Staff</Link>
-            <Link to="/about/institute" className="hover:text-white transition-colors">About</Link>
-            <Link to="/placement/tnp-cell" className="hover:text-white transition-colors">Placements</Link>
-            <Link to="/about/telephone-directory" className="hover:text-white transition-colors">Directory</Link>
-            <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
+            {footerData.columns[0]?.links.map((link, idx) => (
+              link.to ? (
+                <Link key={idx} to={link.to} className="hover:text-white transition-colors">
+                  {link.label}
+                </Link>
+              ) : (
+                <a key={idx} href={link.href} target={link.external ? "_blank" : undefined} rel={link.external ? "noreferrer" : undefined} className="hover:text-white transition-colors">
+                  {link.label}
+                </a>
+              )
+            ))}
           </div>
 
           {/* Section 2: Categories */}
           <div className="flex flex-wrap gap-x-8 gap-y-3 font-semibold py-5 border-b border-white/10 text-sm">
-            <Link to="/academics/calendar" className="flex items-center hover:text-white transition-colors">Academics</Link>
-            <Link to="/departments" className="flex items-center hover:text-white transition-colors">Departments</Link>
-            <Link to="/admission/ug" className="flex items-center hover:text-white transition-colors">Admissions</Link>
-            <Link to="/facilities/computer-center" className="flex items-center hover:text-white transition-colors">Facilities</Link>
-            <Link to="/notices" className="flex items-center hover:text-white transition-colors">Notices</Link>
-            <Link to="/about/accreditation" className="flex items-center hover:text-white transition-colors">Accreditation</Link>
-            <Link to="/students/activities" className="flex items-center hover:text-white transition-colors">Campus Life</Link>
-            <Link to="/about/institute" className="flex items-center hover:text-white transition-colors">The Institute</Link>
+            {footerData.columns[1]?.links.map((link, idx) => (
+              link.to ? (
+                <Link key={idx} to={link.to} className="flex items-center hover:text-white transition-colors">
+                  {link.label}
+                </Link>
+              ) : (
+                <a key={idx} href={link.href} target={link.external ? "_blank" : undefined} rel={link.external ? "noreferrer" : undefined} className="flex items-center hover:text-white transition-colors">
+                  {link.label}
+                </a>
+              )
+            ))}
           </div>
 
           {/* Section 3: Departments */}
@@ -436,12 +479,16 @@ const Footer: React.FC = () => {
 
           {/* Section 4: Policies / Reports */}
           <div className="flex flex-wrap gap-x-8 gap-y-3 font-bold text-white py-6 border-b border-white/10 text-sm">
-            <a href="#" className="hover:text-gray-300 transition-colors">Annual Reports</a>
-            <a href="#" className="hover:text-gray-300 transition-colors">Annual Accounts</a>
-            <a href="#" className="hover:text-gray-300 transition-colors">Annual Budget</a>
-            <a href="#" className="hover:text-gray-300 transition-colors">Act and Statutes</a>
-            <a href="#" className="hover:text-gray-300 transition-colors">Quality Policy</a>
-            <a href="#" className="hover:text-gray-300 transition-colors">ISO 9001:2015</a>
+            {footerData.portals.links.map((link, idx) => (
+              <a key={idx} href={link.href} target="_blank" rel="noreferrer" className="hover:text-gray-300 transition-colors">
+                {link.label}
+              </a>
+            ))}
+            {footerData.visitorStats && (
+              <span className="ml-auto text-xs text-slate-400 font-normal">
+                {footerData.visitorStats.label}: <strong className="text-white font-bold">{footerData.visitorStats.count}</strong> ({footerData.visitorStats.note})
+              </span>
+            )}
           </div>
 
           {/* Section 5: Brand Identity */}
@@ -454,7 +501,7 @@ const Footer: React.FC = () => {
                 श्री गोविंदराम सेकसरिया प्रौद्योगिकी एवं विज्ञान संस्थान
               </h2>
               <p className="text-white font-medium text-xs mt-0.5 tracking-wide">
-                Shri G. S. Institute of Technology & Science
+                {footerData.institution.name}
               </p>
             </div>
           </div>
@@ -463,12 +510,14 @@ const Footer: React.FC = () => {
           <div className="pt-6 pb-2 flex flex-col md:flex-row justify-between items-start text-xs text-slate-400 space-y-4 md:space-y-0 relative">
             <div>
               <div className="space-x-2 mb-1.5">
-                <Link to="/policy/accessibility" className="hover:text-white transition-colors">Accessibility</Link> |
-                <Link to="/policy/privacy" className="hover:text-white transition-colors">Privacy Policy</Link> |
-                <Link to="/policy/terms" className="hover:text-white transition-colors">Terms of Use</Link> |
-                <Link to="/policy/sitemap" className="hover:text-white transition-colors">Sitemap</Link>
+                {footerData.bottomLinks.map((link, idx) => (
+                  <React.Fragment key={idx}>
+                    <Link to={link.to} className="hover:text-white transition-colors">{link.label}</Link>
+                    {idx < footerData.bottomLinks.length - 1 && ' | '}
+                  </React.Fragment>
+                ))}
               </div>
-              <p>© {new Date().getFullYear()} SGSITS - All rights reserved</p>
+              <p>© {new Date().getFullYear()} {footerData.institution.shortCode}SITS - All rights reserved</p>
             </div>
             <div className="text-left md:text-right">
               <p className="mb-0">Powered by<br className="hidden md:block" /> <span className="text-white font-medium">SGSITS Developers</span></p>
@@ -486,6 +535,36 @@ const MainLayout: React.FC = () => {
   const location = useLocation()
   const { pathname } = location
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  // Dynamic States
+  const [settings, setSettings] = useState<SiteSettings>(siteSettingsDefaults)
+  const [topBar, setTopBar] = useState<TopBarData>(topBarDefaults)
+  const [navItemsList, setNavItemsList] = useState<any[]>(navItemsDefault)
+  const [footerData, setFooterData] = useState<FooterData>(footerDefaults)
+  const [alerts, setAlerts] = useState<any[]>([])
+
+  // Load configuration on mount
+  useEffect(() => {
+    const fetchLayoutConfig = async () => {
+      try {
+        const [loadedSettings, loadedTopBar, loadedNav, loadedFooter, loadedAlerts] = await Promise.all([
+          settingsService.getSiteSettings(),
+          settingsService.getTopBarData(),
+          navService.getNavItems(),
+          settingsService.getFooterData(),
+          settingsService.getAlerts()
+        ])
+        setSettings(loadedSettings)
+        setTopBar(loadedTopBar)
+        setNavItemsList(loadedNav)
+        setFooterData(loadedFooter)
+        setAlerts(loadedAlerts)
+      } catch (error) {
+        console.error('Failed to load layout CMS settings:', error)
+      }
+    }
+    fetchLayoutConfig()
+  }, [])
 
   // Scroll to content container if navigated from LeftSidebar, otherwise scroll to absolute top (e.g. from navbar tabs)
   useEffect(() => {
@@ -521,11 +600,20 @@ const MainLayout: React.FC = () => {
     }
   }, [mobileOpen])
 
+  // Filter and sort active alerts for announcements marquee
+  const activeAlerts = alerts
+    .filter((a: any) => a.isActive)
+    .sort((a: any, b: any) => {
+      const pA = typeof a.priority === 'number' ? a.priority : 100
+      const pB = typeof b.priority === 'number' ? b.priority : 100
+      return pA - pB
+    })
+
   return (
     <div className="min-h-screen flex flex-col font-sans text-slate-800 bg-[#f7f8fa] transition-colors duration-300">
-      <TopBar />
-      <LogoBanner onMobileToggle={() => setMobileOpen(o => !o)} mobileOpen={mobileOpen} />
-      <StickyNav mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
+      <TopBar topBar={topBar} />
+      <LogoBanner onMobileToggle={() => setMobileOpen(o => !o)} mobileOpen={mobileOpen} settings={settings} />
+      <StickyNav mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} navItemsList={navItemsList} />
 
       {/* Announcements Marquee */}
       <div className="relative w-full bg-black text-slate-100 flex items-center border-t border-b border-zinc-800">
@@ -538,11 +626,24 @@ const MainLayout: React.FC = () => {
             className: 'text-[13px] sm:text-[14px] font-medium leading-none m-0 pt-[1px] w-full block text-slate-200'
           } as any, (
             <>
-              <span className="mr-8 font-semibold text-accent">Institute Day 2025 - Live Streaming</span>
-              <span className="text-accent/30 mx-2">|</span>
-              <span className="mr-8 font-semibold text-slate-100">Rolling Advertisement No SGSITS/R/3/2025 visit https://sgsits.ac.in for applications</span>
-              <span className="text-accent/30 mx-2">|</span>
-              <span className="mr-8 font-semibold text-slate-100">Semester Exams Rescheduled to 30th April</span>
+              {activeAlerts.length > 0 ? (
+                activeAlerts.map((alert, idx) => (
+                  <React.Fragment key={alert.id || idx}>
+                    {idx > 0 && <span className="text-accent/30 mx-3">|</span>}
+                    {alert.link ? (
+                      <Link to={alert.link} className={`mr-8 font-semibold hover:underline ${idx === 0 ? 'text-accent' : 'text-slate-100'}`}>
+                        {alert.text}
+                      </Link>
+                    ) : (
+                      <span className={`mr-8 font-semibold ${idx === 0 ? 'text-accent' : 'text-slate-100'}`}>
+                        {alert.text}
+                      </span>
+                    )}
+                  </React.Fragment>
+                ))
+              ) : (
+                <span className="text-slate-400 font-medium">No active announcements at the moment.</span>
+              )}
             </>
           ))}
         </div>
@@ -554,7 +655,7 @@ const MainLayout: React.FC = () => {
 
       {pathname === '/' && <CampusRevealBanner />}
 
-      <Footer />
+      <Footer footerData={footerData} settings={settings} />
       {!mobileOpen && <Chatbot />}
     </div>
   )

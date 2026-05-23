@@ -1,20 +1,14 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Mail, Phone } from 'lucide-react'
-
-const admins = [
-  { title: 'Director', name: 'Prof. (Dr.) Rakesh Kumar Bajaj', email: 'director@sgsits.ac.in', phone: '0731-2582100' },
-  { title: 'Deputy Director', name: 'Prof. S.K. Jain', email: 'deputydirector@sgsits.ac.in', phone: '0731-2582102' },
-  { title: 'Dean (Academics)', name: 'Prof. R.K. Pandit', email: 'deanacademics@sgsits.ac.in', phone: '0731-2582103' },
-  { title: 'Dean (Student Welfare)', name: 'Prof. M.L. Sharma', email: 'deansw@sgsits.ac.in', phone: '0731-2582104' },
-  { title: 'Dean (R&D)', name: 'Prof. A.K. Tripathi', email: 'deanrd@sgsits.ac.in', phone: '0731-2582105' },
-  { title: 'Registrar', name: 'Shri P.K. Verma', email: 'registrar@sgsits.ac.in', phone: '0731-2582124' },
-  { title: 'Controller of Examinations', name: 'Prof. V.K. Gupta', email: 'coe@sgsits.ac.in', phone: '0731-2582106' },
-  { title: 'Chief Warden', name: 'Prof. N.K. Joshi', email: 'chiefwarden@sgsits.ac.in', phone: '0731-2582800' },
-  { title: 'Head Librarian', name: 'Dr. S.P. Singh', email: 'library@sgsits.ac.in', phone: '0731-2582700' },
-  { title: 'Estate Officer', name: 'Shri R.S. Patel', email: 'estate@sgsits.ac.in', phone: '0731-2582110' },
-]
+import { aboutService, administrationDefault, type AdminOfficial } from '../../services/aboutService'
 
 const Administration: React.FC = () => {
+  const [admins, setAdmins] = useState<AdminOfficial[]>(administrationDefault)
+
+  useEffect(() => {
+    aboutService.getAdministration().then(setAdmins)
+  }, [])
+
   return (
     <div className="space-y-8">
       <div className="border-b border-gray-200 pb-4">

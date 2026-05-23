@@ -1,33 +1,12 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { BookOpen, Monitor, Clock, Phone, Mail, ExternalLink, Users, CheckCircle2 } from 'lucide-react'
-
-const collections = [
-  { label: 'Books & Textbooks', value: '50,000+' },
-  { label: 'Bound Journals', value: '5,000+' },
-  { label: 'E-Journals (Online)', value: '10,000+' },
-  { label: 'CD/DVD Resources', value: '2,000+' },
-  { label: 'Theses & Dissertations', value: '800+' },
-  { label: 'Newspaper Subscriptions', value: '12' },
-]
-
-const eResources = [
-  { name: 'IEEE Xplore Digital Library', url: 'https://ieeexplore.ieee.org', desc: 'Technical papers, journals, and standards from IEEE' },
-  { name: 'Elsevier ScienceDirect', url: 'https://www.sciencedirect.com', desc: 'Science, technology and medicine full-text articles' },
-  { name: 'Springer Link', url: 'https://link.springer.com', desc: 'Research in science, humanities and social sciences' },
-  { name: 'ASCE Library', url: 'https://ascelibrary.org', desc: 'Civil engineering research and standards' },
-  { name: 'DELNET', url: 'https://delnet.in', desc: 'National network for library resource sharing' },
-  { name: 'NPTEL Lectures', url: 'https://nptel.ac.in', desc: 'IIT and IISc video lectures for all engineering branches' },
-]
-
-const borrowingRules = [
-  { category: 'B.Tech / B.Pharm Students', books: 4, period: '15 days' },
-  { category: 'M.Tech / M.Pharm / MBA Students', books: 6, period: '15 days' },
-  { category: 'Ph.D. Scholars', books: 8, period: '30 days' },
-  { category: 'Faculty Members', books: 10, period: '90 days' },
-  { category: 'Staff Members', books: 4, period: '30 days' },
-]
+import { mockStore } from '../../data/mockStore'
 
 const Library: React.FC = () => {
+  const [data, setData] = useState<any>(null)
+  useEffect(() => { setData(mockStore.getLibrary()) }, [])
+  if (!data) return null
+
   return (
     <div className="space-y-10">
       {/* Page Header */}
@@ -39,13 +18,7 @@ const Library: React.FC = () => {
 
       {/* Intro */}
       <div className="border-l-2 border-accent pl-5">
-        <p className="text-sm text-slate-700 leading-relaxed font-sans">
-          The <strong>Central Library of SGSITS</strong> is a comprehensive knowledge resource centre spread over two floors
-          of the main academic building. With over 50,000 books, thousands of bound journals, and access to premium
-          international e-resources, the library supports the academic, research, and professional growth of all students and faculty.
-          The library is fully automated using the <strong>KOHA Library Management System</strong> with an Online Public Access Catalogue (OPAC)
-          for instant book search.
-        </p>
+        <p className="text-sm text-slate-700 leading-relaxed font-sans">{data.intro}</p>
       </div>
 
       {/* Collection Stats */}
@@ -53,7 +26,7 @@ const Library: React.FC = () => {
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Collection</span>
         <h3 className="text-xl font-display font-bold text-slate-900 mb-4">Library Holdings</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {collections.map((item) => (
+          {(data.collections || []).map((item: any) => (
             <div key={item.label} className="bg-white border border-slate-200 rounded p-4 text-center shadow-sm">
               <p className="text-2xl font-display font-bold text-primary">{item.value}</p>
               <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider font-sans mt-1">{item.label}</p>
@@ -65,9 +38,9 @@ const Library: React.FC = () => {
       {/* E-Resources */}
       <div>
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Digital Access</span>
-        <h3 className="text-xl font-display font-bold text-slate-900 mb-4">E-Resources & Digital Library</h3>
+        <h3 className="text-xl font-display font-bold text-slate-900 mb-4">E-Resources &amp; Digital Library</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {eResources.map((res) => (
+          {(data.eResources || []).map((res: any) => (
             <a
               key={res.name}
               href={res.url}
@@ -101,7 +74,7 @@ const Library: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {borrowingRules.map((row, i) => (
+              {(data.borrowingRules || []).map((row: any, i: number) => (
                 <tr key={i} className="bg-white hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3 border-b border-slate-100 font-medium text-slate-800">{row.category}</td>
                   <td className="px-4 py-3 border-b border-slate-100 text-center font-bold text-primary">{row.books}</td>
@@ -121,23 +94,8 @@ const Library: React.FC = () => {
             <Clock size={16} className="text-accent" />
             <h4 className="font-bold text-sm text-primary uppercase tracking-wider">Working Hours</h4>
           </div>
-          <div className="text-sm space-y-2 font-sans">
-            <div className="flex justify-between">
-              <span className="text-slate-600">Monday – Friday</span>
-              <span className="font-semibold text-slate-800">8:00 AM – 10:00 PM</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">Saturday</span>
-              <span className="font-semibold text-slate-800">8:00 AM – 5:00 PM</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">During Examinations</span>
-              <span className="font-semibold text-slate-800">8:00 AM – 11:00 PM</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">Sunday & Holidays</span>
-              <span className="font-semibold text-slate-800">Closed</span>
-            </div>
+          <div className="text-sm font-sans text-slate-700">
+            <p>{data.openingHours}</p>
           </div>
         </div>
 
@@ -163,7 +121,7 @@ const Library: React.FC = () => {
         </div>
       </div>
 
-      {/* OPAC & Downloads */}
+      {/* OPAC */}
       <div className="bg-primary text-white rounded p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h4 className="font-bold font-display text-base">OPAC — Online Book Search</h4>
@@ -185,11 +143,11 @@ const Library: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm font-sans">
           <div className="flex items-center gap-2">
             <Phone size={14} className="text-accent shrink-0" />
-            <span className="text-slate-600">0731-2582270 (Librarian)</span>
+            <span className="text-slate-600">{data.phone}</span>
           </div>
           <div className="flex items-center gap-2">
             <Mail size={14} className="text-accent shrink-0" />
-            <a href="mailto:library@sgsits.ac.in" className="text-accent-blue hover:underline">library@sgsits.ac.in</a>
+            <a href={`mailto:${data.email}`} className="text-accent-blue hover:underline">{data.email}</a>
           </div>
         </div>
       </div>

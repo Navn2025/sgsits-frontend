@@ -15,29 +15,31 @@ import {
   type TopBarData,
 } from '../mock/settings/settingsData'
 import type { SiteSettings } from '../types'
+import { mockStore } from '../data/mockStore'
 
 /**
  * GET /api/settings
  */
 export const getSiteSettings = async (): Promise<SiteSettings> => {
-  return { ...mockSiteSettings }
-  // REAL: return apiClient.get('/settings').then(r => r.data.data)
+  return mockStore.getSiteSettings()
 }
 
 /**
  * GET /api/content/footer
  */
 export const getFooterData = async (): Promise<FooterData> => {
-  return JSON.parse(JSON.stringify(mockFooterData)) as FooterData
-  // REAL: return apiClient.get('/content/footer').then(r => r.data.data)
+  return mockStore.getFooterData()
 }
 
 /**
  * GET /api/content/top-bar
  */
 export const getTopBarData = async (): Promise<TopBarData> => {
-  return { ...mockTopBarData }
-  // REAL: return apiClient.get('/content/top-bar').then(r => r.data.data)
+  return mockStore.getTopBarData()
+}
+
+export const getAlerts = async (): Promise<any[]> => {
+  return mockStore.getAlerts()
 }
 
 // Synchronous defaults for no-flash initial render
@@ -49,6 +51,7 @@ export const settingsService = {
   getSiteSettings,
   getFooterData,
   getTopBarData,
+  getAlerts,
 }
 
 export default settingsService

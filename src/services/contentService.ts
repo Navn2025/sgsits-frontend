@@ -25,103 +25,64 @@ import {
   type FaqsSection,
   type GallerySection,
 } from '../mock/home/homeData'
+import { mockStore } from '../data/mockStore'
 
 // ─── Home Page ────────────────────────────────────────────────────────────────
 
-/**
- * GET /api/content/home
- * Returns the complete home page CMS content.
- * Replace with: return apiClient.get('/content/home').then(r => r.data.data)
- */
 export const getHomePage = async (): Promise<HomePageData> => {
-  return { ...mockHomePageData }
-  // REAL: return apiClient.get('/content/home').then(r => r.data.data)
+  return mockStore.getHomePageData()
 }
 
-/**
- * GET /api/content/home/hero-tiles
- * Returns only the hero tiles for dynamic rendering.
- * Replace with: return apiClient.get('/content/home/hero-tiles').then(r => r.data.data)
- */
 export const getHeroTiles = async (): Promise<HeroTileData[]> => {
-  return mockHomePageData.heroTiles.filter(t => t.enabled).sort((a, b) => a.order - b.order)
-  // REAL: return apiClient.get('/content/home/hero-tiles').then(r => r.data.data)
+  const hp = mockStore.getHomePageData()
+  return hp.heroTiles.filter((t: any) => t.enabled).sort((a: any, b: any) => a.order - b.order)
 }
 
-/**
- * GET /api/content/home/about
- */
 export const getAboutSection = async (): Promise<AboutSection> => {
-  return { ...mockHomePageData.about }
-  // REAL: return apiClient.get('/content/home/about').then(r => r.data.data)
+  const hp = mockStore.getHomePageData()
+  return hp.about
 }
 
-/**
- * GET /api/content/home/director
- */
 export const getDirectorSection = async (): Promise<DirectorSection> => {
-  return { ...mockHomePageData.director }
-  // REAL: return apiClient.get('/content/home/director').then(r => r.data.data)
+  const hp = mockStore.getHomePageData()
+  return hp.director
 }
 
-/**
- * GET /api/content/home/news-section-config
- */
 export const getNewsSectionConfig = async (): Promise<NewsSectionConfig> => {
-  return { ...mockHomePageData.newsSection }
+  const hp = mockStore.getHomePageData()
+  return hp.newsSection
 }
 
-/**
- * GET /api/content/home/academic-programs
- */
 export const getAcademicPrograms = async (): Promise<AcademicProgramsSection> => {
-  return { ...mockHomePageData.academicsSection }
-  // REAL: return apiClient.get('/content/home/academic-programs').then(r => r.data.data)
+  const hp = mockStore.getHomePageData()
+  return hp.academicsSection
 }
 
-/**
- * GET /api/content/home/departments
- */
 export const getHomeDepartmentsSection = async (): Promise<DepartmentsSection> => {
-  return { ...mockHomePageData.departmentsSection }
-  // REAL: return apiClient.get('/content/home/departments').then(r => r.data.data)
+  const hp = mockStore.getHomePageData()
+  return hp.departmentsSection
 }
 
-/**
- * GET /api/content/home/stats
- */
 export const getStatsSection = async (): Promise<StatsSection> => {
-  return { ...mockHomePageData.statsSection }
-  // REAL: return apiClient.get('/content/home/stats').then(r => r.data.data)
+  const hp = mockStore.getHomePageData()
+  return hp.statsSection
 }
 
-/**
- * GET /api/content/home/campus-life
- */
 export const getCampusLifeSection = async (): Promise<CampusLifeSection> => {
-  return { ...mockHomePageData.campusLifeSection }
-  // REAL: return apiClient.get('/content/home/campus-life').then(r => r.data.data)
+  const hp = mockStore.getHomePageData()
+  return hp.campusLifeSection
 }
 
-/**
- * GET /api/content/home/faqs
- */
 export const getFaqsSection = async (): Promise<FaqsSection> => {
-  return { ...mockHomePageData.faqsSection }
-  // REAL: return apiClient.get('/content/home/faqs').then(r => r.data.data)
+  const hp = mockStore.getHomePageData()
+  return hp.faqsSection
 }
 
-/**
- * GET /api/content/home/gallery-config
- */
 export const getGallerySection = async (): Promise<GallerySection> => {
-  return { ...mockHomePageData.gallerySection }
+  const hp = mockStore.getHomePageData()
+  return hp.gallerySection
 }
 
-// ─── Convenience export ───────────────────────────────────────────────────────
-// homePageDefaults is used by components that need an initial synchronous value
-// before the async call resolves. This avoids a visible loading flash since
-// mock data is returned instantly.
 export const homePageDefaults: HomePageData = mockHomePageData
 
 export const contentService = {

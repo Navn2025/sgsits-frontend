@@ -4,6 +4,7 @@ export interface NavChild {
 }
 
 export interface NavItem {
+  id?: string
   label: string
   path?: string
   children?: NavChild[]
@@ -89,6 +90,7 @@ export const navItems: NavItem[] = [
     ]
   },
   {
+    id: 'campus-life',
     label: 'Campus Life',
     children: [
       { label: 'Student Activities', path: '/students/activities' },

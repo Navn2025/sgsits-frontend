@@ -53,6 +53,10 @@ const Infrastructure = lazy(() => import('../pages/about/Infrastructure'))
 const IQAC = lazy(() => import('../pages/about/IQAC'))
 const AcademicCouncil = lazy(() => import('../pages/about/AcademicCouncil'))
 const Accreditation = lazy(() => import('../pages/about/Accreditation'))
+const CustomAboutPage = lazy(() => import('../pages/about/CustomAboutPage'))
+const CustomAdmissionPage = lazy(() => import('../pages/admission/CustomAdmissionPage'))
+const CustomPlacementPage = lazy(() => import('../pages/placement/CustomPlacementPage'))
+const CustomCampusLifePage = lazy(() => import('../pages/students/CustomCampusLifePage'))
 
 // Academics Section Pages
 const AcademicCalendar = lazy(() => import('../pages/academics/AcademicCalendar'))
@@ -197,6 +201,7 @@ const PlacementCompanyVisits = lazy(() => import('../pages/placementOfficer/Plac
 const PlacementRecords = lazy(() => import('../pages/placementOfficer/PlacementRecords'))
 const PlacementTrainingPrograms = lazy(() => import('../pages/placementOfficer/PlacementTrainingPrograms'))
 const PlacementInternships = lazy(() => import('../pages/placementOfficer/PlacementInternships'))
+const PlacementCms = lazy(() => import('../pages/placementOfficer/PlacementCms'))
 
 
 // ── Admin Pages ───────────────────────────────────────────────────────────
@@ -245,6 +250,7 @@ const router = createBrowserRouter([
           { path: 'iqac',                 element: <S><IQAC /></S>,             handle: bc('IQAC') },
           { path: 'academic-council',     element: <S><AcademicCouncil /></S>,  handle: bc('Academic Council') },
           { path: 'accreditation',        element: <S><Accreditation /></S>,    handle: bc('Accreditation') },
+          { path: ':customPath',          element: <S><CustomAboutPage /></S> },
         ],
       },
 
@@ -306,6 +312,7 @@ const router = createBrowserRouter([
           { path: 'sss',                      element: <S><SSS /></S>,                  handle: bc('SSS') },
           { path: 'ncc',                      element: <S><NCC /></S>,                  handle: bc('NCC') },
           { path: 'nss',                      element: <S><NSS /></S>,                  handle: bc('NSS') },
+          { path: ':customPath',              element: <S><CustomCampusLifePage /></S> },
         ],
       },
 
@@ -342,6 +349,7 @@ const router = createBrowserRouter([
           { path: 'companies',        element: <S><LeadingCompanies /></S>,  handle: bc('Leading Companies') },
           { path: 'record',           element: <S><PlacementRecord /></S>,   handle: bc('Placement Record') },
           { path: 'contact',          element: <S><PlacementContact /></S>,  handle: bc('Contact Person') },
+          { path: ':customPath',      element: <S><CustomPlacementPage /></S> },
         ],
       },
 
@@ -356,6 +364,7 @@ const router = createBrowserRouter([
           { path: 'pg',         element: <S><PGAdmission /></S>,  handle: bc('PG Admission') },
           { path: 'phd',        element: <S><PhDAdmission /></S>, handle: bc('PhD Admission') },
           { path: 'prospectus', element: <S><Prospectus /></S>,   handle: bc('Prospectus') },
+          { path: ':customPath', element: <S><CustomAdmissionPage /></S> },
         ],
       },
 
@@ -625,6 +634,7 @@ const router = createBrowserRouter([
                   { path: 'records',            element: <S><PlacementRecords /></S> },
                   { path: 'training-programs',  element: <S><PlacementTrainingPrograms /></S> },
                   { path: 'internships',        element: <S><PlacementInternships /></S> },
+                  { path: 'cms',                element: <S><PlacementCms /></S> },
                 ],
               },
             ],

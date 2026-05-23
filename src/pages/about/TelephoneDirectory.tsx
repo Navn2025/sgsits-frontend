@@ -1,41 +1,19 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Search, Phone } from 'lucide-react'
-
-const directory = [
-  { department: 'Director Office', name: 'Director', phone: '0731-2582100', ext: '100' },
-  { department: 'Registrar Office', name: 'Registrar', phone: '0731-2582124', ext: '124' },
-  { department: 'Dean Academics', name: 'Dean (Academics)', phone: '0731-2582103', ext: '103' },
-  { department: 'Dean Student Welfare', name: 'Dean (SW)', phone: '0731-2582104', ext: '104' },
-  { department: 'Computer Engineering', name: 'HOD', phone: '0731-2582401', ext: '401' },
-  { department: 'Civil Engineering', name: 'HOD', phone: '0731-2582301', ext: '301' },
-  { department: 'Electrical Engineering', name: 'HOD', phone: '0731-2582201', ext: '201' },
-  { department: 'Mechanical Engineering', name: 'HOD', phone: '0731-2582501', ext: '501' },
-  { department: 'Electronics & Telecomm', name: 'HOD', phone: '0731-2582601', ext: '601' },
-  { department: 'Electronics & Instrumentation', name: 'HOD', phone: '0731-2582602', ext: '602' },
-  { department: 'Information Technology', name: 'HOD', phone: '0731-2582403', ext: '403' },
-  { department: 'Applied Mathematics', name: 'HOD', phone: '0731-2582701', ext: '701' },
-  { department: 'Applied Physics', name: 'HOD', phone: '0731-2582435', ext: '435' },
-  { department: 'Applied Chemistry', name: 'HOD', phone: '0731-2582181', ext: '181' },
-  { department: 'Biomedical Engineering', name: 'HOD', phone: '0731-2582471', ext: '471' },
-  { department: 'Industrial & Production', name: 'HOD', phone: '0731-2582450', ext: '450' },
-  { department: 'Management Studies (MBA)', name: 'HOD', phone: '0731-2582801', ext: '801' },
-  { department: 'Pharmacy', name: 'HOD', phone: '0731-2582850', ext: '850' },
-  { department: 'Humanities & Social Sciences', name: 'HOD', phone: '0731-2582750', ext: '750' },
-  { department: 'Central Library', name: 'Librarian', phone: '0731-2582700', ext: '700' },
-  { department: 'Computer Center', name: 'In-charge', phone: '0731-2582402', ext: '402' },
-  { department: 'Boys Hostel', name: 'Warden', phone: '0731-2582800', ext: '800' },
-  { department: 'Girls Hostel', name: 'Warden', phone: '0731-2582802', ext: '802' },
-  { department: 'Exam Cell', name: 'COE', phone: '0731-2582106', ext: '106' },
-  { department: 'T&P Cell', name: 'TPO', phone: '0731-2582150', ext: '150' },
-]
+import { aboutService, telephoneDirectoryDefault, type TelephoneEntry } from '../../services/aboutService'
 
 const TelephoneDirectory: React.FC = () => {
+  const [directory, setDirectory] = useState<TelephoneEntry[]>(telephoneDirectoryDefault)
   const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    aboutService.getTelephoneDirectory().then(setDirectory)
+  }, [])
 
   const filtered = directory.filter(d =>
     d.department.toLowerCase().includes(search.toLowerCase()) ||
     d.name.toLowerCase().includes(search.toLowerCase()) ||
-    d.phone.includes(search)
+    d.phone.includes(search),
   )
 
   return (
@@ -58,35 +36,39 @@ const TelephoneDirectory: React.FC = () => {
         />
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm border-collapse">
           <thead>
             <tr style={{ backgroundColor: 'var(--color-primary)' }}>
               <th className="text-left text-white px-4 py-3 font-semibold">#</th>
-              <th className="text-left text-white px-4 py-3 font-semibold">Department / Office</th>
+              <th className="text-left text-white px-4 py-3 font-semibold">Department</th>
               <th className="text-left text-white px-4 py-3 font-semibold">Contact Person</th>
-              <th className="text-left text-white px-4 py-3 font-semibold">Phone Number</th>
-              <th className="text-left text-white px-4 py-3 font-semibold">Ext.</th>
+              <th className="text-left text-white px-4 py-3 font-semibold">Phone</th>
+              <th className="text-left text-white px-4 py-3 font-semibold">Extension</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((d, i) => (
-              <tr key={d.department} className="bg-white hover:bg-slate-50 transition-colors duration-150">
+            {filtered.map((entry, i) => (
+              <tr key={i} className="bg-white hover:bg-slate-50 transition-colors duration-150">
                 <td className="px-4 py-3 border-b border-gray-100 text-gray-500">{i + 1}</td>
-                <td className="px-4 py-3 border-b border-gray-100 font-medium" style={{ color: 'var(--color-primary)' }}>{d.department}</td>
-                <td className="px-4 py-3 border-b border-gray-100 text-gray-700">{d.name}</td>
+                <td className="px-4 py-3 border-b border-gray-100 font-medium" style={{ color: 'var(--color-primary)' }}>{entry.department}</td>
+                <td className="px-4 py-3 border-b border-gray-100 text-gray-700">{entry.name}</td>
                 <td className="px-4 py-3 border-b border-gray-100 text-gray-700">
-                  <span className="flex items-center gap-1.5"><Phone size={13} style={{ color: 'var(--color-accent)' }} /> {d.phone}</span>
+                  <div className="flex items-center gap-1.5">
+                    <Phone size={13} style={{ color: 'var(--color-accent)' }} />
+                    {entry.phone}
+                  </div>
                 </td>
-                <td className="px-4 py-3 border-b border-gray-100 text-gray-500">{d.ext}</td>
+                <td className="px-4 py-3 border-b border-gray-100 text-gray-500">{entry.ext}</td>
               </tr>
             ))}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-4 py-8 text-center text-gray-400 text-sm">No results found</td>
+              </tr>
+            )}
           </tbody>
         </table>
-        {filtered.length === 0 && (
-          <p className="text-center py-8 text-gray-500 text-sm">No results found for "{search}"</p>
-        )}
       </div>
     </div>
   )

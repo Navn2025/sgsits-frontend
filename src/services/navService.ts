@@ -1,30 +1,34 @@
 /**
  * Nav Service — Site navigation / menu structure
- *
- * ╔══════════════════════════════════════════════════════════╗
- * ║  MOCK MODE                                              ║
- * ║  Replace with: apiClient.get('/navigation')             ║
- * ╚══════════════════════════════════════════════════════════╝
  */
 
-import { mockNavItems, type NavItem } from '../mock/navbar/navData'
+import { type NavItem } from '../mock/navbar/navData'
+import { mockStore } from '../data/mockStore'
 
 /**
  * GET /api/navigation
  * Returns the full navigation tree.
  */
 export const getNavItems = async (): Promise<NavItem[]> => {
-  return [...mockNavItems]
-  // REAL: return apiClient.get('/navigation').then(r => r.data.data)
+  return mockStore.getNavItems()
+}
+
+/**
+ * POST /api/navigation
+ * Saves the full navigation tree.
+ */
+export const saveNavItems = async (data: NavItem[]): Promise<void> => {
+  mockStore.saveNavItems(data)
 }
 
 // Synchronous default — used as useState initial value to avoid flash
-export const navItemsDefault: NavItem[] = mockNavItems
+export const navItemsDefault: NavItem[] = []
 
 export type { NavItem }
 
 export const navService = {
   getNavItems,
+  saveNavItems,
 }
 
 export default navService

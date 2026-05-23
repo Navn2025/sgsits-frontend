@@ -1,23 +1,22 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Award, TrendingUp, Building2, Users, BarChart2, Briefcase, ChevronRight } from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
+import {
+  placementService,
+  placementRecordsDefault, type PlacementRecord,
+  deptPlacementDefault,    type DeptPlacementStat,
+} from '../../services/placementService'
 
-const deptData = [
-  { dept: 'Computer Engineering', placed: 98, total: 120, avg: '₹9.8 LPA', highest: '₹48 LPA' },
-  { dept: 'Information Technology', placed: 95, total: 100, avg: '₹9.2 LPA', highest: '₹42 LPA' },
-  { dept: 'Electronics & Comm.', placed: 88, total: 100, avg: '₹7.8 LPA', highest: '₹32 LPA' },
-  { dept: 'Mechanical Engineering', placed: 82, total: 120, avg: '₹6.5 LPA', highest: '₹28 LPA' },
-  { dept: 'Civil Engineering', placed: 70, total: 80, avg: '₹5.8 LPA', highest: '₹18 LPA' },
-  { dept: 'Electrical Engineering', placed: 85, total: 100, avg: '₹7.2 LPA', highest: '₹26 LPA' },
-  { dept: 'Electronics & Instr.', placed: 80, total: 90, avg: '₹6.8 LPA', highest: '₹24 LPA' },
-  { dept: 'Pharmacy', placed: 72, total: 80, avg: '₹5.5 LPA', highest: '₹16 LPA' },
-]
+const PlacementRecordPage: React.FC = () => {
+  const [records,  setRecords]  = useState<PlacementRecord[]>(placementRecordsDefault)
+  const [deptData, setDeptData] = useState<DeptPlacementStat[]>(deptPlacementDefault)
 
-const PlacementRecord: React.FC = () => {
-  const records = mockStore.getPlacement()
-  const latest = records[0]
+  useEffect(() => {
+    placementService.getPlacementRecords().then(setRecords)
+    placementService.getDeptPlacement().then(setDeptData)
+  }, [])
 
-  const maxPlaced = Math.max(...records.map(r => r.studentsPlaced))
+  const latest    = records[0]
+  const maxPlaced = records.length > 0 ? Math.max(...records.map(r => r.studentsPlaced)) : 1
 
   return (
     <div className="space-y-10">
@@ -32,36 +31,38 @@ const PlacementRecord: React.FC = () => {
       </div>
 
       {/* Big Stats — Latest Year */}
-      <div className="bg-primary rounded-2xl p-6 text-white">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <p className="text-[10px] uppercase tracking-widest font-bold text-accent/80">Latest — {latest?.year}</p>
-            <h3 className="font-display font-bold text-xl text-white mt-1">Placement Highlights</h3>
+      {latest && (
+        <div className="bg-primary rounded-2xl p-6 text-white">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="text-[10px] uppercase tracking-widest font-bold text-accent/80">Latest — {latest.year}</p>
+              <h3 className="font-display font-bold text-xl text-white mt-1">Placement Highlights</h3>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+              <Briefcase size={22} className="text-accent" />
+            </div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-            <Briefcase size={22} className="text-accent" />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
-          {[
-            { icon: Users, value: `${latest?.studentsPlaced}+`, label: 'Students Placed' },
-            { icon: Building2, value: `${latest?.companies}+`, label: 'Companies' },
-            { icon: Award, value: latest?.highestPackage, label: 'Highest Package' },
-            { icon: TrendingUp, value: latest?.averagePackage, label: 'Average Package' },
-          ].map((stat) => {
-            const Icon = stat.icon
-            return (
-              <div key={stat.label} className="text-center">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-2">
-                  <Icon size={18} className="text-accent" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
+            {[
+              { icon: Users,     value: `${latest.studentsPlaced}+`, label: 'Students Placed' },
+              { icon: Building2, value: `${latest.companies}+`,      label: 'Companies' },
+              { icon: Award,     value: latest.highestPackage,        label: 'Highest Package' },
+              { icon: TrendingUp, value: latest.averagePackage,       label: 'Average Package' },
+            ].map((stat) => {
+              const Icon = stat.icon
+              return (
+                <div key={stat.label} className="text-center">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-2">
+                    <Icon size={18} className="text-accent" />
+                  </div>
+                  <p className="text-2xl font-display font-black text-white">{stat.value}</p>
+                  <p className="text-[10px] text-white/60 uppercase tracking-wider font-bold mt-1">{stat.label}</p>
                 </div>
-                <p className="text-2xl font-display font-black text-white">{stat.value}</p>
-                <p className="text-[10px] text-white/60 uppercase tracking-wider font-bold mt-1">{stat.label}</p>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Year-wise Table */}
       <div>
@@ -125,7 +126,6 @@ const PlacementRecord: React.FC = () => {
         </div>
         <h3 className="text-xl font-display font-bold text-slate-900 mb-4">Students Placed — Year-Over-Year</h3>
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          {/* Y-axis labels + bars */}
           <div className="flex items-end gap-3 h-48 mb-3">
             {records.slice().reverse().map((r, i) => {
               const pct = Math.round((r.studentsPlaced / maxPlaced) * 100)
@@ -144,7 +144,6 @@ const PlacementRecord: React.FC = () => {
               )
             })}
           </div>
-          {/* X-axis */}
           <div className="flex gap-3 border-t border-slate-100 pt-3">
             {records.slice().reverse().map((r) => (
               <div key={r.year} className="flex-1 text-center">
@@ -166,54 +165,56 @@ const PlacementRecord: React.FC = () => {
       </div>
 
       {/* Department-wise Table */}
-      <div>
-        <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Department-wise</span>
-        <h3 className="text-xl font-display font-bold text-slate-900 mb-4">Branch-wise Placement Rate ({latest?.year})</h3>
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Department</th>
-                <th className="text-center px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Placed</th>
-                <th className="text-center px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Rate</th>
-                <th className="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Progress</th>
-                <th className="text-center px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Avg Pkg</th>
-                <th className="text-center px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Highest</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {deptData.map((d) => {
-                const rate = Math.round((d.placed / d.total) * 100)
-                return (
-                  <tr key={d.dept} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-5 py-3.5">
-                      <span className="font-semibold text-slate-800 text-xs font-sans">{d.dept}</span>
-                    </td>
-                    <td className="px-5 py-3.5 text-center">
-                      <span className="text-xs font-bold text-slate-700">{d.placed}/{d.total}</span>
-                    </td>
-                    <td className="px-5 py-3.5 text-center">
-                      <span className={`text-xs font-black ${rate >= 90 ? 'text-[#bfa15f]' : rate >= 80 ? 'text-[#0b2545]' : 'text-slate-600'}`}>
-                        {rate}%
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <div className="w-full bg-slate-100 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full ${rate >= 90 ? 'bg-[#bfa15f]' : rate >= 80 ? 'bg-[#0b2545]' : 'bg-slate-400'}`}
-                          style={{ width: `${rate}%` }}
-                        />
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 text-center text-xs font-bold text-slate-700">{d.avg}</td>
-                    <td className="px-5 py-3.5 text-center text-xs font-bold text-accent">{d.highest}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+      {latest && (
+        <div>
+          <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Department-wise</span>
+          <h3 className="text-xl font-display font-bold text-slate-900 mb-4">Branch-wise Placement Rate ({latest.year})</h3>
+          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200">
+                  <th className="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Department</th>
+                  <th className="text-center px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Placed</th>
+                  <th className="text-center px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Rate</th>
+                  <th className="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Progress</th>
+                  <th className="text-center px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Avg Pkg</th>
+                  <th className="text-center px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Highest</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {deptData.map((d) => {
+                  const rate = Math.round((d.placed / d.total) * 100)
+                  return (
+                    <tr key={d.dept} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-5 py-3.5">
+                        <span className="font-semibold text-slate-800 text-xs font-sans">{d.dept}</span>
+                      </td>
+                      <td className="px-5 py-3.5 text-center">
+                        <span className="text-xs font-bold text-slate-700">{d.placed}/{d.total}</span>
+                      </td>
+                      <td className="px-5 py-3.5 text-center">
+                        <span className={`text-xs font-black ${rate >= 90 ? 'text-[#bfa15f]' : rate >= 80 ? 'text-[#0b2545]' : 'text-slate-600'}`}>
+                          {rate}%
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <div className="w-full bg-slate-100 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full ${rate >= 90 ? 'bg-[#bfa15f]' : rate >= 80 ? 'bg-[#0b2545]' : 'bg-slate-400'}`}
+                            style={{ width: `${rate}%` }}
+                          />
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5 text-center text-xs font-bold text-slate-700">{d.avg}</td>
+                      <td className="px-5 py-3.5 text-center text-xs font-bold text-accent">{d.highest}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Bottom Info */}
       <div className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center gap-4 shadow-sm">
@@ -235,4 +236,4 @@ const PlacementRecord: React.FC = () => {
   )
 }
 
-export default PlacementRecord
+export default PlacementRecordPage

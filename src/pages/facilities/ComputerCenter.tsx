@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Cpu, Wifi, Clock, Database, Terminal } from 'lucide-react'
+import { mockStore } from '../../data/mockStore'
 
 const keySpecs = [
   {
@@ -19,13 +20,11 @@ const keySpecs = [
   }
 ]
 
-const softwares = [
-  { category: 'Engineering & CAD', list: ['AutoCAD', 'SolidWorks', 'ANSYS', 'MATLAB'] },
-  { category: 'Development & Embedded', list: ['Xilinx Vivado', 'Keil MDK', 'Visual Studio', 'Python Suite'] },
-  { category: 'Productivity & Research', list: ['MS Office 365', 'LaTeX Suite', 'R-Studio', 'SPSS'] }
-]
-
 const ComputerCenter: React.FC = () => {
+  const [data, setData] = useState<any>(null)
+  useEffect(() => { setData(mockStore.getComputerCenter()) }, [])
+  if (!data) return null
+
   return (
     <div className="space-y-10">
       {/* Page Header */}
@@ -35,7 +34,7 @@ const ComputerCenter: React.FC = () => {
           Computer Center
         </h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 font-semibold">
-          Central high-performance computing and network nerve center of SGSITS
+          {data.intro}
         </p>
       </div>
 
@@ -55,20 +54,12 @@ const ComputerCenter: React.FC = () => {
         </div>
 
         <div className="flex gap-4 shrink-0 bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 md:p-6 relative z-10 w-full md:w-auto justify-around">
-          <div className="text-center">
-            <p className="text-2xl md:text-3xl font-extrabold text-accent font-display">1 Gbps</p>
-            <p className="text-[10px] uppercase font-bold text-slate-300 mt-1">Bandwidth</p>
-          </div>
-          <div className="w-px bg-white/10" />
-          <div className="text-center">
-            <p className="text-2xl md:text-3xl font-extrabold text-accent font-display">500+</p>
-            <p className="text-[10px] uppercase font-bold text-slate-300 mt-1">LAN Nodes</p>
-          </div>
-          <div className="w-px bg-white/10" />
-          <div className="text-center">
-            <p className="text-2xl md:text-3xl font-extrabold text-accent font-display">24/7</p>
-            <p className="text-[10px] uppercase font-bold text-slate-300 mt-1">Power Backup</p>
-          </div>
+          {(data.stats || []).slice(0,3).map((s: any, i: number) => (
+            <div key={i} className="text-center">
+              <p className="text-2xl md:text-3xl font-extrabold text-accent font-display">{s.value}</p>
+              <p className="text-[10px] uppercase font-bold text-slate-300 mt-1">{s.label}</p>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -77,7 +68,7 @@ const ComputerCenter: React.FC = () => {
         {keySpecs.map((item, idx) => {
           const Icon = item.icon
           return (
-            <div 
+            <div
               key={idx}
               className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-lg shadow-sm flex flex-col justify-between"
             >
@@ -105,30 +96,18 @@ const ComputerCenter: React.FC = () => {
           </div>
           <div>
             <span className="text-[9px] uppercase font-bold tracking-widest text-slate-500">Fully Licensed Tools</span>
-            <h3 className="text-lg font-bold text-primary dark:text-white font-display">Software Architecture Stack</h3>
+            <h3 className="text-lg font-bold text-primary dark:text-white font-display">Software &amp; Services</h3>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
-          {softwares.map((sw, idx) => (
-            <div 
-              key={idx} 
-              className="bg-white dark:bg-slate-950 rounded-lg p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3"
+        <div className="flex flex-wrap gap-2 pt-2">
+          {(data.software || []).map((item: string, key: number) => (
+            <span
+              key={key}
+              className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 px-2.5 py-1 rounded-md text-xs font-semibold text-slate-700 dark:text-slate-350 cursor-default shadow-sm"
             >
-              <h4 className="text-sm font-bold text-primary dark:text-accent font-display border-b border-slate-100 dark:border-slate-850 pb-2">
-                {sw.category}
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {sw.list.map((item, key) => (
-                  <span 
-                    key={key} 
-                    className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 px-2.5 py-1 rounded-md text-xs font-semibold text-slate-700 dark:text-slate-350 cursor-default shadow-sm"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
+              {item}
+            </span>
           ))}
         </div>
       </div>

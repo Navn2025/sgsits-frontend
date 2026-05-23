@@ -1,148 +1,5124 @@
-import React, { useState } from 'react'
-import CrudPage, { Modal, FormField, Input, Select, Textarea } from '../../components/admin/CrudPage'
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import * as Icons from 'lucide-react'
+import { mockStore } from '../../data/mockStore'
+import PlacementCms from '../placementOfficer/PlacementCms'
 
-interface StaticPage {
-  id: string
-  title: string
-  section: 'About' | 'Academics' | 'Admission' | 'Explore'
-  lastUpdated: string
-  updatedBy: string
-  metaDescription: string
-  content: string
-}
+type TabType = 'home' | 'about_inst' | 'vision_mission' | 'governance' | 'directory' | 'iqac' | 'accreditation_infra' | 'academics' | 'director_message' | 'committees' | 'navigation' | 'custom_pages' | 'admissions' | 'placements' | 'campus_life'
 
-const INITIAL_PAGES: StaticPage[] = [
-  { id: 'about-institute', title: 'About Institute', section: 'About', lastUpdated: '2026-04-10', updatedBy: 'Admin Office', metaDescription: 'Learn about the history, autonomous status, and government-aided status of SGSITS Indore.', content: 'Shri Govindram Seksaria Institute of Technology and Science (SGSITS) Indore was established in 1952...' },
-  { id: 'vision-mission', title: 'Vision & Mission', section: 'About', lastUpdated: '2026-03-12', updatedBy: 'Admin Office', metaDescription: 'The strategic vision, core values, and mission statements of SGSITS Indore.', content: 'A research-driven autonomous technical institution of excellence...' },
-  { id: 'director-message', title: "Director's Message", section: 'About', lastUpdated: '2026-05-02', updatedBy: 'Director Office', metaDescription: 'Welcome message from the Director of SGSITS Indore.', content: 'Welcome to Shri Govindram Seksaria Institute of Technology and Science...' },
-  { id: 'admission-ug', title: 'UG Admissions guidelines', section: 'Admission', lastUpdated: '2026-05-18', updatedBy: 'Admission Cell', metaDescription: 'Instructions, eligibility, and links to apply for undergraduate engineering admissions.', content: 'Undergraduate admissions to B.E./B.Tech. courses are processed via DTE Madhya Pradesh counselling...' },
-]
-
-const EMPTY_PAGE: Omit<StaticPage, 'id'> = {
-  title: '',
-  section: 'About',
-  lastUpdated: new Date().toISOString().slice(0, 10),
-  updatedBy: 'Admin Office',
-  metaDescription: '',
-  content: '',
-}
-
-const AdminStaticPages: React.FC = () => {
-  const [pages, setPages] = useState<StaticPage[]>(INITIAL_PAGES)
-  const [isOpen, setIsOpen] = useState(false)
-  const [editing, setEditing] = useState<StaticPage | null>(null)
-  const [form, setForm] = useState(EMPTY_PAGE)
-  const [saving, setSaving] = useState(false)
-
-  const handleAdd = () => {
-    setEditing(null)
-    setForm({
-      ...EMPTY_PAGE,
-      lastUpdated: new Date().toISOString().slice(0, 10),
-    })
-    setIsOpen(true)
-  }
-
-  const handleEdit = (p: StaticPage) => {
-    setEditing(p)
-    setForm({
-      title: p.title,
-      section: p.section,
-      lastUpdated: p.lastUpdated,
-      updatedBy: p.updatedBy,
-      metaDescription: p.metaDescription,
-      content: p.content,
-    })
-    setIsOpen(true)
-  }
-
-  const handleDelete = (p: StaticPage) => {
-    if (window.confirm(`Are you sure you want to delete static page "${p.title}"?`)) {
-      setPages(prev => prev.filter(item => item.id !== p.id))
-    }
-  }
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    await new Promise(r => setTimeout(r, 500))
-
-    if (editing) {
-      setPages(prev => prev.map(item => (item.id === editing.id ? { ...editing, ...form } : item)))
-    } else {
-      const id = form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
-      setPages(prev => [...prev, { id, ...form }])
-    }
-
-    setSaving(false)
-    setIsOpen(false)
-  }
-
-  const columns = [
-    { header: 'Page Title', key: 'title' },
-    { header: 'Section', key: 'section' },
-    { header: 'Meta Description', key: 'metaDescription', className: 'max-w-[200px] truncate' },
-    { header: 'Last Updated', key: 'lastUpdated' },
-    { header: 'Updated By', key: 'updatedBy' },
-  ]
+function Toast({ message, onClose }: { message: string; onClose: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 3000)
+    return () => clearTimeout(t)
+  }, [onClose])
 
   return (
-    <>
-      <CrudPage
-        title="Static Pages Content"
-        subtitle="Modify information, headers, and meta tags for main public pages"
-        addLabel="Add Page"
-        data={pages}
-        columns={columns}
-        searchKeys={['title', 'section', 'metaDescription']}
-        onAdd={handleAdd}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-
-      <Modal isOpen={isOpen} title={editing ? `Edit Page — ${editing.id}` : 'Create Static Page'} onClose={() => setIsOpen(false)} width="max-w-2xl">
-        <form onSubmit={handleSave} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <FormField label="Page Title" required>
-              <Input required value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. History & Milestones" />
-            </FormField>
-
-            <FormField label="Website Section" required>
-              <Select value={form.section} onChange={e => setForm(f => ({ ...f, section: e.target.value as StaticPage['section'] }))}>
-                <option value="About">About Us</option>
-                <option value="Academics">Academics</option>
-                <option value="Admission">Admissions</option>
-                <option value="Explore">Explore</option>
-              </Select>
-            </FormField>
-          </div>
-
-          <FormField label="Meta Description (SEO)" required>
-            <Input required value={form.metaDescription} onChange={e => setForm(f => ({ ...f, metaDescription: e.target.value }))} placeholder="A short description of this page for search engines..." />
-          </FormField>
-
-          <FormField label="Page Markdown Content" required>
-            <Textarea required value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} rows={8} placeholder="Enter markdown or text content of the page here..." />
-          </FormField>
-
-          <div className="grid grid-cols-2 gap-3">
-            <FormField label="Last Updated" required>
-              <Input type="date" required value={form.lastUpdated} onChange={e => setForm(f => ({ ...f, lastUpdated: e.target.value }))} />
-            </FormField>
-
-            <FormField label="Updated By Office" required>
-              <Input required value={form.updatedBy} onChange={e => setForm(f => ({ ...f, updatedBy: e.target.value }))} />
-            </FormField>
-          </div>
-
-          <div className="flex gap-3 pt-3 border-t border-slate-100">
-            <button type="button" onClick={() => setIsOpen(false)} className="flex-1 py-2 border border-slate-200 text-slate-700 rounded font-semibold text-sm hover:bg-slate-50">Cancel</button>
-            <button type="submit" disabled={saving} className="flex-1 py-2 bg-primary text-white rounded font-semibold text-sm hover:bg-primary/90 disabled:opacity-60">{saving ? 'Saving...' : editing ? 'Update Page Content' : 'Publish Page'}</button>
-          </div>
-        </form>
-      </Modal>
-    </>
+    <div className="fixed bottom-4 right-4 z-50 bg-[#0b2545] border border-[#bfa15f]/40 text-white px-5 py-3 rounded-lg shadow-2xl flex items-center gap-3 text-sm font-semibold animate-bounce">
+      <Icons.CheckCircle2 className="text-[#bfa15f] shrink-0" size={16} />
+      <span>{message}</span>
+      <button onClick={onClose} className="hover:text-slate-200 ml-2"><Icons.X size={14} /></button>
+    </div>
   )
 }
 
-export default AdminStaticPages
+export default function AdminStaticPages() {
+  const [activeTab, setActiveTab] = useState<TabType>('home')
+  const [admSubTab, setAdmSubTab] = useState<'ug' | 'pg' | 'phd' | 'prospectus'>('ug')
+  const [toast, setToast] = useState('')
+
+  // ─── Data States ────────────────────────────────────────────────────────────
+  const [homepage, setHomepage] = useState<any>(null)
+  const [aboutInst, setAboutInst] = useState<any>(null)
+  const [visionMission, setVisionMission] = useState<any>(null)
+  const [governingBody, setGoverningBody] = useState<any>(null)
+  const [academicCouncil, setAcademicCouncil] = useState<any>(null)
+  const [administration, setAdministration] = useState<any>(null)
+  const [telephoneDirectory, setTelephoneDirectory] = useState<any>(null)
+  const [iqac, setIqac] = useState<any>(null)
+  const [infrastructure, setInfrastructure] = useState<any>(null)
+  const [accreditation, setAccreditation] = useState<any>(null)
+  const [academicsUg, setAcademicsUg] = useState<any>(null)
+  const [academicsPg, setAcademicsPg] = useState<any>(null)
+  const [academicsPhd, setAcademicsPhd] = useState<any>(null)
+  const [academicsPtdc, setAcademicsPtdc] = useState<any>(null)
+  const [academicsCalendar, setAcademicsCalendar] = useState<any>(null)
+  const [academicsOnline, setAcademicsOnline] = useState<any>(null)
+  const [directorMessage, setDirectorMessage] = useState<any>(null)
+  const [committeesList, setCommitteesList] = useState<any>(null)
+  const [navigationItems, setNavigationItems] = useState<any>(null)
+  const [admissionUg, setAdmissionUg] = useState<any>(null)
+  const [admissionPg, setAdmissionPg] = useState<any>(null)
+  const [admissionPhd, setAdmissionPhd] = useState<any>(null)
+  const [admissionProspectus, setAdmissionProspectus] = useState<any>(null)
+
+  // Campus Life States
+  const [clActivities, setClActivities] = useState<any>(null)
+  const [clNCC, setClNCC] = useState<any>(null)
+  const [clNSS, setClNSS] = useState<any>(null)
+  const [clSchGovt, setClSchGovt] = useState<any>(null)
+  const [clSchInst, setClSchInst] = useState<any>(null)
+  const [clSSS, setClSSS] = useState<any>(null)
+  const [clSubTab, setClSubTab] = useState<'activities'|'ncc'|'nss'|'sch_govt'|'sch_inst'|'sss'>('activities')
+
+  // ─── Custom Dynamic Pages States ───
+  const [customPages, setCustomPages] = useState<any[]>([])
+  const [activeEditPage, setActiveEditPage] = useState<any | null>(null)
+  const [showAddPageModal, setShowAddPageModal] = useState(false)
+  const [pageForm, setPageForm] = useState({
+    title: '',
+    subtitle: '',
+    paragraphs: '',
+    highlightsText: '',
+    affiliationsText: ''
+  })
+  const [addPageForm, setAddPageForm] = useState({
+    slug: '',
+    title: '',
+    subtitle: '',
+    menu: 'about' as 'about' | 'admission' | 'placement' | 'campus-life'
+  })
+
+  // ─── Fetch CMS Data ─────────────────────────────────────────────────────────
+  const refreshAll = () => {
+    setHomepage(JSON.parse(JSON.stringify(mockStore.getHomePageData())))
+    setAboutInst(JSON.parse(JSON.stringify(mockStore.getAboutInstitute())))
+    setVisionMission(JSON.parse(JSON.stringify(mockStore.getVisionMission())))
+    setGoverningBody(JSON.parse(JSON.stringify(mockStore.getGoverningBody())))
+    setAcademicCouncil(JSON.parse(JSON.stringify(mockStore.getAcademicCouncil())))
+    setAdministration(JSON.parse(JSON.stringify(mockStore.getAdministration())))
+    setTelephoneDirectory(JSON.parse(JSON.stringify(mockStore.getTelephoneDirectory())))
+    setIqac(JSON.parse(JSON.stringify(mockStore.getIQAC())))
+    setInfrastructure(JSON.parse(JSON.stringify(mockStore.getInfrastructure())))
+    setAccreditation(JSON.parse(JSON.stringify(mockStore.getAccreditation())))
+    setAcademicsUg(JSON.parse(JSON.stringify(mockStore.getUGCourses())))
+    setAcademicsPg(JSON.parse(JSON.stringify(mockStore.getPGCourses())))
+    setAcademicsPhd(JSON.parse(JSON.stringify(mockStore.getPhDCourses())))
+    setAcademicsPtdc(JSON.parse(JSON.stringify(mockStore.getPTDCCourses())))
+    setAcademicsCalendar(JSON.parse(JSON.stringify(mockStore.getAcademicCalendar())))
+    setAcademicsOnline(JSON.parse(JSON.stringify(mockStore.getOnlineCourses())))
+    setDirectorMessage(JSON.parse(JSON.stringify(mockStore.getDirectorMessage())))
+    setCommitteesList(JSON.parse(JSON.stringify(mockStore.getCommittees())))
+    setNavigationItems(JSON.parse(JSON.stringify(mockStore.getNavItems())))
+    setCustomPages(JSON.parse(JSON.stringify(mockStore.getCustomPages())))
+    setAdmissionUg(JSON.parse(JSON.stringify(mockStore.getUGAdmission())))
+    setAdmissionPg(JSON.parse(JSON.stringify(mockStore.getPGAdmission())))
+    setAdmissionPhd(JSON.parse(JSON.stringify(mockStore.getPhDAdmission())))
+    setAdmissionProspectus(JSON.parse(JSON.stringify(mockStore.getProspectus())))
+    setClActivities(JSON.parse(JSON.stringify(mockStore.getActivities())))
+    setClNCC(JSON.parse(JSON.stringify(mockStore.getNCC())))
+    setClNSS(JSON.parse(JSON.stringify(mockStore.getNSS())))
+    setClSchGovt(JSON.parse(JSON.stringify(mockStore.getScholarshipGovt())))
+    setClSchInst(JSON.parse(JSON.stringify(mockStore.getScholarshipInstitute())))
+    setClSSS(JSON.parse(JSON.stringify(mockStore.getSSS())))
+  }
+
+  useEffect(() => {
+    refreshAll()
+  }, [])
+
+  const triggerSave = (key: string, data: any, msg = 'Section updated successfully!') => {
+    switch (key) {
+      case 'home':
+        mockStore.saveHomePageData(data)
+        break
+      case 'about_institute':
+        mockStore.saveAboutInstitute(data)
+        break
+      case 'vision_mission':
+        mockStore.saveVisionMission(data)
+        break
+      case 'governing_body':
+        mockStore.saveGoverningBody(data)
+        break
+      case 'academic_council':
+        mockStore.saveAcademicCouncil(data)
+        break
+      case 'administration':
+        mockStore.saveAdministration(data)
+        break
+      case 'telephone':
+        mockStore.saveTelephoneDirectory(data)
+        break
+      case 'iqac':
+        mockStore.saveIQAC(data)
+        break
+      case 'infrastructure':
+        mockStore.saveInfrastructure(data)
+        break
+      case 'accreditation':
+        mockStore.saveAccreditation(data)
+        break
+      case 'ug':
+        mockStore.saveUGCourses(data)
+        break
+      case 'pg':
+        mockStore.savePGCourses(data)
+        break
+      case 'phd':
+        mockStore.savePhDCourses(data)
+        break
+      case 'ptdc':
+        mockStore.savePTDCCourses(data)
+        break
+      case 'calendar':
+        mockStore.saveAcademicCalendar(data)
+        break
+      case 'online':
+        mockStore.saveOnlineCourses(data)
+        break
+      case 'director_message':
+        mockStore.saveDirectorMessage(data)
+        break
+      case 'committees':
+        mockStore.saveCommittees(data)
+        break
+      case 'navigation':
+        mockStore.saveNavItems(data)
+        break
+      case 'admission_ug':
+        mockStore.saveUGAdmission(data)
+        break
+      case 'admission_pg':
+        mockStore.savePGAdmission(data)
+        break
+      case 'admission_phd':
+        mockStore.savePhDAdmission(data)
+        break
+      case 'admission_prospectus':
+        mockStore.saveProspectus(data)
+        break
+      case 'campus_activities':
+        mockStore.saveActivities(data)
+        break
+      case 'campus_ncc':
+        mockStore.saveNCC(data)
+        break
+      case 'campus_nss':
+        mockStore.saveNSS(data)
+        break
+      case 'campus_sch_govt':
+        mockStore.saveScholarshipGovt(data)
+        break
+      case 'campus_sch_inst':
+        mockStore.saveScholarshipInstitute(data)
+        break
+      case 'campus_sss':
+        mockStore.saveSSS(data)
+        break
+    }
+    setToast(msg)
+    refreshAll()
+  }
+
+  if (!homepage || !aboutInst || !visionMission || !governingBody || !academicCouncil || !administration || !telephoneDirectory || !iqac || !infrastructure || !accreditation || !academicsUg || !academicsPg || !academicsPhd || !academicsPtdc || !academicsCalendar || !academicsOnline || !directorMessage || !committeesList || !navigationItems || !admissionUg || !admissionPg || !admissionPhd || !admissionProspectus) {
+    return (
+      <div className="flex items-center justify-center min-h-[500px]">
+        <div className="flex flex-col items-center gap-3">
+          <Icons.Loader2 className="animate-spin text-[#0b2545]" size={32} />
+          <p className="text-sm font-semibold text-slate-500">Loading Central CMS Repository...</p>
+        </div>
+      </div>
+    )
+  }
+
+  const tabs: { id: TabType; label: string; icon: any }[] = [
+    { id: 'home', label: 'Home Page CMS', icon: Icons.Home },
+    { id: 'about_inst', label: 'About Profile', icon: Icons.Building2 },
+    { id: 'vision_mission', label: 'Vision & Mission', icon: Icons.Compass },
+    { id: 'director_message', label: "Director's Message", icon: Icons.UserCheck },
+    { id: 'governance', label: 'Governance & Council', icon: Icons.ShieldAlert },
+    { id: 'directory', label: 'Admin & Directory', icon: Icons.Phone },
+    { id: 'committees', label: 'Admin Committees', icon: Icons.Users },
+    { id: 'iqac', label: 'Quality & IQAC', icon: Icons.Award },
+    { id: 'accreditation_infra', label: 'Accreditation & Campus', icon: Icons.MapPin },
+    { id: 'academics', label: 'Academics & Courses', icon: Icons.GraduationCap },
+    { id: 'admissions', label: 'Admissions CMS', icon: Icons.Sparkles },
+    { id: 'placements', label: 'Placements CMS', icon: Icons.Briefcase },
+    { id: 'campus_life', label: 'Campus Life CMS', icon: Icons.Users },
+    { id: 'navigation', label: 'Navigation Menus', icon: Icons.Menu },
+    { id: 'custom_pages', label: 'Dynamic Pages Builder', icon: Icons.FilePlus },
+  ]
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="font-display text-2xl font-bold text-slate-900">Central CMS Portal</h1>
+        <p className="text-sm text-slate-500 mt-0.5">Control, update, and manage all public content blocks dynamically with real-time propagation</p>
+      </div>
+
+      {/* Tabs list */}
+      <div className="flex border-b border-slate-200 overflow-x-auto gap-2 bg-slate-50 p-2 rounded-t-lg">
+        {tabs.map(tab => {
+          const Icon = tab.icon
+          const isActive = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-md border transition-all duration-200 shrink-0 ${
+                isActive
+                  ? 'bg-[#0b2545] border-[#0b2545] text-white shadow-md'
+                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-350'
+              }`}
+            >
+              <Icon size={14} className={isActive ? 'text-[#bfa15f]' : 'text-slate-400'} />
+              {tab.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Tab Panel Context */}
+      <div className="bg-white border border-slate-200 rounded-b-lg shadow-sm p-6 space-y-8">
+
+        {/* ─── HOME TAB ──────────────────────────────────────────────────────── */}
+        {activeTab === 'home' && (
+          <div className="space-y-8 divide-y divide-slate-100">
+            {/* --- SEO METADATA --- */}
+            <div className="space-y-4">
+              <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.Shield size={18} className="text-[#bfa15f]" />
+                SEO Meta & Keywords
+              </h3>
+              <div className="grid grid-cols-1 gap-4 bg-slate-50 p-4 rounded border border-slate-200">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Meta Title Tag</label>
+                  <input
+                    type="text"
+                    value={homepage.meta?.title || ''}
+                    onChange={e => setHomepage({ ...homepage, meta: { ...homepage.meta, title: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Meta Description</label>
+                  <textarea
+                    rows={2}
+                    value={homepage.meta?.description || ''}
+                    onChange={e => setHomepage({ ...homepage, meta: { ...homepage.meta, description: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Keywords (Comma Separated)</label>
+                  <input
+                    type="text"
+                    value={homepage.meta?.keywords || ''}
+                    onChange={e => setHomepage({ ...homepage, meta: { ...homepage.meta, keywords: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-mono text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* --- HERO SHORTCUT TILES --- */}
+            <div className="space-y-4 pt-6">
+              <h3 className="font-display text-lg font-bold text-[#0b2545] flex items-center gap-2">
+                <Icons.Grid size={18} className="text-[#bfa15f]" />
+                Hero Shortcut Tiles (Maximum 4 displayed)
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(homepage.heroTiles || []).map((tile: any, idx: number) => (
+                  <div key={tile.id || idx} className="border border-slate-200 p-4 rounded-lg bg-slate-50/40 space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
+                      <span className="text-[10px] font-bold text-slate-400 font-mono">TILE #{idx + 1}</span>
+                      <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-600 uppercase cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded border-slate-300 text-primary"
+                          checked={tile.enabled}
+                          onChange={e => {
+                            const list = [...homepage.heroTiles]
+                            list[idx].enabled = e.target.checked
+                            setHomepage({ ...homepage, heroTiles: list })
+                          }}
+                        />
+                        Enabled
+                      </label>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[9px] font-bold text-slate-400 uppercase">Title</label>
+                        <input
+                          type="text"
+                          value={tile.title}
+                          onChange={e => {
+                            const list = [...homepage.heroTiles]
+                            list[idx].title = e.target.value
+                            setHomepage({ ...homepage, heroTiles: list })
+                          }}
+                          className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none font-bold text-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[9px] font-bold text-slate-400 uppercase">Subtitle</label>
+                        <input
+                          type="text"
+                          value={tile.subtitle}
+                          onChange={e => {
+                            const list = [...homepage.heroTiles]
+                            list[idx].subtitle = e.target.value
+                            setHomepage({ ...homepage, heroTiles: list })
+                          }}
+                          className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none text-slate-650"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      <div className="col-span-2">
+                        <label className="text-[9px] font-bold text-slate-400 uppercase">Path</label>
+                        <input
+                          type="text"
+                          value={tile.path}
+                          onChange={e => {
+                            const list = [...homepage.heroTiles]
+                            list[idx].path = e.target.value
+                            setHomepage({ ...homepage, heroTiles: list })
+                          }}
+                          className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[9px] font-bold text-slate-400 uppercase text-center block">Order</label>
+                        <input
+                          type="number"
+                          value={tile.order}
+                          onChange={e => {
+                            const list = [...homepage.heroTiles]
+                            list[idx].order = parseInt(e.target.value) || 0
+                            setHomepage({ ...homepage, heroTiles: list })
+                          }}
+                          className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none text-center font-bold"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[9px] font-bold text-slate-400 uppercase">Icon Name</label>
+                        <input
+                          type="text"
+                          value={tile.iconName}
+                          onChange={e => {
+                            const list = [...homepage.heroTiles]
+                            list[idx].iconName = e.target.value
+                            setHomepage({ ...homepage, heroTiles: list })
+                          }}
+                          className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none font-mono text-slate-650"
+                        />
+                      </div>
+                      <div className="flex items-center pt-3 pl-2">
+                        <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-600 uppercase cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="rounded border-slate-300 text-primary"
+                            checked={tile.dark}
+                            onChange={e => {
+                              const list = [...homepage.heroTiles]
+                              list[idx].dark = e.target.checked
+                              setHomepage({ ...homepage, heroTiles: list })
+                            }}
+                          />
+                          Dark BG (Navy)
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* --- HERO & WELCOME BANNER --- */}
+            <div className="space-y-4 pt-6">
+              <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.Home size={18} className="text-[#bfa15f]" />
+                1 · Hero Welcome Banner
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Institute Name</label>
+                  <input
+                    type="text"
+                    value={homepage.hero.instituteName}
+                    onChange={e => setHomepage({ ...homepage, hero: { ...homepage.hero, instituteName: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Hero Welcome Tagline</label>
+                  <input
+                    type="text"
+                    value={homepage.hero.welcomeText}
+                    onChange={e => setHomepage({ ...homepage, hero: { ...homepage.hero, welcomeText: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Hero Accent (Gold) Text</label>
+                  <input
+                    type="text"
+                    value={homepage.hero.accentText}
+                    onChange={e => setHomepage({ ...homepage, hero: { ...homepage.hero, accentText: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Hero Image URL</label>
+                  <input
+                    type="text"
+                    value={homepage.hero.imageUrl}
+                    onChange={e => setHomepage({ ...homepage, hero: { ...homepage.hero, imageUrl: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* --- DIRECTORgetMessage Messages --- */}
+            <div className="space-y-4 pt-6">
+              <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.User size={18} className="text-[#bfa15f]" />
+                2 · Director's Message Corner
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Director Name</label>
+                  <input
+                    type="text"
+                    value={homepage.director.name}
+                    onChange={e => setHomepage({ ...homepage, director: { ...homepage.director, name: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Director Image URL</label>
+                  <input
+                    type="text"
+                    value={homepage.director.photo}
+                    onChange={e => setHomepage({ ...homepage, director: { ...homepage.director, photo: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary text-xs"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase">Director Message Statement</label>
+                  <textarea
+                    rows={4}
+                    value={homepage.director.bio}
+                    onChange={e => setHomepage({ ...homepage, director: { ...homepage.director, bio: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* --- INTRO ABOUT SECTION --- */}
+            <div className="space-y-4 pt-6">
+              <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.FileText size={18} className="text-[#bfa15f]" />
+                2b · About SGSITS Introduction Block
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50/50 p-4 rounded border border-slate-200">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Block Label</label>
+                  <input
+                    type="text"
+                    value={homepage.about.label}
+                    onChange={e => setHomepage({ ...homepage, about: { ...homepage.about, label: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Primary Heading</label>
+                  <input
+                    type="text"
+                    value={homepage.about.heading}
+                    onChange={e => setHomepage({ ...homepage, about: { ...homepage.about, heading: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Accent Heading (Gold)</label>
+                  <input
+                    type="text"
+                    value={homepage.about.accentText}
+                    onChange={e => setHomepage({ ...homepage, about: { ...homepage.about, accentText: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white"
+                  />
+                </div>
+                <div className="md:col-span-3">
+                  <label className="text-xs font-bold text-slate-500 uppercase">Narrative Body Text</label>
+                  <textarea
+                    rows={5}
+                    value={homepage.about.body}
+                    onChange={e => setHomepage({ ...homepage, about: { ...homepage.about, body: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white font-sans text-xs leading-relaxed"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Primary CTA Label</label>
+                  <input
+                    type="text"
+                    value={homepage.about.primaryButton.label}
+                    onChange={e => setHomepage({ ...homepage, about: { ...homepage.about, primaryButton: { ...homepage.about.primaryButton, label: e.target.value } } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Primary CTA Link</label>
+                  <input
+                    type="text"
+                    value={homepage.about.primaryButton.to}
+                    onChange={e => setHomepage({ ...homepage, about: { ...homepage.about, primaryButton: { ...homepage.about.primaryButton, to: e.target.value } } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white font-mono text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* --- DEPARTMENTS LIST SHORTCUTS --- */}
+            <div className="space-y-4 pt-6">
+              <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.Building2 size={18} className="text-[#bfa15f]" />
+                2c · Homepage Shortcut Departments
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/50 p-4 rounded border border-slate-200">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Heading Title</label>
+                  <input
+                    type="text"
+                    value={homepage.departmentsSection.heading}
+                    onChange={e => setHomepage({ ...homepage, departmentsSection: { ...homepage.departmentsSection, heading: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">View All Link Path</label>
+                  <input
+                    type="text"
+                    value={homepage.departmentsSection.showAllLink}
+                    onChange={e => setHomepage({ ...homepage, departmentsSection: { ...homepage.departmentsSection, showAllLink: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white font-mono text-xs"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Shortcut Departments Items List</label>
+                <table className="w-full text-xs text-left border border-slate-250 rounded-lg overflow-hidden">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th className="px-3 py-2 text-slate-600 font-bold">Department Title Name</th>
+                      <th className="px-3 py-2 text-slate-600 font-bold">Branch URL Slug</th>
+                      <th className="px-3 py-2 text-right text-slate-600 font-bold w-12">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {homepage.departmentsSection.items.map((item: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-slate-50">
+                        <td className="px-3 py-2">
+                          <input
+                            type="text"
+                            value={item.name}
+                            onChange={e => {
+                              const list = [...homepage.departmentsSection.items]
+                              list[idx].name = e.target.value
+                              setHomepage({ ...homepage, departmentsSection: { ...homepage.departmentsSection, items: list } })
+                            }}
+                            className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none font-semibold text-primary"
+                          />
+                        </td>
+                        <td className="px-3 py-2">
+                          <input
+                            type="text"
+                            value={item.slug}
+                            onChange={e => {
+                              const list = [...homepage.departmentsSection.items]
+                              list[idx].slug = e.target.value
+                              setHomepage({ ...homepage, departmentsSection: { ...homepage.departmentsSection, items: list } })
+                            }}
+                            className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none font-mono"
+                          />
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const list = homepage.departmentsSection.items.filter((_: any, i: number) => i !== idx)
+                              setHomepage({ ...homepage, departmentsSection: { ...homepage.departmentsSection, items: list } })
+                            }}
+                            className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-650 rounded"
+                          >
+                            <Icons.Trash2 size={13} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="flex justify-start">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = [...homepage.departmentsSection.items, { name: 'Computer Science & Engineering', slug: 'computer-engineering' }]
+                      setHomepage({ ...homepage, departmentsSection: { ...homepage.departmentsSection, items: list } })
+                    }}
+                    className="px-3 py-1 border border-dashed border-slate-300 hover:border-slate-500 text-slate-655 text-xs font-semibold rounded-md flex items-center gap-1.5"
+                  >
+                    <Icons.Plus size={12} /> Add Department Shortcut
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* --- KEY CAMPUS STATS --- */}
+            <div className="space-y-4 pt-6">
+              <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.BarChart3 size={18} className="text-[#bfa15f]" />
+                3 · Key Campus Statistics
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {homepage.statsSection.items.map((stat: any, idx: number) => (
+                  <div key={idx} className="border border-slate-200 p-3 rounded bg-slate-50/50">
+                    <span className="text-[10px] font-bold text-slate-400 block mb-1 font-mono">Stat Card #{idx + 1}</span>
+                    <input
+                      type="text"
+                      value={stat.val}
+                      placeholder="e.g. 10,000+"
+                      onChange={e => {
+                        const newItems = [...homepage.statsSection.items]
+                        newItems[idx].val = e.target.value
+                        setHomepage({ ...homepage, statsSection: { ...homepage.statsSection, items: newItems } })
+                      }}
+                      className="w-full border border-slate-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-primary mb-2 font-bold text-primary"
+                    />
+                    <input
+                      type="text"
+                      value={stat.label}
+                      placeholder="e.g. Students"
+                      onChange={e => {
+                        const newItems = [...homepage.statsSection.items]
+                        newItems[idx].label = e.target.value
+                        setHomepage({ ...homepage, statsSection: { ...homepage.statsSection, items: newItems } })
+                      }}
+                      className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-primary text-slate-650"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* --- CAMPUS NEWS HEADERS --- */}
+            <div className="space-y-4 pt-6">
+              <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.Newspaper size={18} className="text-[#bfa15f]" />
+                4 · Campus News Section Header
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Section Tag/Label</label>
+                  <input
+                    type="text"
+                    value={homepage.newsSection.label}
+                    onChange={e => setHomepage({ ...homepage, newsSection: { ...homepage.newsSection, label: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Primary Title</label>
+                  <input
+                    type="text"
+                    value={homepage.newsSection.heading}
+                    onChange={e => setHomepage({ ...homepage, newsSection: { ...homepage.newsSection, heading: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Accent Title (Italic)</label>
+                  <input
+                    type="text"
+                    value={homepage.newsSection.accentText}
+                    onChange={e => setHomepage({ ...homepage, newsSection: { ...homepage.newsSection, accentText: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+                  />
+                </div>
+                <div className="md:col-span-3">
+                  <label className="text-xs font-bold text-slate-500 uppercase">Description Subtitle</label>
+                  <input
+                    type="text"
+                    value={homepage.newsSection.description}
+                    onChange={e => setHomepage({ ...homepage, newsSection: { ...homepage.newsSection, description: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* --- ACADEMIC PROGRAMS SECTION --- */}
+            <div className="space-y-4 pt-6">
+              <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.GraduationCap size={18} className="text-[#bfa15f]" />
+                5 · Academic Programs Section
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50/50 p-4 rounded border border-slate-150">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Section Tag/Label</label>
+                  <input
+                    type="text"
+                    value={homepage.academicsSection.label}
+                    onChange={e => setHomepage({ ...homepage, academicsSection: { ...homepage.academicsSection, label: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Primary Title</label>
+                  <input
+                    type="text"
+                    value={homepage.academicsSection.heading}
+                    onChange={e => setHomepage({ ...homepage, academicsSection: { ...homepage.academicsSection, heading: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Accent Title (Italic)</label>
+                  <input
+                    type="text"
+                    value={homepage.academicsSection.accentText}
+                    onChange={e => setHomepage({ ...homepage, academicsSection: { ...homepage.academicsSection, accentText: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white"
+                  />
+                </div>
+                <div className="md:col-span-3">
+                  <label className="text-xs font-bold text-slate-500 uppercase">Description Subtitle</label>
+                  <input
+                    type="text"
+                    value={homepage.academicsSection.description}
+                    onChange={e => setHomepage({ ...homepage, academicsSection: { ...homepage.academicsSection, description: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Programs Cards */}
+              <div className="space-y-4 mt-4">
+                <label className="text-xs font-bold text-slate-500 uppercase block">Program Cards (UG, PG, PhD)</label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {homepage.academicsSection.programs.map((prog: any, idx: number) => (
+                    <div key={prog.id || idx} className="border border-slate-200 p-4 rounded-lg bg-white shadow-xs space-y-3">
+                      <span className="text-[10px] font-bold text-slate-400 block font-mono">PROGRAM CARD #{idx + 1}</span>
+                      <div>
+                        <label className="text-[9px] font-bold text-slate-400 uppercase">Program Title</label>
+                        <input
+                          type="text"
+                          value={prog.title}
+                          onChange={e => {
+                            const newProgs = [...homepage.academicsSection.programs]
+                            newProgs[idx].title = e.target.value
+                            setHomepage({ ...homepage, academicsSection: { ...homepage.academicsSection, programs: newProgs } })
+                          }}
+                          className="w-full border border-slate-200 rounded px-2.5 py-1 text-xs focus:outline-none font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[9px] font-bold text-slate-400 uppercase">Description</label>
+                        <textarea
+                          rows={3}
+                          value={prog.description}
+                          onChange={e => {
+                            const newProgs = [...homepage.academicsSection.programs]
+                            newProgs[idx].description = e.target.value
+                            setHomepage({ ...homepage, academicsSection: { ...homepage.academicsSection, programs: newProgs } })
+                          }}
+                          className="w-full border border-slate-200 rounded px-2.5 py-1 text-xs focus:outline-none font-sans"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-400 uppercase">CTA Label</label>
+                          <input
+                            type="text"
+                            value={prog.ctaLabel}
+                            onChange={e => {
+                              const newProgs = [...homepage.academicsSection.programs]
+                              newProgs[idx].ctaLabel = e.target.value
+                              setHomepage({ ...homepage, academicsSection: { ...homepage.academicsSection, programs: newProgs } })
+                            }}
+                            className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-400 uppercase">Icon Name</label>
+                          <input
+                            type="text"
+                            value={prog.iconName}
+                            onChange={e => {
+                              const newProgs = [...homepage.academicsSection.programs]
+                              newProgs[idx].iconName = e.target.value
+                              setHomepage({ ...homepage, academicsSection: { ...homepage.academicsSection, programs: newProgs } })
+                            }}
+                            className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none font-mono"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* --- CAMPUS LIFE SECTION --- */}
+            <div className="space-y-4 pt-6">
+              <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.Compass size={18} className="text-[#bfa15f]" />
+                6 · Campus Life Section
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50/50 p-4 rounded border border-slate-150">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Section Tag/Label</label>
+                  <input
+                    type="text"
+                    value={homepage.campusLifeSection.label}
+                    onChange={e => setHomepage({ ...homepage, campusLifeSection: { ...homepage.campusLifeSection, label: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Primary Title</label>
+                  <input
+                    type="text"
+                    value={homepage.campusLifeSection.heading}
+                    onChange={e => setHomepage({ ...homepage, campusLifeSection: { ...homepage.campusLifeSection, heading: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Accent Title (Italic)</label>
+                  <input
+                    type="text"
+                    value={homepage.campusLifeSection.accentText}
+                    onChange={e => setHomepage({ ...homepage, campusLifeSection: { ...homepage.campusLifeSection, accentText: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white"
+                  />
+                </div>
+                <div className="md:col-span-3">
+                  <label className="text-xs font-bold text-slate-500 uppercase">Description Subtitle</label>
+                  <input
+                    type="text"
+                    value={homepage.campusLifeSection.description}
+                    onChange={e => setHomepage({ ...homepage, campusLifeSection: { ...homepage.campusLifeSection, description: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Facilities Grid */}
+              <div className="space-y-4 mt-4">
+                <label className="text-xs font-bold text-slate-500 uppercase block">Facilities & Assets Cards</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {homepage.campusLifeSection.facilities.map((fac: any, idx: number) => (
+                    <div key={fac.id || idx} className="border border-slate-200 p-4 rounded-lg bg-white shadow-xs space-y-3 relative">
+                      <button
+                        onClick={() => {
+                          const newFacs = homepage.campusLifeSection.facilities.filter((_: any, i: number) => i !== idx)
+                          setHomepage({ ...homepage, campusLifeSection: { ...homepage.campusLifeSection, facilities: newFacs } })
+                        }}
+                        className="absolute top-2 right-2 text-slate-400 hover:text-red-650 transition-colors"
+                      >
+                        <Icons.Trash2 size={14} />
+                      </button>
+                      <span className="text-[10px] font-bold text-slate-400 block font-mono">FACILITY CARD #{idx + 1}</span>
+                      <div>
+                        <label className="text-[9px] font-bold text-slate-400 uppercase">Facility Title</label>
+                        <input
+                          type="text"
+                          value={fac.title}
+                          onChange={e => {
+                            const newFacs = [...homepage.campusLifeSection.facilities]
+                            newFacs[idx].title = e.target.value
+                            setHomepage({ ...homepage, campusLifeSection: { ...homepage.campusLifeSection, facilities: newFacs } })
+                          }}
+                          className="w-full border border-slate-200 rounded px-2.5 py-1 text-xs focus:outline-none font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[9px] font-bold text-slate-400 uppercase">Description</label>
+                        <textarea
+                          rows={2}
+                          value={fac.description}
+                          onChange={e => {
+                            const newFacs = [...homepage.campusLifeSection.facilities]
+                            newFacs[idx].description = e.target.value
+                            setHomepage({ ...homepage, campusLifeSection: { ...homepage.campusLifeSection, facilities: newFacs } })
+                          }}
+                          className="w-full border border-slate-200 rounded px-2.5 py-1 text-xs focus:outline-none font-sans"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[9px] font-bold text-slate-400 uppercase">Image URL</label>
+                        <input
+                          type="text"
+                          value={fac.imageUrl}
+                          onChange={e => {
+                            const newFacs = [...homepage.campusLifeSection.facilities]
+                            newFacs[idx].imageUrl = e.target.value
+                            setHomepage({ ...homepage, campusLifeSection: { ...homepage.campusLifeSection, facilities: newFacs } })
+                          }}
+                          className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none font-sans"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-400 uppercase">Navigation Path</label>
+                          <input
+                            type="text"
+                            value={fac.to}
+                            onChange={e => {
+                              const newFacs = [...homepage.campusLifeSection.facilities]
+                              newFacs[idx].to = e.target.value
+                              setHomepage({ ...homepage, campusLifeSection: { ...homepage.campusLifeSection, facilities: newFacs } })
+                            }}
+                            className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none font-mono"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-400 uppercase">Icon Name</label>
+                          <input
+                            type="text"
+                            value={fac.iconName}
+                            onChange={e => {
+                              const newFacs = [...homepage.campusLifeSection.facilities]
+                              newFacs[idx].iconName = e.target.value
+                              setHomepage({ ...homepage, campusLifeSection: { ...homepage.campusLifeSection, facilities: newFacs } })
+                            }}
+                            className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none font-mono"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-start">
+                  <button
+                    onClick={() => {
+                      const newFacs = [...homepage.campusLifeSection.facilities, { id: 'fac-' + Math.random().toString(36).slice(2, 6), title: 'New Facility', description: 'Brief descriptions', iconName: 'Building', imageUrl: 'https://picsum.photos/seed/sgslib/600/400', to: '#' }]
+                      setHomepage({ ...homepage, campusLifeSection: { ...homepage.campusLifeSection, facilities: newFacs } })
+                    }}
+                    className="px-3 py-1.5 border border-dashed border-slate-300 hover:border-slate-500 text-slate-650 hover:text-slate-800 text-xs font-semibold rounded-md flex items-center gap-1.5"
+                  >
+                    <Icons.Plus size={12} /> Add Campus Asset
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* --- FAQS SECTION --- */}
+            <div className="space-y-4 pt-6">
+              <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.HelpCircle size={18} className="text-[#bfa15f]" />
+                7 · Frequently Asked Questions (FAQs)
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50/50 p-4 rounded border border-slate-150">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Section Tag/Label</label>
+                  <input
+                    type="text"
+                    value={homepage.faqsSection.subLabel}
+                    onChange={e => setHomepage({ ...homepage, faqsSection: { ...homepage.faqsSection, subLabel: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Primary Title</label>
+                  <input
+                    type="text"
+                    value={homepage.faqsSection.heading}
+                    onChange={e => setHomepage({ ...homepage, faqsSection: { ...homepage.faqsSection, heading: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">View All Path</label>
+                  <input
+                    type="text"
+                    value={homepage.faqsSection.viewAllLink}
+                    onChange={e => setHomepage({ ...homepage, faqsSection: { ...homepage.faqsSection, viewAllLink: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* FAQs Accordions list */}
+              <div className="space-y-4 mt-4">
+                <label className="text-xs font-bold text-slate-500 uppercase block">Q&A list</label>
+                <div className="space-y-4">
+                  {homepage.faqsSection.items.map((faq: any, idx: number) => (
+                    <div key={faq.id || idx} className="border border-slate-200 p-4 rounded-lg bg-white shadow-xs space-y-3 relative">
+                      <button
+                        onClick={() => {
+                          const newFaqs = homepage.faqsSection.items.filter((_: any, i: number) => i !== idx)
+                          setHomepage({ ...homepage, faqsSection: { ...homepage.faqsSection, items: newFaqs } })
+                        }}
+                        className="absolute top-2 right-2 text-slate-400 hover:text-red-650 transition-colors"
+                      >
+                        <Icons.Trash2 size={14} />
+                      </button>
+                      <span className="text-[10px] font-bold text-slate-400 block font-mono">FAQ ITEM #{idx + 1}</span>
+                      <div>
+                        <label className="text-[9px] font-bold text-slate-400 uppercase">Question Text</label>
+                        <input
+                          type="text"
+                          value={faq.question}
+                          onChange={e => {
+                            const newFaqs = [...homepage.faqsSection.items]
+                            newFaqs[idx].question = e.target.value
+                            setHomepage({ ...homepage, faqsSection: { ...homepage.faqsSection, items: newFaqs } })
+                          }}
+                          className="w-full border border-slate-200 rounded px-2.5 py-1.5 text-xs focus:outline-none font-semibold text-primary"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-400 uppercase block mb-1">Direct Answer Text (Optional)</label>
+                          <textarea
+                            rows={3}
+                            value={faq.answer || ''}
+                            onChange={e => {
+                              const newFaqs = [...homepage.faqsSection.items]
+                              newFaqs[idx].answer = e.target.value || null
+                              setHomepage({ ...homepage, faqsSection: { ...homepage.faqsSection, items: newFaqs } })
+                            }}
+                            className="w-full border border-slate-200 rounded px-2.5 py-1 text-xs focus:outline-none font-sans"
+                            placeholder="Direct answer to show when expanded..."
+                          />
+                        </div>
+                        <div className="border border-slate-100 p-3 rounded-md bg-slate-50/50 space-y-2">
+                          <label className="text-[9px] font-bold text-slate-400 uppercase block">Contact Person (Optional)</label>
+                          <div className="grid grid-cols-1 gap-1.5">
+                            <input
+                              type="text"
+                              value={faq.contact?.name || ''}
+                              placeholder="Contact Name (e.g. Office of Academics)"
+                              onChange={e => {
+                                const newFaqs = [...homepage.faqsSection.items]
+                                const updatedContact = faq.contact ? { ...faq.contact, name: e.target.value } : { name: e.target.value, phone: '', email: '' }
+                                newFaqs[idx].contact = updatedContact.name || updatedContact.phone || updatedContact.email ? updatedContact : null
+                                setHomepage({ ...homepage, faqsSection: { ...homepage.faqsSection, items: newFaqs } })
+                              }}
+                              className="w-full border border-slate-200 rounded px-2 py-0.5 text-xs focus:outline-none"
+                            />
+                            <input
+                              type="text"
+                              value={faq.contact?.phone || ''}
+                              placeholder="Phone Number (e.g. +91-731-2431234)"
+                              onChange={e => {
+                                const newFaqs = [...homepage.faqsSection.items]
+                                const updatedContact = faq.contact ? { ...faq.contact, phone: e.target.value } : { name: '', phone: e.target.value, email: '' }
+                                newFaqs[idx].contact = updatedContact.name || updatedContact.phone || updatedContact.email ? updatedContact : null
+                                setHomepage({ ...homepage, faqsSection: { ...homepage.faqsSection, items: newFaqs } })
+                              }}
+                              className="w-full border border-slate-200 rounded px-2 py-0.5 text-xs focus:outline-none font-mono"
+                            />
+                            <input
+                              type="email"
+                              value={faq.contact?.email || ''}
+                              placeholder="Email Address (e.g. info@sgsits.ac.in)"
+                              onChange={e => {
+                                const newFaqs = [...homepage.faqsSection.items]
+                                const updatedContact = faq.contact ? { ...faq.contact, email: e.target.value } : { name: '', phone: '', email: e.target.value }
+                                newFaqs[idx].contact = updatedContact.name || updatedContact.phone || updatedContact.email ? updatedContact : null
+                                setHomepage({ ...homepage, faqsSection: { ...homepage.faqsSection, items: newFaqs } })
+                              }}
+                              className="w-full border border-slate-200 rounded px-2 py-0.5 text-xs focus:outline-none font-sans"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-start">
+                  <button
+                    onClick={() => {
+                      const newFaqs = [...homepage.faqsSection.items, { id: 'faq-' + Math.random().toString(36).slice(2, 6), question: 'New Question Text?', answer: 'Answer details go here.', contact: null, defaultOpen: false }]
+                      setHomepage({ ...homepage, faqsSection: { ...homepage.faqsSection, items: newFaqs } })
+                    }}
+                    className="px-3 py-1.5 border border-dashed border-slate-350 hover:border-slate-500 text-slate-650 hover:text-slate-800 text-xs font-semibold rounded-md flex items-center gap-1.5"
+                  >
+                    <Icons.Plus size={12} /> Add Q&A Accordion
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* --- PHOTO GALLERY HEADERS --- */}
+            <div className="space-y-4 pt-6">
+              <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.Image size={18} className="text-[#bfa15f]" />
+                8 · Photo Gallery Headers
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Section Tag/Label</label>
+                  <input
+                    type="text"
+                    value={homepage.gallerySection.subLabel}
+                    onChange={e => setHomepage({ ...homepage, gallerySection: { ...homepage.gallerySection, subLabel: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Primary Title</label>
+                  <input
+                    type="text"
+                    value={homepage.gallerySection.heading}
+                    onChange={e => setHomepage({ ...homepage, gallerySection: { ...homepage.gallerySection, heading: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Accent Title (Gold)</label>
+                  <input
+                    type="text"
+                    value={homepage.gallerySection.accentText}
+                    onChange={e => setHomepage({ ...homepage, gallerySection: { ...homepage.gallerySection, accentText: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">View All Path</label>
+                  <input
+                    type="text"
+                    value={homepage.gallerySection.viewAllLink}
+                    onChange={e => setHomepage({ ...homepage, gallerySection: { ...homepage.gallerySection, viewAllLink: e.target.value } })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* SAVE BUTTON */}
+            <div className="pt-6 flex justify-end">
+              <button
+                onClick={() => triggerSave('home', homepage, 'All Homepage CMS sections saved successfully!')}
+                className="px-6 py-2.5 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+              >
+                <Icons.Save size={14} className="text-[#bfa15f]" />
+                Save All Homepage Sections
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── ABOUT INSTITUTE TAB ───────────────────────────────────────────── */}
+        {activeTab === 'about_inst' && (
+          <div className="space-y-6">
+            <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2">Narrative Story paragraphs</h3>
+            <p className="text-xs text-slate-400 leading-normal">Write paragraphs below. Separate each paragraph by a full double blank line (i.e. click Enter twice). Standard HTML tags like &lt;strong&gt;&lt;/strong&gt; are supported.</p>
+            <textarea
+              rows={8}
+              value={aboutInst.narrativeParagraphs.join('\n\n')}
+              onChange={e => setAboutInst({ ...aboutInst, narrativeParagraphs: e.target.value.split('\n\n') })}
+              className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-sans leading-relaxed text-justify"
+            />
+
+            <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 pt-4">Institute highlights</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {aboutInst.highlights.map((item: any, idx: number) => (
+                <div key={idx} className="border border-slate-200 p-4 rounded-lg bg-slate-50/50 flex flex-col gap-2 relative">
+                  <button
+                    onClick={() => {
+                      const newList = aboutInst.highlights.filter((_: any, i: number) => i !== idx)
+                      setAboutInst({ ...aboutInst, highlights: newList })
+                    }}
+                    className="absolute top-2 right-2 text-slate-400 hover:text-red-600 transition-colors"
+                  >
+                    <Icons.Trash2 size={14} />
+                  </button>
+                  <span className="text-[10px] font-bold text-slate-400 block">HIGHLIGHT #{idx + 1}</span>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-[9px] font-bold text-slate-400 uppercase">Value</label>
+                      <input
+                        type="text"
+                        value={item.value}
+                        onChange={e => {
+                          const list = [...aboutInst.highlights]
+                          list[idx].value = e.target.value
+                          setAboutInst({ ...aboutInst, highlights: list })
+                        }}
+                        className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-[9px] font-bold text-slate-400 uppercase">Label</label>
+                      <input
+                        type="text"
+                        value={item.label}
+                        onChange={e => {
+                          const list = [...aboutInst.highlights]
+                          list[idx].label = e.target.value
+                          setAboutInst({ ...aboutInst, highlights: list })
+                        }}
+                        className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none font-bold"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[9px] font-bold text-slate-400 uppercase">Description</label>
+                    <input
+                      type="text"
+                      value={item.desc}
+                      onChange={e => {
+                        const list = [...aboutInst.highlights]
+                        list[idx].desc = e.target.value
+                        setAboutInst({ ...aboutInst, highlights: list })
+                      }}
+                      className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[9px] font-bold text-slate-400 uppercase">Lucide Icon Name</label>
+                    <input
+                      type="text"
+                      value={item.iconName}
+                      onChange={e => {
+                        const list = [...aboutInst.highlights]
+                        list[idx].iconName = e.target.value
+                        setAboutInst({ ...aboutInst, highlights: list })
+                      }}
+                      className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none font-mono"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-start">
+              <button
+                onClick={() => {
+                  const newList = [...aboutInst.highlights, { iconName: 'Building2', label: 'New Highlight', value: '100+', desc: 'Short details description' }]
+                  setAboutInst({ ...aboutInst, highlights: newList })
+                }}
+                className="px-3 py-1.5 border border-dashed border-slate-300 hover:border-slate-500 text-slate-650 hover:text-slate-800 text-xs font-semibold rounded-lg flex items-center gap-1.5"
+              >
+                <Icons.Plus size={14} /> Add New Highlight
+              </button>
+            </div>
+
+            <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 pt-4">Affiliations & Recognition Bulletins</h3>
+            <div className="space-y-2">
+              {aboutInst.affiliations.map((aff: string, idx: number) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <Icons.CheckCircle2 size={16} className="text-slate-400 shrink-0" />
+                  <input
+                    type="text"
+                    value={aff}
+                    onChange={e => {
+                      const list = [...aboutInst.affiliations]
+                      list[idx] = e.target.value
+                      setAboutInst({ ...aboutInst, affiliations: list })
+                    }}
+                    className="w-full border border-slate-200 rounded px-3 py-1.5 text-xs focus:outline-none focus:border-primary"
+                  />
+                  <button
+                    onClick={() => {
+                      const list = aboutInst.affiliations.filter((_: any, i: number) => i !== idx)
+                      setAboutInst({ ...aboutInst, affiliations: list })
+                    }}
+                    className="p-1.5 border border-slate-200 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded"
+                  >
+                    <Icons.Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-start">
+              <button
+                onClick={() => {
+                  const list = [...aboutInst.affiliations, 'Affiliation and approvals point text']
+                  setAboutInst({ ...aboutInst, affiliations: list })
+                }}
+                className="px-3 py-1.5 border border-dashed border-slate-300 hover:border-slate-500 text-slate-650 hover:text-slate-800 text-xs font-semibold rounded-lg flex items-center gap-1.5"
+              >
+                <Icons.Plus size={14} /> Add Affiliation Point
+              </button>
+            </div>
+
+            <div className="pt-6 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => triggerSave('about_institute', aboutInst, 'About Profile CMS details updated!')}
+                className="px-6 py-2.5 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+              >
+                <Icons.Save size={14} className="text-[#bfa15f]" />
+                Save About Profile
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── VISION & MISSION TAB ──────────────────────────────────────────── */}
+        {activeTab === 'vision_mission' && (
+          <div className="space-y-6">
+            <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2">Institutional Vision Statements</h3>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Vision (English)</label>
+                <textarea
+                  rows={3}
+                  value={visionMission.visionEnglish}
+                  onChange={e => setVisionMission({ ...visionMission, visionEnglish: e.target.value })}
+                  className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-medium italic"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase font-sans">Vision (Hindi - अनुवाद)</label>
+                <textarea
+                  rows={3}
+                  value={visionMission.visionHindi}
+                  onChange={e => setVisionMission({ ...visionMission, visionHindi: e.target.value })}
+                  className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-medium text-slate-800"
+                />
+              </div>
+            </div>
+
+            <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 pt-4">Mission points</h3>
+            <div className="space-y-3">
+              {visionMission.missionPoints.map((item: any, idx: number) => (
+                <div key={idx} className="flex gap-2 items-start bg-slate-50/50 p-2 border border-slate-200 rounded">
+                  <input
+                    type="text"
+                    value={item.num}
+                    onChange={e => {
+                      const list = [...visionMission.missionPoints]
+                      list[idx].num = e.target.value
+                      setVisionMission({ ...visionMission, missionPoints: list })
+                    }}
+                    className="w-12 border border-slate-200 rounded px-2 py-1 text-xs text-center font-bold"
+                  />
+                  <textarea
+                    rows={2}
+                    value={item.text}
+                    onChange={e => {
+                      const list = [...visionMission.missionPoints]
+                      list[idx].text = e.target.value
+                      setVisionMission({ ...visionMission, missionPoints: list })
+                    }}
+                    className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none"
+                  />
+                  <button
+                    onClick={() => {
+                      const list = visionMission.missionPoints.filter((_: any, i: number) => i !== idx)
+                      setVisionMission({ ...visionMission, missionPoints: list })
+                    }}
+                    className="p-1.5 border border-slate-200 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded self-center"
+                  >
+                    <Icons.Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-start">
+              <button
+                onClick={() => {
+                  const list = [...visionMission.missionPoints, { num: String(visionMission.missionPoints.length + 1), text: 'New institutional mission points description.' }]
+                  setVisionMission({ ...visionMission, missionPoints: list })
+                }}
+                className="px-3 py-1.5 border border-dashed border-slate-300 hover:border-slate-500 text-slate-650 hover:text-slate-800 text-xs font-semibold rounded-lg flex items-center gap-1.5"
+              >
+                <Icons.Plus size={14} /> Add Mission Point
+              </button>
+            </div>
+
+            <div className="pt-6 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => triggerSave('vision_mission', visionMission, 'Vision & Mission values saved!')}
+                className="px-6 py-2.5 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+              >
+                <Icons.Save size={14} className="text-[#bfa15f]" />
+                Save Vision & Mission
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── GOVERNANCE & COUNCIL TAB ──────────────────────────────────────── */}
+        {activeTab === 'governance' && (
+          <div className="space-y-6">
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2">1 · Governing Body Board</h2>
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase">Board description</label>
+              <textarea
+                rows={3}
+                value={governingBody.description}
+                onChange={e => setGoverningBody({ ...governingBody, description: e.target.value })}
+                className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Governing Members list</label>
+              <table className="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Role</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Name / Organization</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Category</th>
+                    <th className="px-3 py-2 text-right text-slate-600 font-bold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {governingBody.members.map((member: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-slate-50">
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={member.role}
+                          onChange={e => {
+                            const list = [...governingBody.members]
+                            list[idx].role = e.target.value
+                            setGoverningBody({ ...governingBody, members: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={member.name}
+                          onChange={e => {
+                            const list = [...governingBody.members]
+                            list[idx].name = e.target.value
+                            setGoverningBody({ ...governingBody, members: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <select
+                          value={member.category}
+                          onChange={e => {
+                            const list = [...governingBody.members]
+                            list[idx].category = e.target.value as any
+                            setGoverningBody({ ...governingBody, members: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 bg-white focus:outline-none"
+                        >
+                          <option value="Government">Government</option>
+                          <option value="University">University</option>
+                          <option value="Industry">Industry</option>
+                          <option value="Regulatory">Regulatory</option>
+                          <option value="Faculty">Faculty</option>
+                          <option value="Institute">Institute</option>
+                        </select>
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <button
+                          onClick={() => {
+                            const list = governingBody.members.filter((_: any, i: number) => i !== idx)
+                            setGoverningBody({ ...governingBody, members: list })
+                          }}
+                          className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded"
+                        >
+                          <Icons.Trash2 size={13} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex justify-start">
+                <button
+                  onClick={() => {
+                    const list = [...governingBody.members, { role: 'Member', name: 'Nominee Name', category: 'Government' }]
+                    setGoverningBody({ ...governingBody, members: list })
+                  }}
+                  className="px-3 py-1 border border-dashed border-slate-300 hover:border-slate-500 text-slate-650 text-xs font-semibold rounded-md flex items-center gap-1.5"
+                >
+                  <Icons.Plus size={12} /> Add Governing Member
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => triggerSave('governing_body', governingBody, 'Governing Body board saved!')}
+                className="px-4 py-2 bg-[#0b2545] text-white hover:bg-primary/95 text-xs font-semibold uppercase tracking-wider rounded flex items-center gap-1.5 border border-[#bfa15f]/20 shadow-sm"
+              >
+                <Icons.Save size={12} className="text-[#bfa15f]" /> Save Governing Body
+              </button>
+            </div>
+
+            {/* Academic Council Section */}
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">2 · Academic Council Board</h2>
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase">Academic Council Description</label>
+              <textarea
+                rows={3}
+                value={academicCouncil.description}
+                onChange={e => setAcademicCouncil({ ...academicCouncil, description: e.target.value })}
+                className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Council Members list</label>
+              <table className="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-3 py-2 text-slate-600 font-bold w-16">S.No.</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Member Name</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Designation</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Category</th>
+                    <th className="px-3 py-2 text-right text-slate-600 font-bold w-12">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {academicCouncil.members.map((member: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-slate-50">
+                      <td className="px-3 py-2">
+                        <input
+                          type="number"
+                          value={member.sno}
+                          onChange={e => {
+                            const list = [...academicCouncil.members]
+                            list[idx].sno = Number(e.target.value)
+                            setAcademicCouncil({ ...academicCouncil, members: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-center"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={member.name}
+                          onChange={e => {
+                            const list = [...academicCouncil.members]
+                            list[idx].name = e.target.value
+                            setAcademicCouncil({ ...academicCouncil, members: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={member.designation}
+                          onChange={e => {
+                            const list = [...academicCouncil.members]
+                            list[idx].designation = e.target.value
+                            setAcademicCouncil({ ...academicCouncil, members: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={member.category}
+                          onChange={e => {
+                            const list = [...academicCouncil.members]
+                            list[idx].category = e.target.value
+                            setAcademicCouncil({ ...academicCouncil, members: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <button
+                          onClick={() => {
+                            const list = academicCouncil.members.filter((_: any, i: number) => i !== idx)
+                            setAcademicCouncil({ ...academicCouncil, members: list })
+                          }}
+                          className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded"
+                        >
+                          <Icons.Trash2 size={13} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex justify-start">
+                <button
+                  onClick={() => {
+                    const list = [...academicCouncil.members, { sno: academicCouncil.members.length + 1, name: 'Council Nominee', designation: 'Invitee Member', category: 'Ex-Officio' }]
+                    setAcademicCouncil({ ...academicCouncil, members: list })
+                  }}
+                  className="px-3 py-1 border border-dashed border-slate-300 hover:border-slate-500 text-slate-650 text-xs font-semibold rounded-md flex items-center gap-1.5"
+                >
+                  <Icons.Plus size={12} /> Add Council Member
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2 border-t border-slate-100">
+              <button
+                onClick={() => triggerSave('academic_council', academicCouncil, 'Academic Council board saved!')}
+                className="px-6 py-2.5 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+              >
+                <Icons.Save size={14} className="text-[#bfa15f]" /> Save Academic Council
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── ADMIN & DIRECTORY TAB ─────────────────────────────────────────── */}
+        {activeTab === 'directory' && (
+          <div className="space-y-6">
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2">1 · Administration Officials Roster</h2>
+            <div className="space-y-2">
+              <table className="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Role / Title</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Official Name</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Email</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Phone No.</th>
+                    <th className="px-3 py-2 text-right text-slate-600 font-bold w-12">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {administration.map((official: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-slate-50">
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={official.title}
+                          onChange={e => {
+                            const list = [...administration]
+                            list[idx].title = e.target.value
+                            setAdministration(list)
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none font-bold text-[#0b2545]"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={official.name}
+                          onChange={e => {
+                            const list = [...administration]
+                            list[idx].name = e.target.value
+                            setAdministration(list)
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="email"
+                          value={official.email}
+                          onChange={e => {
+                            const list = [...administration]
+                            list[idx].email = e.target.value
+                            setAdministration(list)
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none font-mono"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={official.phone}
+                          onChange={e => {
+                            const list = [...administration]
+                            list[idx].phone = e.target.value
+                            setAdministration(list)
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <button
+                          onClick={() => {
+                            const list = administration.filter((_: any, i: number) => i !== idx)
+                            setAdministration(list)
+                          }}
+                          className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded"
+                        >
+                          <Icons.Trash2 size={13} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex justify-start">
+                <button
+                  onClick={() => {
+                    const list = [...administration, { title: 'New Dean', name: 'Dr. Officer', email: 'dean@sgsits.ac.in', phone: '0731-2582xxx' }]
+                    setAdministration(list)
+                  }}
+                  className="px-3 py-1 border border-dashed border-slate-300 hover:border-slate-500 text-slate-650 text-xs font-semibold rounded-md flex items-center gap-1.5"
+                >
+                  <Icons.Plus size={12} /> Add Admin Official
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => triggerSave('administration', administration, 'Administration list saved!')}
+                className="px-4 py-2 bg-[#0b2545] text-white hover:bg-primary/95 text-xs font-semibold uppercase tracking-wider rounded flex items-center gap-1.5 border border-[#bfa15f]/20 shadow-sm"
+              >
+                <Icons.Save size={12} className="text-[#bfa15f]" /> Save Administration
+              </button>
+            </div>
+
+            {/* Telephone Directory Section */}
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">2 · Telephone Intercom Directory</h2>
+            <div className="space-y-2">
+              <table className="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Department</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Contact Name</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Phone No.</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Intercom Ext</th>
+                    <th className="px-3 py-2 text-right text-slate-600 font-bold w-12">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {telephoneDirectory.map((entry: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-slate-50">
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={entry.department}
+                          onChange={e => {
+                            const list = [...telephoneDirectory]
+                            list[idx].department = e.target.value
+                            setTelephoneDirectory(list)
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={entry.name}
+                          onChange={e => {
+                            const list = [...telephoneDirectory]
+                            list[idx].name = e.target.value
+                            setTelephoneDirectory(list)
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none font-bold"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={entry.phone}
+                          onChange={e => {
+                            const list = [...telephoneDirectory]
+                            list[idx].phone = e.target.value
+                            setTelephoneDirectory(list)
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={entry.ext}
+                          onChange={e => {
+                            const list = [...telephoneDirectory]
+                            list[idx].ext = e.target.value
+                            setTelephoneDirectory(list)
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-20 bg-white focus:outline-none text-center"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <button
+                          onClick={() => {
+                            const list = telephoneDirectory.filter((_: any, i: number) => i !== idx)
+                            setTelephoneDirectory(list)
+                          }}
+                          className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded"
+                        >
+                          <Icons.Trash2 size={13} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex justify-start">
+                <button
+                  onClick={() => {
+                    const list = [...telephoneDirectory, { department: 'New Department', name: 'HOD', phone: '0731-2582xxx', ext: '100' }]
+                    setTelephoneDirectory(list)
+                  }}
+                  className="px-3 py-1 border border-dashed border-slate-300 hover:border-slate-500 text-slate-650 text-xs font-semibold rounded-md flex items-center gap-1.5"
+                >
+                  <Icons.Plus size={12} /> Add Telephone Roster entry
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => triggerSave('telephone', telephoneDirectory, 'Telephone directory CMS records saved!')}
+                className="px-6 py-2.5 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+              >
+                <Icons.Save size={14} className="text-[#bfa15f]" /> Save Telephone Directory
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── QUALITY & IQAC TAB ────────────────────────────────────────────── */}
+        {activeTab === 'iqac' && (
+          <div className="space-y-6">
+            <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2">About IQAC cell</h3>
+            <textarea
+              rows={4}
+              value={iqac.about}
+              onChange={e => setIqac({ ...iqac, about: e.target.value })}
+              className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none"
+            />
+
+            <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 pt-2">IQAC Strategic Vision</h3>
+            <textarea
+              rows={3}
+              value={iqac.vision}
+              onChange={e => setIqac({ ...iqac, vision: e.target.value })}
+              className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none"
+            />
+
+            <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 pt-2">IQAC Committee Contacts</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Chairperson Name</label>
+                <input
+                  type="text"
+                  value={iqac.chairpersonName}
+                  onChange={e => setIqac({ ...iqac, chairpersonName: e.target.value })}
+                  className="w-full border border-slate-200 rounded px-3 py-1.5 text-xs focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Chairperson Title</label>
+                <input
+                  type="text"
+                  value={iqac.chairpersonTitle}
+                  onChange={e => setIqac({ ...iqac, chairpersonTitle: e.target.value })}
+                  className="w-full border border-slate-200 rounded px-3 py-1.5 text-xs focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Coordinator Name</label>
+                <input
+                  type="text"
+                  value={iqac.coordinatorName}
+                  onChange={e => setIqac({ ...iqac, coordinatorName: e.target.value })}
+                  className="w-full border border-slate-200 rounded px-3 py-1.5 text-xs focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Coordinator Email</label>
+                <input
+                  type="email"
+                  value={iqac.coordinatorEmail}
+                  onChange={e => setIqac({ ...iqac, coordinatorEmail: e.target.value })}
+                  className="w-full border border-slate-200 rounded px-3 py-1.5 text-xs focus:outline-none font-mono"
+                />
+              </div>
+            </div>
+
+            <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 pt-4">Primary quality objectives</h3>
+            <div className="space-y-2">
+              {iqac.objectives.map((obj: string, idx: number) => (
+                <div key={idx} className="flex gap-2">
+                  <span className="font-bold text-xs text-slate-400 self-center">{idx + 1}.</span>
+                  <input
+                    type="text"
+                    value={obj}
+                    onChange={e => {
+                      const list = [...iqac.objectives]
+                      list[idx] = e.target.value
+                      setIqac({ ...iqac, objectives: list })
+                    }}
+                    className="w-full border border-slate-200 rounded px-3 py-1.5 text-xs focus:outline-none"
+                  />
+                  <button
+                    onClick={() => {
+                      const list = iqac.objectives.filter((_: any, i: number) => i !== idx)
+                      setIqac({ ...iqac, objectives: list })
+                    }}
+                    className="p-1.5 border border-slate-200 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded"
+                  >
+                    <Icons.Trash2 size={13} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-start">
+              <button
+                onClick={() => {
+                  const list = [...iqac.objectives, 'New quality improvement parameter and metrics directive.']
+                  setIqac({ ...iqac, objectives: list })
+                }}
+                className="px-3 py-1.5 border border-dashed border-slate-300 hover:border-slate-500 text-slate-655 text-xs font-semibold rounded-lg flex items-center gap-1.5"
+              >
+                <Icons.Plus size={14} /> Add IQAC Objective
+              </button>
+            </div>
+
+            <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 pt-4">Recent IQAC Activities</h3>
+            <div className="space-y-4">
+              {(iqac.recentActivities || []).map((act: any, idx: number) => (
+                <div key={idx} className="border border-slate-200 p-4 rounded-lg bg-slate-50/50 flex flex-col gap-2 relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newList = iqac.recentActivities.filter((_: any, i: number) => i !== idx)
+                      setIqac({ ...iqac, recentActivities: newList })
+                    }}
+                    className="absolute top-2 right-2 text-slate-400 hover:text-red-650 transition-colors"
+                  >
+                    <Icons.Trash2 size={14} />
+                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Activity Title</label>
+                      <input
+                        type="text"
+                        value={act.title}
+                        onChange={e => {
+                          const list = [...iqac.recentActivities]
+                          list[idx].title = e.target.value
+                          setIqac({ ...iqac, recentActivities: list })
+                        }}
+                        className="w-full border border-slate-200 rounded px-2.5 py-1 text-xs focus:outline-none font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Date / Timeline</label>
+                      <input
+                        type="text"
+                        value={act.date}
+                        onChange={e => {
+                          const list = [...iqac.recentActivities]
+                          list[idx].date = e.target.value
+                          setIqac({ ...iqac, recentActivities: list })
+                        }}
+                        className="w-full border border-slate-200 rounded px-2.5 py-1 text-xs focus:outline-none font-semibold text-accent"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase">Description / Achievement Summary</label>
+                    <textarea
+                      rows={2}
+                      value={act.description}
+                      onChange={e => {
+                        const list = [...iqac.recentActivities]
+                        list[idx].description = e.target.value
+                        setIqac({ ...iqac, recentActivities: list })
+                      }}
+                      className="w-full border border-slate-200 rounded px-2.5 py-1 text-xs focus:outline-none"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-start">
+              <button
+                type="button"
+                onClick={() => {
+                  const newList = [...(iqac.recentActivities || []), { title: 'New IQAC Event', description: 'Brief description of the quality audit/seminar.', date: 'May 2026' }]
+                  setIqac({ ...iqac, recentActivities: newList })
+                }}
+                className="px-3 py-1.5 border border-dashed border-slate-300 hover:border-slate-500 text-slate-655 text-xs font-semibold rounded-lg flex items-center gap-1.5"
+              >
+                <Icons.Plus size={14} /> Add Recent Activity
+              </button>
+            </div>
+
+            <div className="pt-6 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => triggerSave('iqac', iqac, 'IQAC Quality policies and contacts updated!')}
+                className="px-6 py-2.5 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+              >
+                <Icons.Save size={14} className="text-[#bfa15f]" /> Save IQAC Settings
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── ACCREDITATION & INFRASTRUCTURE TAB ────────────────────────────── */}
+        {activeTab === 'accreditation_infra' && (
+          <div className="space-y-6">
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2">1 · Institutional Accreditation</h2>
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase">About Accreditations</label>
+              <textarea
+                rows={3}
+                value={accreditation.about}
+                onChange={e => setAccreditation({ ...accreditation, about: e.target.value })}
+                className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Accreditation Audit Records</label>
+              <table className="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Body</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Grade/Status</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Valid Upto</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Audit Cycle</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">NAAC Score</th>
+                    <th className="px-3 py-2 text-right text-slate-600 font-bold w-12">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {accreditation.records.map((rec: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-slate-50">
+                      <td className="px-3 py-2 font-bold text-[#0b2545]">
+                        <input
+                          type="text"
+                          value={rec.body}
+                          onChange={e => {
+                            const list = [...accreditation.records]
+                            list[idx].body = e.target.value
+                            setAccreditation({ ...accreditation, records: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={rec.grade}
+                          onChange={e => {
+                            const list = [...accreditation.records]
+                            list[idx].grade = e.target.value
+                            setAccreditation({ ...accreditation, records: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={rec.validUpto}
+                          onChange={e => {
+                            const list = [...accreditation.records]
+                            list[idx].validUpto = e.target.value
+                            setAccreditation({ ...accreditation, records: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-center"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={rec.cycle || ''}
+                          onChange={e => {
+                            const list = [...accreditation.records]
+                            list[idx].cycle = e.target.value
+                            setAccreditation({ ...accreditation, records: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-center"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={rec.naacScore || ''}
+                          onChange={e => {
+                            const list = [...accreditation.records]
+                            list[idx].naacScore = e.target.value
+                            setAccreditation({ ...accreditation, records: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-center font-mono"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <button
+                          onClick={() => {
+                            const list = accreditation.records.filter((_: any, i: number) => i !== idx)
+                            setAccreditation({ ...accreditation, records: list })
+                          }}
+                          className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded"
+                        >
+                          <Icons.Trash2 size={13} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex justify-start">
+                <button
+                  onClick={() => {
+                    const list = [...accreditation.records, { body: 'New Audit', grade: 'Approved', validUpto: '2028', cycle: 'Annual', naacScore: '' }]
+                    setAccreditation({ ...accreditation, records: list })
+                  }}
+                  className="px-3 py-1 border border-dashed border-slate-300 hover:border-slate-500 text-slate-650 text-xs font-semibold rounded-md flex items-center gap-1.5"
+                >
+                  <Icons.Plus size={12} /> Add Accreditation Record
+                </button>
+              </div>
+            </div>
+
+            {/* NBA Programs Editor */}
+            <div className="pt-4">
+              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Accredited NBA Programs (One per line)</label>
+              <textarea
+                rows={4}
+                value={(accreditation.nbaPrograms || []).join('\n')}
+                onChange={e => setAccreditation({ ...accreditation, nbaPrograms: e.target.value.split('\n').map(l => l.trim()).filter(Boolean) })}
+                className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none"
+                placeholder="e.g. B.E. Computer Engineering"
+              />
+            </div>
+
+            {/* NIRF Rankings Editor */}
+            <div className="space-y-2 pt-4">
+              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">NIRF National Rankings</label>
+              <table className="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Year</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Rank / Achievement</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Category</th>
+                    <th className="px-3 py-2 text-right text-slate-600 font-bold w-12">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {(accreditation.nirf || []).map((n: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-slate-50">
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={n.year}
+                          onChange={e => {
+                            const list = [...accreditation.nirf]
+                            list[idx].year = e.target.value
+                            setAccreditation({ ...accreditation, nirf: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={n.rank}
+                          onChange={e => {
+                            const list = [...accreditation.nirf]
+                            list[idx].rank = e.target.value
+                            setAccreditation({ ...accreditation, nirf: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none font-semibold"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={n.category}
+                          onChange={e => {
+                            const list = [...accreditation.nirf]
+                            list[idx].category = e.target.value
+                            setAccreditation({ ...accreditation, nirf: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const list = accreditation.nirf.filter((_: any, i: number) => i !== idx)
+                            setAccreditation({ ...accreditation, nirf: list })
+                          }}
+                          className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded"
+                        >
+                          <Icons.Trash2 size={13} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex justify-start">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const list = [...(accreditation.nirf || []), { year: '2026', rank: 'Top 100', category: 'Engineering' }]
+                    setAccreditation({ ...accreditation, nirf: list })
+                  }}
+                  className="px-3 py-1 border border-dashed border-slate-300 hover:border-slate-500 text-slate-650 text-xs font-semibold rounded-md flex items-center gap-1.5"
+                >
+                  <Icons.Plus size={12} /> Add NIRF Entry
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2 border-t border-slate-100">
+              <button
+                onClick={() => triggerSave('accreditation', accreditation, 'Accreditations saved!')}
+                className="px-4 py-2 bg-[#0b2545] text-white hover:bg-primary/95 text-xs font-semibold uppercase tracking-wider rounded flex items-center gap-1.5 border border-[#bfa15f]/20 shadow-sm"
+              >
+                <Icons.Save size={12} className="text-[#bfa15f]" /> Save Accreditations
+              </button>
+            </div>
+
+            {/* Infrastructure Section */}
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">2 · Campus Infrastructure</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Campus Area (e.g. 51+ Acres)</label>
+                <input
+                  type="text"
+                  value={infrastructure.campusArea}
+                  onChange={e => setInfrastructure({ ...infrastructure, campusArea: e.target.value })}
+                  className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Built-Up Area</label>
+                <input
+                  type="text"
+                  value={infrastructure.builtUpArea}
+                  onChange={e => setInfrastructure({ ...infrastructure, builtUpArea: e.target.value })}
+                  className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-xs font-bold text-slate-500 uppercase">Infrastructure Summary narrative</label>
+                <textarea
+                  rows={3}
+                  value={infrastructure.summary}
+                  onChange={e => setInfrastructure({ ...infrastructure, summary: e.target.value })}
+                  className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 pt-4">Campus Blocks & Buildings</h3>
+            <div className="grid grid-cols-1 gap-4">
+              {infrastructure.items.map((block: any, idx: number) => (
+                <div key={idx} className="border border-slate-200 p-4 rounded-lg bg-slate-50/50 flex flex-col gap-2 relative">
+                  <button
+                    onClick={() => {
+                      const newList = infrastructure.items.filter((_: any, i: number) => i !== idx)
+                      setInfrastructure({ ...infrastructure, items: newList })
+                    }}
+                    className="absolute top-2 right-2 text-slate-400 hover:text-red-600 transition-colors"
+                  >
+                    <Icons.Trash2 size={14} />
+                  </button>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Block/Facility Title</label>
+                      <input
+                        type="text"
+                        value={block.title}
+                        onChange={e => {
+                          const list = [...infrastructure.items]
+                          list[idx].title = e.target.value
+                          setInfrastructure({ ...infrastructure, items: list })
+                        }}
+                        className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none font-bold"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase">Description</label>
+                    <textarea
+                      rows={2}
+                      value={block.description}
+                      onChange={e => {
+                        const list = [...infrastructure.items]
+                        list[idx].description = e.target.value
+                        setInfrastructure({ ...infrastructure, items: list })
+                      }}
+                      className="w-full border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-start">
+              <button
+                onClick={() => {
+                  const newList = [...infrastructure.items, { title: 'New Facility Block', description: 'Classrooms, high tech laboratories, and seminar halls.' }]
+                  setInfrastructure({ ...infrastructure, items: newList })
+                }}
+                className="px-3 py-1.5 border border-dashed border-slate-300 hover:border-slate-500 text-slate-655 text-xs font-semibold rounded-lg flex items-center gap-1.5"
+              >
+                <Icons.Plus size={14} /> Add Campus Block
+              </button>
+            </div>
+
+            {/* Additional Facilities Editor */}
+            <div className="pt-4">
+              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Additional Facilities (One per line)</label>
+              <textarea
+                rows={4}
+                value={(infrastructure.additionalFacilities || []).join('\n')}
+                onChange={e => setInfrastructure({ ...infrastructure, additionalFacilities: e.target.value.split('\n').map(l => l.trim()).filter(Boolean) })}
+                className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none"
+                placeholder="e.g. Solar Power Plant"
+              />
+            </div>
+
+            <div className="pt-6 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => triggerSave('infrastructure', infrastructure, 'Campus Infrastructure parameters saved!')}
+                className="px-6 py-2.5 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+              >
+                <Icons.Save size={14} className="text-[#bfa15f]" /> Save Campus Details
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── ACADEMICS & COURSES TAB ───────────────────────────────────────── */}
+        {activeTab === 'academics' && (
+          <div className="space-y-6">
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2">1 · Undergraduate (UG) Courses</h2>
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase">UG Courses Intro narrative</label>
+              <textarea
+                rows={2}
+                value={academicsUg.intro}
+                onChange={e => setAcademicsUg({ ...academicsUg, intro: e.target.value })}
+                className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">UG Courses list</label>
+              <table className="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Course Name</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold w-24">Intake Seats</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold w-24">Code</th>
+                    <th className="px-3 py-2 text-right text-slate-600 font-bold w-12">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {academicsUg.courses.map((course: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-slate-50">
+                      <td className="px-3 py-2 font-bold text-slate-800">
+                        <input
+                          type="text"
+                          value={course.name}
+                          onChange={e => {
+                            const list = [...academicsUg.courses]
+                            list[idx].name = e.target.value
+                            setAcademicsUg({ ...academicsUg, courses: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="number"
+                          value={course.seats}
+                          onChange={e => {
+                            const list = [...academicsUg.courses]
+                            list[idx].seats = Number(e.target.value)
+                            setAcademicsUg({ ...academicsUg, courses: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-center font-semibold text-[#0b2545]"
+                        />
+                      </td>
+                      <td className="px-3 py-2 font-mono">
+                        <input
+                          type="text"
+                          value={course.code}
+                          onChange={e => {
+                            const list = [...academicsUg.courses]
+                            list[idx].code = e.target.value
+                            setAcademicsUg({ ...academicsUg, courses: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-center uppercase"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <button
+                          onClick={() => {
+                            const list = academicsUg.courses.filter((_: any, i: number) => i !== idx)
+                            setAcademicsUg({ ...academicsUg, courses: list })
+                          }}
+                          className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded"
+                        >
+                          <Icons.Trash2 size={13} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex justify-start">
+                <button
+                  onClick={() => {
+                    const list = [...academicsUg.courses, { name: 'New Course Program', seats: 60, code: 'NEW' }]
+                    setAcademicsUg({ ...academicsUg, courses: list })
+                  }}
+                  className="px-3 py-1 border border-dashed border-slate-300 hover:border-slate-500 text-slate-650 text-xs font-semibold rounded-md flex items-center gap-1.5"
+                >
+                  <Icons.Plus size={12} /> Add UG Program
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => triggerSave('ug', academicsUg, 'UG Academics details updated!')}
+                className="px-4 py-2 bg-[#0b2545] text-white hover:bg-primary/95 text-xs font-semibold uppercase tracking-wider rounded flex items-center gap-1.5 border border-[#bfa15f]/20 shadow-sm"
+              >
+                <Icons.Save size={12} className="text-[#bfa15f]" /> Save UG Curriculum
+              </button>
+            </div>
+
+            {/* Postgraduate section */}
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">2 · Postgraduate (PG) Courses</h2>
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase">PG Courses Intro narrative</label>
+              <textarea
+                rows={2}
+                value={academicsPg.intro}
+                onChange={e => setAcademicsPg({ ...academicsPg, intro: e.target.value })}
+                className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">PG Courses list</label>
+              <table className="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Program</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Department</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold w-20">Intake</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold w-48">Eligibility</th>
+                    <th className="px-3 py-2 text-right text-slate-600 font-bold w-12">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {academicsPg.programs.map((prog: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-slate-50">
+                      <td className="px-3 py-2 font-bold text-slate-800">
+                        <input
+                          type="text"
+                          value={prog.program}
+                          onChange={e => {
+                            const list = [...academicsPg.programs]
+                            list[idx].program = e.target.value
+                            setAcademicsPg({ ...academicsPg, programs: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={prog.dept}
+                          onChange={e => {
+                            const list = [...academicsPg.programs]
+                            list[idx].dept = e.target.value
+                            setAcademicsPg({ ...academicsPg, programs: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-center font-bold text-[#0b2545]">
+                        <input
+                          type="number"
+                          value={prog.intake}
+                          onChange={e => {
+                            const list = [...academicsPg.programs]
+                            list[idx].intake = Number(e.target.value)
+                            setAcademicsPg({ ...academicsPg, programs: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-center"
+                        />
+                      </td>
+                      <td className="px-3 py-2 font-semibold">
+                        <input
+                          type="text"
+                          value={prog.eligibility}
+                          onChange={e => {
+                            const list = [...academicsPg.programs]
+                            list[idx].eligibility = e.target.value
+                            setAcademicsPg({ ...academicsPg, programs: list })
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <button
+                          onClick={() => {
+                            const list = academicsPg.programs.filter((_: any, i: number) => i !== idx)
+                            setAcademicsPg({ ...academicsPg, programs: list })
+                          }}
+                          className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded"
+                        >
+                          <Icons.Trash2 size={13} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex justify-start">
+                <button
+                  onClick={() => {
+                    const list = [...academicsPg.programs, { program: 'M.Tech — Applied Science', dept: 'Applied Sciences', intake: 18, eligibility: 'B.Tech/GATE' }]
+                    setAcademicsPg({ ...academicsPg, programs: list })
+                  }}
+                  className="px-3 py-1 border border-dashed border-slate-300 hover:border-slate-500 text-slate-650 text-xs font-semibold rounded-md flex items-center gap-1.5"
+                >
+                  <Icons.Plus size={12} /> Add PG Program
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => triggerSave('pg', academicsPg, 'PG Academics details updated!')}
+                className="px-4 py-2 bg-[#0b2545] text-white hover:bg-primary/95 text-xs font-semibold uppercase tracking-wider rounded flex items-center gap-1.5 border border-[#bfa15f]/20 shadow-sm"
+              >
+                <Icons.Save size={12} className="text-[#bfa15f]" /> Save PG Curriculum
+              </button>
+            </div>
+
+            {/* Academic Calendar Events section */}
+            <h2 className="font-display text-xl font-bold text-[#0b2545] border-b border-[#0b2545]/10 pb-2 pt-6">3 · Academic Calendar</h2>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Calendar Schedule</label>
+              <table className="w-full text-xs text-left border border-slate-200 rounded-lg overflow-hidden">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-3 py-2 text-slate-600 font-bold">Event Description</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold w-48">Scheduled Dates</th>
+                    <th className="px-3 py-2 text-slate-600 font-bold w-36">Category</th>
+                    <th className="px-3 py-2 text-right text-slate-600 font-bold w-12">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {academicsCalendar.map((item: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-slate-50">
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={item.event}
+                          onChange={e => {
+                            const list = [...academicsCalendar]
+                            list[idx].event = e.target.value
+                            setAcademicsCalendar(list)
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none font-bold text-slate-800"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={item.dates}
+                          onChange={e => {
+                            const list = [...academicsCalendar]
+                            list[idx].dates = e.target.value
+                            setAcademicsCalendar(list)
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <select
+                          value={item.category}
+                          onChange={e => {
+                            const list = [...academicsCalendar]
+                            list[idx].category = e.target.value as any
+                            setAcademicsCalendar(list)
+                          }}
+                          className="border border-slate-150 rounded px-2 py-0.5 bg-white focus:outline-none"
+                        >
+                          <option value="Odd Semester">Odd Semester</option>
+                          <option value="Even Semester">Even Semester</option>
+                          <option value="Examination">Examination</option>
+                          <option value="Holiday">Holiday</option>
+                          <option value="General">General</option>
+                        </select>
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <button
+                          onClick={() => {
+                            const list = academicsCalendar.filter((_: any, i: number) => i !== idx)
+                            setAcademicsCalendar(list)
+                          }}
+                          className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded"
+                        >
+                          <Icons.Trash2 size={13} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex justify-start">
+                <button
+                  onClick={() => {
+                    const list = [...academicsCalendar, { event: 'New Calendar Event', dates: 'TBA', category: 'General' }]
+                    setAcademicsCalendar(list)
+                  }}
+                  className="px-3 py-1 border border-dashed border-slate-300 hover:border-slate-500 text-slate-650 text-xs font-semibold rounded-md flex items-center gap-1.5"
+                >
+                  <Icons.Plus size={12} /> Add Calendar Event
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => triggerSave('calendar', academicsCalendar, 'Academic Calendar events saved!')}
+                className="px-6 py-2.5 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+              >
+                <Icons.Save size={14} className="text-[#bfa15f]" /> Save Calendar & Schedule
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── DIRECTOR'S MESSAGE TAB ────────────────────────────────────────── */}
+        {activeTab === 'director_message' && (
+          <div className="space-y-6">
+            <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2">Director's Personal Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Director Name</label>
+                <input
+                  type="text"
+                  value={directorMessage.directorName}
+                  onChange={e => setDirectorMessage({ ...directorMessage, directorName: e.target.value })}
+                  className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-bold text-primary"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Director Image URL</label>
+                <input
+                  type="text"
+                  value={directorMessage.directorPhotoUrl}
+                  onChange={e => setDirectorMessage({ ...directorMessage, directorPhotoUrl: e.target.value })}
+                  className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Director Email</label>
+                <input
+                  type="email"
+                  value={directorMessage.directorEmail}
+                  onChange={e => setDirectorMessage({ ...directorMessage, directorEmail: e.target.value })}
+                  className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-mono"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Director Phone</label>
+                <input
+                  type="text"
+                  value={directorMessage.directorPhone}
+                  onChange={e => setDirectorMessage({ ...directorMessage, directorPhone: e.target.value })}
+                  className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-xs font-bold text-slate-500 uppercase">Director's Office Location</label>
+                <input
+                  type="text"
+                  value={directorMessage.directorOffice}
+                  onChange={e => setDirectorMessage({ ...directorMessage, directorOffice: e.target.value })}
+                  className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-semibold text-slate-700"
+                />
+              </div>
+            </div>
+
+            <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 pt-4">Clean Editorial Quote Block</h3>
+            <div>
+              <textarea
+                rows={3}
+                value={directorMessage.quote}
+                onChange={e => setDirectorMessage({ ...directorMessage, quote: e.target.value })}
+                className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-medium italic text-slate-800"
+              />
+            </div>
+
+            <h3 className="font-display text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 pt-4">Director's Written Message Paragraphs</h3>
+            <p className="text-xs text-slate-400 leading-normal">Write paragraphs below. Separate each paragraph by a full double blank line (i.e. click Enter twice).</p>
+            <textarea
+              rows={12}
+              value={directorMessage.paragraphs.join('\n\n')}
+              onChange={e => setDirectorMessage({ ...directorMessage, paragraphs: e.target.value.split('\n\n') })}
+              className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-sans leading-relaxed text-justify text-slate-750"
+            />
+
+            <div className="pt-6 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => triggerSave('director_message', directorMessage, 'Director\'s Message updated!')}
+                className="px-6 py-2.5 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+              >
+                <Icons.Save size={14} className="text-[#bfa15f]" />
+                Save Director's Message
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── ADMINISTRATIVE COMMITTEES TAB ──────────────────────────────────── */}
+        {activeTab === 'committees' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h3 className="font-display text-lg font-bold text-slate-800">Administrative Committees</h3>
+              <button
+                onClick={() => {
+                  const newList = [...committeesList, { name: 'New Committee', desc: 'Constituted for specific oversight purposes.', members: '0', membersList: [] }]
+                  setCommitteesList(newList)
+                }}
+                className="px-3 py-1.5 bg-[#0b2545] text-white hover:bg-primary/95 text-xs font-bold rounded flex items-center gap-1.5 border border-[#bfa15f]/20"
+              >
+                <Icons.Plus size={14} className="text-[#bfa15f]" /> Add New Committee
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+              {committeesList.map((comm: any, idx: number) => (
+                <div key={idx} className="border border-slate-200 p-5 rounded-lg bg-slate-50/30 flex flex-col gap-4 relative shadow-sm hover:border-slate-350 transition-all duration-200">
+                  <button
+                    onClick={() => {
+                      const newList = committeesList.filter((_: any, i: number) => i !== idx)
+                      setCommitteesList(newList)
+                    }}
+                    className="absolute top-4 right-4 text-slate-400 hover:text-red-600 transition-colors p-1 hover:bg-slate-100 rounded"
+                    title="Delete Committee"
+                  >
+                    <Icons.Trash2 size={16} />
+                  </button>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="md:col-span-1">
+                      <label className="text-xs font-bold text-slate-500 uppercase">Committee Name</label>
+                      <input
+                        type="text"
+                        value={comm.name}
+                        onChange={e => {
+                          const newList = [...committeesList]
+                          newList[idx].name = e.target.value
+                          setCommitteesList(newList)
+                        }}
+                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-bold text-primary"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="text-xs font-bold text-slate-500 uppercase">Short Description</label>
+                      <input
+                        type="text"
+                        value={comm.desc}
+                        onChange={e => {
+                          const newList = [...committeesList]
+                          newList[idx].desc = e.target.value
+                          setCommitteesList(newList)
+                        }}
+                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Members Sub-Table CRUD */}
+                  <div className="border border-slate-200 rounded-md overflow-hidden bg-white">
+                    <div className="bg-slate-50 border-b border-slate-200 px-4 py-2 flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-650 uppercase tracking-wider">Constituted Members ({comm.membersList?.length || 0})</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newList = [...committeesList]
+                          newList[idx].membersList = [...(newList[idx].membersList || []), { role: 'Member', name: 'Dr. John Doe', dept: 'Department' }]
+                          setCommitteesList(newList)
+                        }}
+                        className="px-2.5 py-1 border border-slate-250 hover:bg-slate-100 text-slate-700 hover:text-slate-950 text-[10px] font-bold uppercase rounded flex items-center gap-1 bg-white shadow-xs"
+                      >
+                        <Icons.UserPlus size={12} className="text-[#bfa15f]" /> Add Member
+                      </button>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs text-left border-collapse">
+                        <thead className="bg-slate-50 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px] text-slate-500">
+                          <tr>
+                            <th className="px-3 py-2">Role / Capacity</th>
+                            <th className="px-3 py-2">Member Name</th>
+                            <th className="px-3 py-2">Department / Affiliation</th>
+                            <th className="px-3 py-2 text-right w-12">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 text-slate-650 font-medium">
+                          {(comm.membersList || []).map((m: any, mIdx: number) => (
+                            <tr key={mIdx} className="hover:bg-slate-50/50">
+                              <td className="px-3 py-1.5">
+                                <input
+                                  type="text"
+                                  value={m.role}
+                                  onChange={e => {
+                                    const newList = [...committeesList]
+                                    newList[idx].membersList[mIdx].role = e.target.value
+                                    setCommitteesList(newList)
+                                  }}
+                                  className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-bold text-primary"
+                                />
+                              </td>
+                              <td className="px-3 py-1.5">
+                                <input
+                                  type="text"
+                                  value={m.name}
+                                  onChange={e => {
+                                    const newList = [...committeesList]
+                                    newList[idx].membersList[mIdx].name = e.target.value
+                                    setCommitteesList(newList)
+                                  }}
+                                  className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-semibold text-slate-800"
+                                />
+                              </td>
+                              <td className="px-3 py-1.5">
+                                <input
+                                  type="text"
+                                  value={m.dept || ''}
+                                  placeholder="e.g. Mechanical Engg"
+                                  onChange={e => {
+                                    const newList = [...committeesList]
+                                    newList[idx].membersList[mIdx].dept = e.target.value
+                                    setCommitteesList(newList)
+                                  }}
+                                  className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs"
+                                />
+                              </td>
+                              <td className="px-3 py-1.5 text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newList = [...committeesList]
+                                    newList[idx].membersList = newList[idx].membersList.filter((_: any, i: number) => i !== mIdx)
+                                    setCommitteesList(newList)
+                                  }}
+                                  className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-650 rounded"
+                                >
+                                  <Icons.Trash2 size={13} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                          {(comm.membersList || []).length === 0 && (
+                            <tr>
+                              <td colSpan={4} className="px-4 py-4 text-center text-slate-400 italic">No members added to this committee. Click "Add Member" to construct the roster.</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-6 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => triggerSave('committees', committeesList, 'Administrative Committees roster saved!')}
+                className="px-6 py-2.5 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+              >
+                <Icons.Save size={14} className="text-[#bfa15f]" />
+                Save All Committees
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── SITE NAVIGATION & DROPDOWNS TAB ────────────────────────────────── */}
+        {activeTab === 'navigation' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="font-display text-lg font-bold text-slate-800">Dynamic Menu Navigation Builder</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Add, edit, reorder, or delete main categories and drop-down submenu link lists in real-time.</p>
+              </div>
+              <button
+                onClick={() => {
+                  const newList = [...navigationItems, { label: 'New Menu', path: '/new-link', children: undefined }]
+                  setNavigationItems(newList)
+                }}
+                className="px-3 py-1.5 bg-[#0b2545] text-white hover:bg-primary/95 text-xs font-bold rounded flex items-center gap-1.5 border border-[#bfa15f]/20"
+              >
+                <Icons.Plus size={14} className="text-[#bfa15f]" /> Add Main Category
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {navigationItems.map((item: any, idx: number) => {
+                const hasChildren = item.children && Array.isArray(item.children)
+                return (
+                  <div key={idx} className="border border-slate-200 p-5 rounded-lg bg-slate-50/20 flex flex-col gap-4 relative shadow-sm hover:border-slate-350 transition-all duration-200">
+                    
+                    {/* Header: Label, Reorder, Delete controls */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/60 pb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-extrabold text-slate-400 bg-slate-100 px-2 py-1 rounded font-mono">CATEGORY #{idx + 1}</span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            disabled={idx === 0}
+                            onClick={() => {
+                              const newList = [...navigationItems]
+                              const temp = newList[idx]
+                              newList[idx] = newList[idx - 1]
+                              newList[idx - 1] = temp
+                              setNavigationItems(newList)
+                            }}
+                            className="p-1 border border-slate-200 rounded hover:bg-white text-slate-600 disabled:opacity-30 disabled:pointer-events-none"
+                            title="Move Category Up"
+                          >
+                            <Icons.ChevronUp size={14} />
+                          </button>
+                          <button
+                            disabled={idx === navigationItems.length - 1}
+                            onClick={() => {
+                              const newList = [...navigationItems]
+                              const temp = newList[idx]
+                              newList[idx] = newList[idx + 1]
+                              newList[idx + 1] = temp
+                              setNavigationItems(newList)
+                            }}
+                            className="p-1 border border-slate-200 rounded hover:bg-white text-slate-600 disabled:opacity-30 disabled:pointer-events-none"
+                            title="Move Category Down"
+                          >
+                            <Icons.ChevronDown size={14} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const newList = navigationItems.filter((_: any, i: number) => i !== idx)
+                          setNavigationItems(newList)
+                        }}
+                        className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        title="Delete Category"
+                      >
+                        <Icons.Trash2 size={16} />
+                      </button>
+                    </div>
+
+                    {/* Main input controls */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase">Category Label</label>
+                        <input
+                          type="text"
+                          value={item.label}
+                          onChange={e => {
+                            const newList = [...navigationItems]
+                            newList[idx].label = e.target.value
+                            setNavigationItems(newList)
+                          }}
+                          className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-bold text-[#0b2545]"
+                        />
+                      </div>
+                      
+                      <div className="flex flex-col justify-end pb-1.5">
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={hasChildren}
+                            onChange={e => {
+                              const newList = [...navigationItems]
+                              if (e.target.checked) {
+                                newList[idx].children = []
+                                delete newList[idx].path
+                              } else {
+                                newList[idx].path = '/'
+                                delete newList[idx].children
+                              }
+                              setNavigationItems(newList)
+                            }}
+                            className="w-4 h-4 text-primary border-slate-300 rounded focus:ring-primary"
+                          />
+                          <span className="text-xs font-bold text-slate-650 uppercase">Has Submenu Dropdown</span>
+                        </label>
+                      </div>
+
+                      {!hasChildren && (
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 uppercase">Direct Target Path</label>
+                          <input
+                            type="text"
+                            value={item.path || ''}
+                            onChange={e => {
+                              const newList = [...navigationItems]
+                              newList[idx].path = e.target.value
+                              setNavigationItems(newList)
+                            }}
+                            className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-mono text-xs"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Submenu Children CRUD */}
+                    {hasChildren && (
+                      <div className="border border-slate-200 rounded-md overflow-hidden bg-white mt-2">
+                        <div className="bg-slate-50 border-b border-slate-200 px-4 py-2 flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-650 uppercase tracking-wider">Dropdown Sub-Items ({item.children.length})</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newList = [...navigationItems]
+                              newList[idx].children = [...newList[idx].children, { label: 'New Dropdown Link', path: '#' }]
+                              setNavigationItems(newList)
+                            }}
+                            className="px-2.5 py-1 border border-slate-250 hover:bg-slate-100 text-slate-700 hover:text-slate-950 text-[10px] font-bold uppercase rounded flex items-center gap-1 bg-white shadow-3xs"
+                          >
+                            <Icons.Plus size={12} className="text-[#bfa15f]" /> Add Dropdown Link
+                          </button>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-xs text-left border-collapse">
+                            <thead className="bg-slate-50 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px] text-slate-500">
+                              <tr>
+                                <th className="px-3 py-2 w-16 text-center">Order</th>
+                                <th className="px-3 py-2">Link Label</th>
+                                <th className="px-3 py-2">Redirect Path</th>
+                                <th className="px-3 py-2 text-right w-12">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 text-slate-650 font-medium">
+                              {item.children.map((child: any, cIdx: number) => (
+                                <tr key={cIdx} className="hover:bg-slate-50/50">
+                                  <td className="px-3 py-1.5 text-center">
+                                    <div className="flex items-center justify-center gap-0.5">
+                                      <button
+                                        disabled={cIdx === 0}
+                                        onClick={() => {
+                                          const newList = [...navigationItems]
+                                          const children = [...newList[idx].children]
+                                          const temp = children[cIdx]
+                                          children[cIdx] = children[cIdx - 1]
+                                          children[cIdx - 1] = temp
+                                          newList[idx].children = children
+                                          setNavigationItems(newList)
+                                        }}
+                                        className="p-0.5 border border-slate-200 rounded hover:bg-slate-100 text-slate-600 disabled:opacity-20"
+                                      >
+                                        <Icons.ChevronUp size={11} />
+                                      </button>
+                                      <button
+                                        disabled={cIdx === item.children.length - 1}
+                                        onClick={() => {
+                                          const newList = [...navigationItems]
+                                          const children = [...newList[idx].children]
+                                          const temp = children[cIdx]
+                                          children[cIdx] = children[cIdx + 1]
+                                          children[cIdx + 1] = temp
+                                          newList[idx].children = children
+                                          setNavigationItems(newList)
+                                        }}
+                                        className="p-0.5 border border-slate-200 rounded hover:bg-slate-100 text-slate-600 disabled:opacity-20"
+                                      >
+                                        <Icons.ChevronDown size={11} />
+                                      </button>
+                                    </div>
+                                  </td>
+                                  <td className="px-3 py-1.5">
+                                    <input
+                                      type="text"
+                                      value={child.label}
+                                      onChange={e => {
+                                        const newList = [...navigationItems]
+                                        newList[idx].children[cIdx].label = e.target.value
+                                        setNavigationItems(newList)
+                                      }}
+                                      className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-bold text-slate-800"
+                                    />
+                                  </td>
+                                  <td className="px-3 py-1.5">
+                                    <input
+                                      type="text"
+                                      value={child.path}
+                                      onChange={e => {
+                                        const newList = [...navigationItems]
+                                        newList[idx].children[cIdx].path = e.target.value
+                                        setNavigationItems(newList)
+                                      }}
+                                      className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-mono"
+                                    />
+                                  </td>
+                                  <td className="px-3 py-1.5 text-right">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newList = [...navigationItems]
+                                        newList[idx].children = newList[idx].children.filter((_: any, i: number) => i !== cIdx)
+                                        setNavigationItems(newList)
+                                      }}
+                                      className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded"
+                                    >
+                                      <Icons.Trash2 size={13} />
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                              {item.children.length === 0 && (
+                                <tr>
+                                  <td colSpan={4} className="px-4 py-4 text-center text-slate-400 italic">No submenus configured. Click "Add Dropdown Link" to insert routes.</td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="pt-6 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => triggerSave('navigation', navigationItems, 'Site Navigation Menus updated successfully!')}
+                className="px-6 py-2.5 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+              >
+                <Icons.Save size={14} className="text-[#bfa15f]" />
+                Save Navigation Tree
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── DYNAMIC PAGES BUILDER TAB ─────────────────────────────────────── */}
+        {activeTab === 'custom_pages' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="font-display text-lg font-bold text-slate-800">Dynamic Section Pages Builder</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Build and manage custom sub-pages under either the About Us or Admissions dropdown sections. Created pages mount automatically.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddPageModal(true)}
+                className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#0b2545] border border-[#bfa15f]/20 hover:bg-primary/95 text-white text-xs font-bold uppercase tracking-wider rounded-md"
+              >
+                <Icons.Plus size={13} className="text-[#bfa15f]" /> Create Page
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {customPages.map((p: any) => {
+                const parentMenu = p.menu || 'about'
+                return (
+                  <div key={p.slug} className="border border-slate-200 p-5 rounded-lg bg-white shadow-2xs space-y-3 flex flex-col justify-between hover:border-slate-350 transition-colors">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-bold text-accent uppercase tracking-wider font-mono">
+                          {parentMenu === 'about' ? 'About Us' : parentMenu === 'admission' ? 'Admissions' : parentMenu === 'placement' ? 'Placements' : 'Campus Life'}
+                        </span>
+                      </div>
+                      <h4 className="font-bold text-slate-800 font-display text-sm leading-snug mt-1">{p.title}</h4>
+                      <p className="text-[11px] font-mono text-slate-400 mt-1">/{parentMenu === 'campus-life' ? 'students' : parentMenu}/{p.slug}</p>
+                      <p className="text-xs text-slate-500 mt-2.5 line-clamp-2 leading-relaxed">{p.subtitle || 'Custom dynamic page'}</p>
+                    </div>
+                    <div className="flex gap-2 pt-3 border-t border-slate-100 mt-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveEditPage(p)
+                          setPageForm({
+                            title: p.title,
+                            subtitle: p.subtitle || '',
+                            paragraphs: (p.narrativeParagraphs || []).join('\n\n'),
+                            highlightsText: (p.highlights || []).map((h: any) => `${h.iconName}|${h.label}|${h.value}|${h.desc}`).join('\n'),
+                            affiliationsText: (p.affiliations || []).join('\n')
+                          })
+                        }}
+                        className="flex-1 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 font-bold text-[10px] uppercase rounded hover:bg-slate-100 flex items-center justify-center gap-1"
+                      >
+                        <Icons.Pencil size={11} /> Edit Content
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!window.confirm(`Are you sure you want to delete the dynamic page: "${p.title}"? This will also remove it from navigation menus.`)) {
+                            return
+                          }
+                          const current = mockStore.getCustomPages()
+                          const filteredPages = current.filter((x: any) => x.slug !== p.slug)
+                          mockStore.saveCustomPages(filteredPages)
+
+                          // Remove from navigation menu
+                          const navs = mockStore.getNavItems()
+                          const parentNav = navs.find((n: any) => n.id === parentMenu)
+                          if (parentNav && parentNav.children) {
+                            const path = parentMenu === 'campus-life'
+                              ? `/students/${p.slug}`
+                              : `/${parentMenu}/${p.slug}`
+                            parentNav.children = parentNav.children.filter((c: any) => c.path !== path)
+                            mockStore.saveNavItems(navs)
+                          }
+
+                          setToast(`Dynamic Page ${p.title} deleted.`)
+                          refreshAll()
+                        }}
+                        className="p-1.5 border border-slate-200 text-slate-400 hover:text-red-650 hover:bg-red-50 rounded"
+                        title="Delete Page"
+                      >
+                        <Icons.Trash2 size={12} />
+                      </button>
+                      <Link
+                        to={`/${parentMenu === 'campus-life' ? 'students' : parentMenu}/${p.slug}`}
+                        target="_blank"
+                        className="p-1.5 border border-slate-200 text-slate-500 hover:text-accent-blue rounded hover:bg-slate-50"
+                        title="Preview Public Page"
+                      >
+                        <Icons.ExternalLink size={12} />
+                      </Link>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* CREATE PAGE MODAL */}
+            {showAddPageModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-black/50" onClick={() => setShowAddPageModal(false)} />
+                <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6 z-10">
+                  <form onSubmit={(e) => {
+                    e.preventDefault()
+                    if (!addPageForm.slug || !addPageForm.title) return
+                    const cleanSlug = addPageForm.slug.toLowerCase().trim().replace(/\s+/g, '-')
+                    const newPage = {
+                      slug: cleanSlug,
+                      menu: addPageForm.menu,
+                      title: addPageForm.title,
+                      subtitle: addPageForm.subtitle,
+                      narrativeParagraphs: ['This is a freshly drafted dynamic page. You can customize paragraphs, highlights, and affiliations easily.'],
+                      highlights: [{ iconName: 'Award', label: 'Recognition', value: 'New Cycle', desc: 'Accredited dynamic content' }],
+                      affiliations: ['AICTE Approved', 'State Ratified']
+                    }
+
+                    const current = mockStore.getCustomPages()
+                    mockStore.saveCustomPages([...current, newPage])
+                    
+                    // Add page to navigation menus so it's instantly accessible!
+                    const navs = mockStore.getNavItems()
+                    const parentMenu = navs.find((n: any) => n.id === addPageForm.menu)
+                    if (parentMenu && parentMenu.children) {
+                      const path = addPageForm.menu === 'campus-life'
+                        ? `/students/${cleanSlug}`
+                        : `/${addPageForm.menu}/${cleanSlug}`
+                      const exists = parentMenu.children.some((c: any) => c.path === path)
+                      if (!exists) {
+                        parentMenu.children.push({
+                          label: addPageForm.title,
+                          path
+                        })
+                        mockStore.saveNavItems(navs)
+                      }
+                    }
+
+                    setToast(`Dynamic Page ${newPage.title} created and registered in Nav Menu.`)
+                    setShowAddPageModal(false)
+                    setAddPageForm({ slug: '', title: '', subtitle: '', menu: 'about' })
+                    refreshAll()
+                  }} className="space-y-4">
+                    <h3 className="font-bold text-slate-850 font-display text-sm uppercase tracking-wider border-b border-slate-150 pb-2">Draft Custom dynamic subpage</h3>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Parent Dropdown Menu Section</label>
+                      <select
+                        value={addPageForm.menu}
+                        onChange={e => setAddPageForm({ ...addPageForm, menu: e.target.value as 'about' | 'admission' | 'placement' | 'campus-life' })}
+                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-bold text-slate-800 bg-white"
+                      >
+                        <option value="about">About Us Dropdown</option>
+                        <option value="admission">Admissions Dropdown</option>
+                        <option value="placement">Placements Dropdown</option>
+                        <option value="campus-life">Campus Life Dropdown</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Page Title Name</label>
+                      <input
+                        type="text"
+                        required
+                        value={addPageForm.title}
+                        onChange={e => setAddPageForm({ ...addPageForm, title: e.target.value })}
+                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-semibold"
+                        placeholder="e.g. Research & Development Legacy"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Page URL Slug Segment</label>
+                      <input
+                        type="text"
+                        required
+                        value={addPageForm.slug}
+                        onChange={e => setAddPageForm({ ...addPageForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-mono text-xs"
+                        placeholder="e.g. research-legacy"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Page Subtitle / Academic Tag</label>
+                      <input
+                        type="text"
+                        value={addPageForm.subtitle}
+                        onChange={e => setAddPageForm({ ...addPageForm, subtitle: e.target.value })}
+                        className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary"
+                        placeholder="e.g. Driving innovation hubs across Central India"
+                      />
+                    </div>
+                    <div className="flex gap-3 pt-2 border-t border-slate-100">
+                      <button type="button" onClick={() => setShowAddPageModal(false)} className="flex-grow py-2 border border-slate-200 text-slate-700 rounded font-semibold text-xs uppercase tracking-wider hover:bg-slate-50">Cancel</button>
+                      <button type="submit" className="flex-grow py-2 bg-[#0b2545] text-white rounded font-semibold text-xs uppercase tracking-wider hover:opacity-90">✓ Draft Page</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* EDIT PAGE MODAL */}
+            {activeEditPage && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-black/50" onClick={() => setActiveEditPage(null)} />
+                <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-4 z-10">
+                  <form onSubmit={(e) => {
+                    e.preventDefault()
+                    if (!activeEditPage) return
+
+                    const resolvedParas = pageForm.paragraphs.split('\n\n').map(p => p.trim()).filter(Boolean)
+                    const resolvedHl = pageForm.highlightsText.split('\n').map(line => {
+                      const parts = line.split('|')
+                      return {
+                        iconName: parts[0] || 'Award',
+                        label: parts[1] || 'Highlight',
+                        value: parts[2] || 'New',
+                        desc: parts[3] || ''
+                      }
+                    }).filter(h => h.label)
+                    const resolvedAff = pageForm.affiliationsText.split('\n').map(l => l.trim()).filter(Boolean)
+
+                    const updatedPage = {
+                      slug: activeEditPage.slug,
+                      title: pageForm.title,
+                      subtitle: pageForm.subtitle,
+                      narrativeParagraphs: resolvedParas,
+                      highlights: resolvedHl,
+                      affiliations: resolvedAff
+                    }
+
+                    mockStore.saveCustomPage(activeEditPage.slug, updatedPage)
+                    setToast(`Dynamic Page ${updatedPage.title} saved successfully.`)
+                    setActiveEditPage(null)
+                    refreshAll()
+                  }} className="space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-150 pb-2">
+                      <h3 className="font-bold text-slate-850 font-display text-sm uppercase tracking-wider">Edit Content — {activeEditPage.title}</h3>
+                      <button type="button" onClick={() => setActiveEditPage(null)} className="text-slate-400 hover:text-slate-600"><Icons.X size={18} /></button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">Title Name</label>
+                        <input
+                          type="text"
+                          required
+                          value={pageForm.title}
+                          onChange={e => setPageForm({ ...pageForm, title: e.target.value })}
+                          className="w-full border border-slate-200 rounded px-3 py-1.5 text-xs mt-1 focus:outline-none focus:border-primary font-semibold"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">Page Subtitle</label>
+                        <input
+                          type="text"
+                          value={pageForm.subtitle}
+                          onChange={e => setPageForm({ ...pageForm, subtitle: e.target.value })}
+                          className="w-full border border-slate-200 rounded px-3 py-1.5 text-xs mt-1 focus:outline-none focus:border-primary"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase font-sans">Narrative Paragraphs (Double Enter to separate paragraphs)</label>
+                      <textarea
+                        rows={6}
+                        value={pageForm.paragraphs}
+                        onChange={e => setPageForm({ ...pageForm, paragraphs: e.target.value })}
+                        className="w-full border border-slate-200 rounded px-3 py-2 text-xs mt-1 focus:outline-none font-sans leading-relaxed"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Key highlights markers (Format: Icon|Label|Value|Description)</label>
+                        <textarea
+                          rows={4}
+                          value={pageForm.highlightsText}
+                          onChange={e => setPageForm({ ...pageForm, highlightsText: e.target.value })}
+                          className="w-full border border-slate-200 rounded px-3 py-2 text-xs focus:outline-none font-mono text-[10px] leading-normal"
+                          placeholder="e.g. Award|Legacy|70+ Years|Innovation since 1952"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Affiliations / Recognitions (One per line)</label>
+                        <textarea
+                          rows={4}
+                          value={pageForm.affiliationsText}
+                          onChange={e => setPageForm({ ...pageForm, affiliationsText: e.target.value })}
+                          className="w-full border border-slate-200 rounded px-3 py-2 text-xs focus:outline-none font-sans leading-normal"
+                          placeholder="e.g. Approved by AICTE, New Delhi"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-3 pt-2 border-t border-slate-100">
+                      <button type="button" onClick={() => setActiveEditPage(null)} className="flex-grow py-2 border border-slate-200 text-slate-700 rounded font-semibold text-xs uppercase tracking-wider hover:bg-slate-50">Cancel</button>
+                      <button type="submit" className="flex-grow py-2 bg-[#0b2545] text-white rounded font-semibold text-xs uppercase tracking-wider hover:opacity-90 flex items-center justify-center gap-1.5"><Icons.Save size={13} className="text-[#bfa15f]" /> Save page changes</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ─── ADMISSIONS CMS TAB ─────────────────────────────────────────────── */}
+        {activeTab === 'admissions' && (
+          <div className="space-y-8">
+            <div className="flex items-center justify-between border-b border-slate-150 pb-4">
+              <div>
+                <h3 className="font-display text-lg font-bold text-slate-800">Dynamic Admissions CMS</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Control the titles, descriptions, fee matrices, timelines, document checklists, and eligibility guidelines across all admissions portals.</p>
+              </div>
+            </div>
+
+            {/* Admissions Sub-tabs */}
+            <div className="flex border-b border-slate-200 gap-4 text-xs font-bold uppercase tracking-wider">
+              {[
+                { id: 'ug', label: 'UG Admissions' },
+                { id: 'pg', label: 'PG Admissions' },
+                { id: 'phd', label: 'PhD Admissions' },
+                { id: 'prospectus', label: 'Prospectus Download' }
+              ].map(sub => (
+                <button
+                  key={sub.id}
+                  onClick={() => setAdmSubTab(sub.id as any)}
+                  className={`pb-2 px-1 border-b-2 transition-all ${
+                    admSubTab === sub.id
+                      ? 'border-[#0b2545] text-[#0b2545]'
+                      : 'border-transparent text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  {sub.label}
+                </button>
+              ))}
+            </div>
+
+            {/* ─── UG ADMISSIONS CMS SUBTAB ─── */}
+            {admSubTab === 'ug' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">UG Header Title</label>
+                    <input
+                      type="text"
+                      value={admissionUg.title || ''}
+                      onChange={e => setAdmissionUg({ ...admissionUg, title: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Apply Link URL</label>
+                    <input
+                      type="text"
+                      value={admissionUg.applyUrl || ''}
+                      onChange={e => setAdmissionUg({ ...admissionUg, applyUrl: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-mono text-xs"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">UG Description Statement</label>
+                    <textarea
+                      rows={2}
+                      value={admissionUg.description || ''}
+                      onChange={e => setAdmissionUg({ ...admissionUg, description: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">MPDTE Counselling URL</label>
+                    <input
+                      type="text"
+                      value={admissionUg.mpdteUrl || ''}
+                      onChange={e => setAdmissionUg({ ...admissionUg, mpdteUrl: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Prospectus Page URL</label>
+                    <input
+                      type="text"
+                      value={admissionUg.prospectusUrl || ''}
+                      onChange={e => setAdmissionUg({ ...admissionUg, prospectusUrl: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Admission Cell Email</label>
+                    <input
+                      type="text"
+                      value={admissionUg.admissionEmail || ''}
+                      onChange={e => setAdmissionUg({ ...admissionUg, admissionEmail: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Admission Cell Phone</label>
+                    <input
+                      type="text"
+                      value={admissionUg.admissionPhone || ''}
+                      onChange={e => setAdmissionUg({ ...admissionUg, admissionPhone: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary text-xs"
+                    />
+                  </div>
+                </div>
+
+                {/* Programs Grid */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase block">Undergraduate Offered Programs Matrix</label>
+                  <table className="w-full text-xs border border-slate-200 rounded-lg overflow-hidden text-left">
+                    <thead className="bg-slate-50 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px] text-slate-500">
+                      <tr>
+                        <th className="px-3 py-2">Program Name</th>
+                        <th className="px-3 py-2 text-center w-24">Intake Seats</th>
+                        <th className="px-3 py-2">Eligibility Criteria</th>
+                        <th className="px-3 py-2">Counselling Basis</th>
+                        <th className="px-3 py-2 text-right w-12">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {admissionUg.programs.map((p: any, idx: number) => (
+                        <tr key={idx}>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={p.name}
+                              onChange={e => {
+                                const list = [...admissionUg.programs]
+                                list[idx].name = e.target.value
+                                setAdmissionUg({ ...admissionUg, programs: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-semibold text-slate-800"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="number"
+                              value={p.seats}
+                              onChange={e => {
+                                const list = [...admissionUg.programs]
+                                list[idx].seats = parseInt(e.target.value) || 0
+                                setAdmissionUg({ ...admissionUg, programs: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-center font-bold text-accent"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={p.eligibility}
+                              onChange={e => {
+                                const list = [...admissionUg.programs]
+                                list[idx].eligibility = e.target.value
+                                setAdmissionUg({ ...admissionUg, programs: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-slate-650"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={p.basis}
+                              onChange={e => {
+                                const list = [...admissionUg.programs]
+                                list[idx].basis = e.target.value
+                                setAdmissionUg({ ...admissionUg, programs: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-slate-655"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const list = admissionUg.programs.filter((_: any, i: number) => i !== idx)
+                                setAdmissionUg({ ...admissionUg, programs: list })
+                              }}
+                              className="p-1 text-slate-400 hover:text-red-650 hover:bg-red-50 rounded"
+                            >
+                              <Icons.Trash2 size={13} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = [...admissionUg.programs, { name: 'B.Tech Smart Systems', seats: 60, eligibility: '10+2 with PCM (min 45%)', basis: 'JEE Main / MPDTE' }]
+                      setAdmissionUg({ ...admissionUg, programs: list })
+                    }}
+                    className="px-3 py-1 border border-dashed border-slate-350 hover:border-slate-500 rounded text-xs font-semibold text-slate-650 flex items-center gap-1.5 bg-white"
+                  >
+                    <Icons.Plus size={12} /> Add Program Row
+                  </button>
+                </div>
+
+                {/* Counselling keyDates */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase block">Admission & Counselling Timeline Calendar</label>
+                  <table className="w-full text-xs border border-slate-200 rounded-lg overflow-hidden text-left">
+                    <thead className="bg-slate-50 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px] text-slate-500">
+                      <tr>
+                        <th className="px-3 py-2">Event Milestone</th>
+                        <th className="px-3 py-2">Milestone Schedule Date</th>
+                        <th className="px-3 py-2 text-right w-12">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {admissionUg.keyDates.map((d: any, idx: number) => (
+                        <tr key={idx}>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={d.event}
+                              onChange={e => {
+                                const list = [...admissionUg.keyDates]
+                                list[idx].event = e.target.value
+                                setAdmissionUg({ ...admissionUg, keyDates: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-semibold text-slate-800"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={d.date}
+                              onChange={e => {
+                                const list = [...admissionUg.keyDates]
+                                list[idx].date = e.target.value
+                                setAdmissionUg({ ...admissionUg, keyDates: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-slate-650"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const list = admissionUg.keyDates.filter((_: any, i: number) => i !== idx)
+                                setAdmissionUg({ ...admissionUg, keyDates: list })
+                              }}
+                              className="p-1 text-slate-400 hover:text-red-650 hover:bg-red-50 rounded"
+                            >
+                              <Icons.Trash2 size={13} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = [...admissionUg.keyDates, { event: 'Allotment Letter Issued', date: 'August 2025' }]
+                      setAdmissionUg({ ...admissionUg, keyDates: list })
+                    }}
+                    className="px-3 py-1 border border-dashed border-slate-350 hover:border-slate-500 rounded text-xs font-semibold text-slate-655 flex items-center gap-1.5 bg-white"
+                  >
+                    <Icons.Plus size={12} /> Add Date Event
+                  </button>
+                </div>
+
+                {/* Tuition fees */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase block">Tuition Fees Structure</label>
+                  <table className="w-full text-xs border border-slate-200 rounded-lg overflow-hidden text-left">
+                    <thead className="bg-slate-50 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px] text-slate-500">
+                      <tr>
+                        <th className="px-3 py-2">Quota Category</th>
+                        <th className="px-3 py-2 text-center">Tuition Fee</th>
+                        <th className="px-3 py-2 text-center">Other Miscellaneous Fees</th>
+                        <th className="px-3 py-2 text-center">Total / Year</th>
+                        <th className="px-3 py-2 text-right w-12">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {admissionUg.fees.map((f: any, idx: number) => (
+                        <tr key={idx}>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={f.category}
+                              onChange={e => {
+                                const list = [...admissionUg.fees]
+                                list[idx].category = e.target.value
+                                setAdmissionUg({ ...admissionUg, fees: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-semibold text-slate-800"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={f.tuition}
+                              onChange={e => {
+                                const list = [...admissionUg.fees]
+                                list[idx].tuition = e.target.value
+                                setAdmissionUg({ ...admissionUg, fees: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-center font-bold"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={f.other}
+                              onChange={e => {
+                                const list = [...admissionUg.fees]
+                                list[idx].other = e.target.value
+                                setAdmissionUg({ ...admissionUg, fees: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-center font-mono"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={f.total}
+                              onChange={e => {
+                                const list = [...admissionUg.fees]
+                                list[idx].total = e.target.value
+                                setAdmissionUg({ ...admissionUg, fees: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-center font-bold text-primary"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const list = admissionUg.fees.filter((_: any, i: number) => i !== idx)
+                                setAdmissionUg({ ...admissionUg, fees: list })
+                              }}
+                              className="p-1 text-slate-400 hover:text-red-650 hover:bg-red-50 rounded"
+                            >
+                              <Icons.Trash2 size={13} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = [...admissionUg.fees, { category: 'TFW (Tuition Fee Waiver)', tuition: '₹0', other: '₹12,500', total: '₹12,500' }]
+                      setAdmissionUg({ ...admissionUg, fees: list })
+                    }}
+                    className="px-3 py-1 border border-dashed border-slate-350 hover:border-slate-500 rounded text-xs font-semibold text-slate-655 flex items-center gap-1.5 bg-white"
+                  >
+                    <Icons.Plus size={12} /> Add Fee Tier Row
+                  </button>
+                </div>
+
+                {/* Documents list */}
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Documents Checklist Required (One per line)</label>
+                  <textarea
+                    rows={6}
+                    value={admissionUg.documents.join('\n')}
+                    onChange={e => setAdmissionUg({ ...admissionUg, documents: e.target.value.split('\n').filter(Boolean) })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-xs focus:outline-none leading-relaxed font-sans"
+                  />
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button
+                    onClick={() => triggerSave('admission_ug', admissionUg, 'Undergraduate admissions successfully updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+                  >
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save UG Changes
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ─── PG ADMISSIONS CMS SUBTAB ─── */}
+            {admSubTab === 'pg' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">PG Header Title</label>
+                    <input
+                      type="text"
+                      value={admissionPg.title || ''}
+                      onChange={e => setAdmissionPg({ ...admissionPg, title: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Apply Link URL</label>
+                    <input
+                      type="text"
+                      value={admissionPg.applyUrl || ''}
+                      onChange={e => setAdmissionPg({ ...admissionPg, applyUrl: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-mono text-xs"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">PG Description Statement</label>
+                    <textarea
+                      rows={2}
+                      value={admissionPg.description || ''}
+                      onChange={e => setAdmissionPg({ ...admissionPg, description: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* PG programs Offered */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase block">PG Offered Programs Seats Directory</label>
+                  <table className="w-full text-xs border border-slate-200 rounded-lg overflow-hidden text-left">
+                    <thead className="bg-slate-50 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px] text-slate-500">
+                      <tr>
+                        <th className="px-3 py-2">Program Title</th>
+                        <th className="px-3 py-2">Parent Department</th>
+                        <th className="px-3 py-2 text-center w-24">Intake Seats</th>
+                        <th className="px-3 py-2">Eligibility Criteria</th>
+                        <th className="px-3 py-2">Admission Basis</th>
+                        <th className="px-3 py-2 text-right w-12">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {admissionPg.programs.map((p: any, idx: number) => (
+                        <tr key={idx}>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={p.name}
+                              onChange={e => {
+                                const list = [...admissionPg.programs]
+                                list[idx].name = e.target.value
+                                setAdmissionPg({ ...admissionPg, programs: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-semibold text-slate-800"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={p.dept}
+                              onChange={e => {
+                                const list = [...admissionPg.programs]
+                                list[idx].dept = e.target.value
+                                setAdmissionPg({ ...admissionPg, programs: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-slate-650"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="number"
+                              value={p.seats}
+                              onChange={e => {
+                                const list = [...admissionPg.programs]
+                                list[idx].seats = parseInt(e.target.value) || 0
+                                setAdmissionPg({ ...admissionPg, programs: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-center font-bold text-accent"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={p.eligibility}
+                              onChange={e => {
+                                const list = [...admissionPg.programs]
+                                list[idx].eligibility = e.target.value
+                                setAdmissionPg({ ...admissionPg, programs: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-slate-600"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={p.basis}
+                              onChange={e => {
+                                const list = [...admissionPg.programs]
+                                list[idx].basis = e.target.value
+                                setAdmissionPg({ ...admissionPg, programs: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-slate-600"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const list = admissionPg.programs.filter((_: any, i: number) => i !== idx)
+                                setAdmissionPg({ ...admissionPg, programs: list })
+                              }}
+                              className="p-1 text-slate-400 hover:text-red-650 hover:bg-red-50 rounded"
+                            >
+                              <Icons.Trash2 size={13} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = [...admissionPg.programs, { name: 'M.Tech Data Science', dept: 'Computer Engineering', seats: 18, eligibility: 'B.Tech CSE/IT (min 60%)', basis: 'GATE CS' }]
+                      setAdmissionPg({ ...admissionPg, programs: list })
+                    }}
+                    className="px-3 py-1 border border-dashed border-slate-350 hover:border-slate-500 rounded text-xs font-semibold text-slate-655 flex items-center gap-1.5 bg-white"
+                  >
+                    <Icons.Plus size={12} /> Add PG Course Row
+                  </button>
+                </div>
+
+                {/* PG Tuition fees */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase block">PG Fee Tiers Structure</label>
+                  <table className="w-full text-xs border border-slate-200 rounded-lg overflow-hidden text-left">
+                    <thead className="bg-slate-50 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px] text-slate-500">
+                      <tr>
+                        <th className="px-3 py-2">Program Scope</th>
+                        <th className="px-3 py-2 text-center">Tuition Fee</th>
+                        <th className="px-3 py-2 text-center">Other Miscellaneous Fees</th>
+                        <th className="px-3 py-2 text-center">Total / Year</th>
+                        <th className="px-3 py-2 text-right w-12">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {admissionPg.fees.map((f: any, idx: number) => (
+                        <tr key={idx}>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={f.program}
+                              onChange={e => {
+                                const list = [...admissionPg.fees]
+                                list[idx].program = e.target.value
+                                setAdmissionPg({ ...admissionPg, fees: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-semibold text-slate-800"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={f.tuition}
+                              onChange={e => {
+                                const list = [...admissionPg.fees]
+                                list[idx].tuition = e.target.value
+                                setAdmissionPg({ ...admissionPg, fees: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-center font-bold"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={f.other}
+                              onChange={e => {
+                                const list = [...admissionPg.fees]
+                                list[idx].other = e.target.value
+                                setAdmissionPg({ ...admissionPg, fees: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-center font-mono"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={f.total}
+                              onChange={e => {
+                                const list = [...admissionPg.fees]
+                                list[idx].total = e.target.value
+                                setAdmissionPg({ ...admissionPg, fees: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-center font-bold text-primary"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const list = admissionPg.fees.filter((_: any, i: number) => i !== idx)
+                                setAdmissionPg({ ...admissionPg, fees: list })
+                              }}
+                              className="p-1 text-slate-400 hover:text-red-650 hover:bg-red-50 rounded"
+                            >
+                              <Icons.Trash2 size={13} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = [...admissionPg.fees, { program: 'M.Pharm (All branches)', tuition: '₹48,000', other: '₹12,000', total: '₹60,000' }]
+                      setAdmissionPg({ ...admissionPg, fees: list })
+                    }}
+                    className="px-3 py-1 border border-dashed border-slate-350 hover:border-slate-500 rounded text-xs font-semibold text-slate-655 flex items-center gap-1.5 bg-white"
+                  >
+                    <Icons.Plus size={12} /> Add PG Fee Row
+                  </button>
+                </div>
+
+                {/* PG Scholarships */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase block">PG Scholarships & Stipends</label>
+                  <table className="w-full text-xs border border-slate-200 rounded-lg overflow-hidden text-left">
+                    <thead className="bg-slate-50 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px] text-slate-500">
+                      <tr>
+                        <th className="px-3 py-2 w-44">Scholarship Name</th>
+                        <th className="px-3 py-2 w-32">Stipend Amount</th>
+                        <th className="px-3 py-2">Short Description</th>
+                        <th className="px-3 py-2">Fellowship Eligibility</th>
+                        <th className="px-3 py-2 text-right w-12">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {admissionPg.scholarships.map((s: any, idx: number) => (
+                        <tr key={idx}>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={s.title}
+                              onChange={e => {
+                                const list = [...admissionPg.scholarships]
+                                list[idx].title = e.target.value
+                                setAdmissionPg({ ...admissionPg, scholarships: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-bold text-slate-800"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={s.amount}
+                              onChange={e => {
+                                const list = [...admissionPg.scholarships]
+                                list[idx].amount = e.target.value
+                                setAdmissionPg({ ...admissionPg, scholarships: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-extrabold text-accent"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={s.desc}
+                              onChange={e => {
+                                const list = [...admissionPg.scholarships]
+                                list[idx].desc = e.target.value
+                                setAdmissionPg({ ...admissionPg, scholarships: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-slate-600"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={s.eligibility}
+                              onChange={e => {
+                                const list = [...admissionPg.scholarships]
+                                list[idx].eligibility = e.target.value
+                                setAdmissionPg({ ...admissionPg, scholarships: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-slate-550"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const list = admissionPg.scholarships.filter((_: any, i: number) => i !== idx)
+                                setAdmissionPg({ ...admissionPg, scholarships: list })
+                              }}
+                              className="p-1 text-slate-400 hover:text-red-650 hover:bg-red-50 rounded"
+                            >
+                              <Icons.Trash2 size={13} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = [...admissionPg.scholarships, { title: 'Non-GATE Scholarship', amount: '₹8,000/month', desc: 'AICTE fellowship for PG candidates of accredited courses.', eligibility: 'Valid score / entrance' }]
+                      setAdmissionPg({ ...admissionPg, scholarships: list })
+                    }}
+                    className="px-3 py-1 border border-dashed border-slate-350 hover:border-slate-500 rounded text-xs font-semibold text-slate-655 flex items-center gap-1.5 bg-white"
+                  >
+                    <Icons.Plus size={12} /> Add Scholarship Card
+                  </button>
+                </div>
+
+                {/* PG Contacts */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase block">PG Admission Contacts & Coordinators</label>
+                  <table className="w-full text-xs border border-slate-200 rounded-lg overflow-hidden text-left">
+                    <thead className="bg-slate-50 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px] text-slate-500">
+                      <tr>
+                        <th className="px-3 py-2">Role Name</th>
+                        <th className="px-3 py-2">Officer Name</th>
+                        <th className="px-3 py-2">Affiliation Department</th>
+                        <th className="px-3 py-2">Office Phone</th>
+                        <th className="px-3 py-2">Inquiry Email</th>
+                        <th className="px-3 py-2 text-right w-12">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {admissionPg.contacts.map((c: any, idx: number) => (
+                        <tr key={idx}>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={c.role}
+                              onChange={e => {
+                                const list = [...admissionPg.contacts]
+                                list[idx].role = e.target.value
+                                setAdmissionPg({ ...admissionPg, contacts: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-bold text-slate-800"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={c.name}
+                              onChange={e => {
+                                const list = [...admissionPg.contacts]
+                                list[idx].name = e.target.value
+                                setAdmissionPg({ ...admissionPg, contacts: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-semibold text-slate-700"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={c.dept}
+                              onChange={e => {
+                                const list = [...admissionPg.contacts]
+                                list[idx].dept = e.target.value
+                                setAdmissionPg({ ...admissionPg, contacts: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-slate-600"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={c.phone}
+                              onChange={e => {
+                                const list = [...admissionPg.contacts]
+                                list[idx].phone = e.target.value
+                                setAdmissionPg({ ...admissionPg, contacts: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-mono"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={c.email}
+                              onChange={e => {
+                                const list = [...admissionPg.contacts]
+                                list[idx].email = e.target.value
+                                setAdmissionPg({ ...admissionPg, contacts: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-mono text-slate-550"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const list = admissionPg.contacts.filter((_: any, i: number) => i !== idx)
+                                setAdmissionPg({ ...admissionPg, contacts: list })
+                              }}
+                              className="p-1 text-slate-400 hover:text-red-650 hover:bg-red-50 rounded"
+                            >
+                              <Icons.Trash2 size={13} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = [...admissionPg.contacts, { role: 'PG Officer', name: 'Dr. John Doe', dept: 'Applied Sciences', phone: '+91-731-2570-5726', email: 'office@sgsits.ac.in' }]
+                      setAdmissionPg({ ...admissionPg, contacts: list })
+                    }}
+                    className="px-3 py-1 border border-dashed border-slate-350 hover:border-slate-500 rounded text-xs font-semibold text-slate-655 flex items-center gap-1.5 bg-white"
+                  >
+                    <Icons.Plus size={12} /> Add Coordinator Contact
+                  </button>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button
+                    onClick={() => triggerSave('admission_pg', admissionPg, 'Postgraduate admissions successfully updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+                  >
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save PG Changes
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ─── PHD ADMISSIONS CMS SUBTAB ─── */}
+            {admSubTab === 'phd' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">PhD Header Title</label>
+                    <input
+                      type="text"
+                      value={admissionPhd.title || ''}
+                      onChange={e => setAdmissionPhd({ ...admissionPhd, title: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Apply Link URL</label>
+                    <input
+                      type="text"
+                      value={admissionPhd.applyUrl || ''}
+                      onChange={e => setAdmissionPhd({ ...admissionPhd, applyUrl: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-mono text-xs"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">PhD Description Statement</label>
+                    <textarea
+                      rows={2}
+                      value={admissionPhd.description || ''}
+                      onChange={e => setAdmissionPhd({ ...admissionPhd, description: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Download Brochure Link</label>
+                    <input
+                      type="text"
+                      value={admissionPhd.brochureUrl || ''}
+                      onChange={e => setAdmissionPhd({ ...admissionPhd, brochureUrl: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Proposal Guidelines Link</label>
+                    <input
+                      type="text"
+                      value={admissionPhd.guidelinesUrl || ''}
+                      onChange={e => setAdmissionPhd({ ...admissionPhd, guidelinesUrl: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/50 p-4 rounded border border-slate-200">
+                  <div className="md:col-span-2">
+                    <h4 className="text-xs font-bold text-[#0b2545] uppercase tracking-wider">Research & Development (R&D) Cell Details</h4>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">Dean (R&D) Address Text</label>
+                    <input
+                      type="text"
+                      value={admissionPhd.rdAddress || ''}
+                      onChange={e => setAdmissionPhd({ ...admissionPhd, rdAddress: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-2.5 py-1 text-xs focus:outline-none bg-white font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">R&D Cell Telephone</label>
+                    <input
+                      type="text"
+                      value={admissionPhd.rdPhone || ''}
+                      onChange={e => setAdmissionPhd({ ...admissionPhd, rdPhone: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-2.5 py-1 text-xs focus:outline-none bg-white font-mono"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">R&D Inquiry Email</label>
+                    <input
+                      type="text"
+                      value={admissionPhd.rdEmail || ''}
+                      onChange={e => setAdmissionPhd({ ...admissionPhd, rdEmail: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-2.5 py-1 text-xs focus:outline-none bg-white font-mono text-slate-550"
+                    />
+                  </div>
+                </div>
+
+                {/* Eligibility criteria */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Academic Qualification Criteria (One per line)</label>
+                    <textarea
+                      rows={4}
+                      value={admissionPhd.eligibilityQualifications.join('\n')}
+                      onChange={e => setAdmissionPhd({ ...admissionPhd, eligibilityQualifications: e.target.value.split('\n').filter(Boolean) })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-xs focus:outline-none leading-relaxed font-sans"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Fellowship & Stipend Criteria (One per line)</label>
+                    <textarea
+                      rows={4}
+                      value={admissionPhd.eligibilityFellowships.join('\n')}
+                      onChange={e => setAdmissionPhd({ ...admissionPhd, eligibilityFellowships: e.target.value.split('\n').filter(Boolean) })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-xs focus:outline-none leading-relaxed font-sans"
+                    />
+                  </div>
+                </div>
+
+                {/* PhD Vacancies Table */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase block">Departmental PhD Vacancy matrix</label>
+                  <table className="w-full text-xs border border-slate-200 rounded-lg overflow-hidden text-left">
+                    <thead className="bg-slate-50 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px] text-slate-500">
+                      <tr>
+                        <th className="px-3 py-2 w-48">Department Name</th>
+                        <th className="px-3 py-2 text-center w-24">Open Seats</th>
+                        <th className="px-3 py-2 w-60">Supervisors Available</th>
+                        <th className="px-3 py-2">Specialization Fields</th>
+                        <th className="px-3 py-2 text-right w-12">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {admissionPhd.vacancies.map((v: any, idx: number) => (
+                        <tr key={idx}>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={v.dept}
+                              onChange={e => {
+                                const list = [...admissionPhd.vacancies]
+                                list[idx].dept = e.target.value
+                                setAdmissionPhd({ ...admissionPhd, vacancies: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-bold text-slate-800"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="number"
+                              value={v.vacancies}
+                              onChange={e => {
+                                const list = [...admissionPhd.vacancies]
+                                list[idx].vacancies = parseInt(e.target.value) || 0
+                                setAdmissionPhd({ ...admissionPhd, vacancies: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-center font-bold text-accent"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={v.supervisors}
+                              onChange={e => {
+                                const list = [...admissionPhd.vacancies]
+                                list[idx].supervisors = e.target.value
+                                setAdmissionPhd({ ...admissionPhd, vacancies: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-slate-655"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={v.area}
+                              onChange={e => {
+                                const list = [...admissionPhd.vacancies]
+                                list[idx].area = e.target.value
+                                setAdmissionPhd({ ...admissionPhd, vacancies: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs text-slate-600"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const list = admissionPhd.vacancies.filter((_: any, i: number) => i !== idx)
+                                setAdmissionPhd({ ...admissionPhd, vacancies: list })
+                              }}
+                              className="p-1 text-slate-400 hover:text-red-650 hover:bg-red-50 rounded"
+                            >
+                              <Icons.Trash2 size={13} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = [...admissionPhd.vacancies, { dept: 'Applied Chemistry', vacancies: 2, supervisors: 'Dr. R. Pandey', area: 'Polymer Nano-composites' }]
+                      setAdmissionPhd({ ...admissionPhd, vacancies: list })
+                    }}
+                    className="px-3 py-1 border border-dashed border-slate-350 hover:border-slate-500 rounded text-xs font-semibold text-slate-655 flex items-center gap-1.5 bg-white"
+                  >
+                    <Icons.Plus size={12} /> Add Vacancy Row
+                  </button>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button
+                    onClick={() => triggerSave('admission_phd', admissionPhd, 'PhD admissions successfully updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+                  >
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save PhD Changes
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ─── PROSPECTUS CMS SUBTAB ─── */}
+            {admSubTab === 'prospectus' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Prospectus Header Title</label>
+                    <input
+                      type="text"
+                      value={admissionProspectus.title || ''}
+                      onChange={e => setAdmissionProspectus({ ...admissionProspectus, title: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Published Date Tag</label>
+                    <input
+                      type="text"
+                      value={admissionProspectus.publishedDate || ''}
+                      onChange={e => setAdmissionProspectus({ ...admissionProspectus, publishedDate: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-semibold"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Prospectus Description Statement</label>
+                    <textarea
+                      rows={2}
+                      value={admissionProspectus.description || ''}
+                      onChange={e => setAdmissionProspectus({ ...admissionProspectus, description: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">English Brochure PDF Link</label>
+                    <input
+                      type="text"
+                      value={admissionProspectus.englishUrl || ''}
+                      onChange={e => setAdmissionProspectus({ ...admissionProspectus, englishUrl: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Hindi Brochure PDF Link</label>
+                    <input
+                      type="text"
+                      value={admissionProspectus.hindiUrl || ''}
+                      onChange={e => setAdmissionProspectus({ ...admissionProspectus, hindiUrl: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary text-xs"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">File Details String (size, format, etc.)</label>
+                    <input
+                      type="text"
+                      value={admissionProspectus.fileDetails || ''}
+                      onChange={e => setAdmissionProspectus({ ...admissionProspectus, fileDetails: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm mt-1 focus:outline-none focus:border-primary font-mono text-xs"
+                    />
+                  </div>
+                </div>
+
+                {/* Historical editions */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase block">Previous Archived Editions</label>
+                  <table className="w-full text-xs border border-slate-200 rounded-lg overflow-hidden text-left">
+                    <thead className="bg-slate-50 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px] text-slate-500">
+                      <tr>
+                        <th className="px-3 py-2 w-52">Academic Session Year</th>
+                        <th className="px-3 py-2">Brochure File Target Path</th>
+                        <th className="px-3 py-2 text-right w-12">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {admissionProspectus.archive.map((a: any, idx: number) => (
+                        <tr key={idx}>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={a.year}
+                              onChange={e => {
+                                const list = [...admissionProspectus.archive]
+                                list[idx].year = e.target.value
+                                setAdmissionProspectus({ ...admissionProspectus, archive: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-bold text-slate-800"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input
+                              type="text"
+                              value={a.fileUrl}
+                              onChange={e => {
+                                const list = [...admissionProspectus.archive]
+                                list[idx].fileUrl = e.target.value
+                                setAdmissionProspectus({ ...admissionProspectus, archive: list })
+                              }}
+                              className="border border-slate-150 rounded px-2 py-0.5 w-full bg-white focus:outline-none text-xs font-mono text-slate-650"
+                            />
+                          </td>
+                          <td className="px-3 py-1.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const list = admissionProspectus.archive.filter((_: any, i: number) => i !== idx)
+                                setAdmissionProspectus({ ...admissionProspectus, archive: list })
+                              }}
+                              className="p-1 text-slate-400 hover:text-red-650 hover:bg-red-50 rounded"
+                            >
+                              <Icons.Trash2 size={13} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = [...admissionProspectus.archive, { year: '2020–21', fileUrl: '#' }]
+                      setAdmissionProspectus({ ...admissionProspectus, archive: list })
+                    }}
+                    className="px-3 py-1 border border-dashed border-slate-350 hover:border-slate-500 rounded text-xs font-semibold text-slate-655 flex items-center gap-1.5 bg-white"
+                  >
+                    <Icons.Plus size={12} /> Add Archive Edition Row
+                  </button>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button
+                    onClick={() => triggerSave('admission_prospectus', admissionProspectus, 'Prospectus download information successfully updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white hover:bg-primary/95 font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md"
+                  >
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save Prospectus Changes
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ─── PLACEMENTS CMS TAB ───────────────────────────────────────────── */}
+        {activeTab === 'placements' && (
+          <PlacementCms />
+        )}
+
+        {/* ─── CAMPUS LIFE CMS TAB ───────────────────────────────────────────── */}
+        {activeTab === 'campus_life' && clActivities && clNCC && clNSS && clSchGovt && clSchInst && clSSS && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-display text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Icons.Users size={18} className="text-[#bfa15f]" />
+                Campus Life &amp; Student Welfare CMS
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">Edit all student welfare sections: Activities, NCC, NSS, Scholarships, and SSS</p>
+            </div>
+
+            {/* Sub-tab bar */}
+            <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
+              {([
+                { id: 'activities', label: 'Student Activities' },
+                { id: 'ncc', label: 'NCC Wing' },
+                { id: 'nss', label: 'NSS Wing' },
+                { id: 'sch_govt', label: 'Govt Scholarships' },
+                { id: 'sch_inst', label: 'Institute Scholarships' },
+                { id: 'sss', label: 'Support Services (SSS)' },
+              ] as const).map(st => (
+                <button
+                  key={st.id}
+                  onClick={() => setClSubTab(st.id)}
+                  className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded border transition-all ${
+                    clSubTab === st.id
+                      ? 'bg-[#0b2545] text-white border-[#0b2545]'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >{st.label}</button>
+              ))}
+            </div>
+
+            {/* ── ACTIVITIES ── */}
+            {clSubTab === 'activities' && (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Intro Paragraph</label>
+                  <textarea rows={3} value={clActivities.intro || ''}
+                    onChange={e => setClActivities({ ...clActivities, intro: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Activity Cards</label>
+                    <button onClick={() => setClActivities({ ...clActivities, activities: [...(clActivities.activities || []), { title: 'New Activity', description: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-600 flex items-center gap-1">
+                      <Icons.Plus size={11} /> Add Card
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(clActivities.activities || []).map((act: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-400 font-mono">CARD #{idx + 1}</span>
+                          <button onClick={() => { const list = clActivities.activities.filter((_:any,i:number)=>i!==idx); setClActivities({...clActivities, activities: list}) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-400 uppercase">Title</label>
+                          <input type="text" value={act.title}
+                            onChange={e => { const list=[...clActivities.activities]; list[idx]={...list[idx],title:e.target.value}; setClActivities({...clActivities,activities:list}) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm mt-0.5 focus:outline-none focus:border-primary" />
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-400 uppercase">Description</label>
+                          <textarea rows={2} value={act.description}
+                            onChange={e => { const list=[...clActivities.activities]; list[idx]={...list[idx],description:e.target.value}; setClActivities({...clActivities,activities:list}) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm mt-0.5 focus:outline-none focus:border-primary" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button onClick={() => triggerSave('campus_activities', clActivities, 'Student Activities updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save Activities
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── NCC ── */}
+            {clSubTab === 'ncc' && (
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Unit Details</label>
+                    <input type="text" value={clNCC.unitDetails || ''}
+                      onChange={e => setClNCC({ ...clNCC, unitDetails: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Officer Name</label>
+                    <input type="text" value={clNCC.officerName || ''}
+                      onChange={e => setClNCC({ ...clNCC, officerName: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Officer Contact</label>
+                    <input type="text" value={clNCC.officerContact || ''}
+                      onChange={e => setClNCC({ ...clNCC, officerContact: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Enrolled Cadets</label>
+                    <input type="number" value={clNCC.enrolledCadets || 0}
+                      onChange={e => setClNCC({ ...clNCC, enrolledCadets: parseInt(e.target.value) || 0 })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">About (Description)</label>
+                  <textarea rows={4} value={clNCC.about || ''}
+                    onChange={e => setClNCC({ ...clNCC, about: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Activities List</label>
+                    <button onClick={() => setClNCC({ ...clNCC, activities: [...(clNCC.activities||[]), ''] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-600 flex items-center gap-1">
+                      <Icons.Plus size={11} /> Add Activity
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {(clNCC.activities || []).map((act: string, idx: number) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <input type="text" value={act}
+                          onChange={e => { const list=[...clNCC.activities]; list[idx]=e.target.value; setClNCC({...clNCC,activities:list}) }}
+                          className="flex-1 border border-slate-200 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                        <button onClick={() => { const list=clNCC.activities.filter((_:any,i:number)=>i!==idx); setClNCC({...clNCC,activities:list}) }}
+                          className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Achievements List</label>
+                    <button onClick={() => setClNCC({ ...clNCC, achievements: [...(clNCC.achievements||[]), ''] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-600 flex items-center gap-1">
+                      <Icons.Plus size={11} /> Add Achievement
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {(clNCC.achievements || []).map((ach: string, idx: number) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <input type="text" value={ach}
+                          onChange={e => { const list=[...clNCC.achievements]; list[idx]=e.target.value; setClNCC({...clNCC,achievements:list}) }}
+                          className="flex-1 border border-slate-200 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                        <button onClick={() => { const list=clNCC.achievements.filter((_:any,i:number)=>i!==idx); setClNCC({...clNCC,achievements:list}) }}
+                          className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button onClick={() => triggerSave('campus_ncc', clNCC, 'NCC Wing details updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save NCC
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── NSS ── */}
+            {clSubTab === 'nss' && (
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Unit Details</label>
+                    <input type="text" value={clNSS.unitDetails || ''}
+                      onChange={e => setClNSS({ ...clNSS, unitDetails: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Program Officer Name</label>
+                    <input type="text" value={clNSS.programOfficerName || ''}
+                      onChange={e => setClNSS({ ...clNSS, programOfficerName: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Program Officer Contact</label>
+                    <input type="text" value={clNSS.programOfficerContact || ''}
+                      onChange={e => setClNSS({ ...clNSS, programOfficerContact: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Enrolled Volunteers</label>
+                    <input type="number" value={clNSS.enrolledVolunteers || 0}
+                      onChange={e => setClNSS({ ...clNSS, enrolledVolunteers: parseInt(e.target.value) || 0 })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">About (Description)</label>
+                  <textarea rows={4} value={clNSS.about || ''}
+                    onChange={e => setClNSS({ ...clNSS, about: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Activities List</label>
+                    <button onClick={() => setClNSS({ ...clNSS, activities: [...(clNSS.activities||[]), ''] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-600 flex items-center gap-1">
+                      <Icons.Plus size={11} /> Add Activity
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {(clNSS.activities || []).map((act: string, idx: number) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <input type="text" value={act}
+                          onChange={e => { const list=[...clNSS.activities]; list[idx]=e.target.value; setClNSS({...clNSS,activities:list}) }}
+                          className="flex-1 border border-slate-200 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                        <button onClick={() => { const list=clNSS.activities.filter((_:any,i:number)=>i!==idx); setClNSS({...clNSS,activities:list}) }}
+                          className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Achievements List</label>
+                    <button onClick={() => setClNSS({ ...clNSS, achievements: [...(clNSS.achievements||[]), ''] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-600 flex items-center gap-1">
+                      <Icons.Plus size={11} /> Add Achievement
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {(clNSS.achievements || []).map((ach: string, idx: number) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <input type="text" value={ach}
+                          onChange={e => { const list=[...clNSS.achievements]; list[idx]=e.target.value; setClNSS({...clNSS,achievements:list}) }}
+                          className="flex-1 border border-slate-200 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-primary" />
+                        <button onClick={() => { const list=clNSS.achievements.filter((_:any,i:number)=>i!==idx); setClNSS({...clNSS,achievements:list}) }}
+                          className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button onClick={() => triggerSave('campus_nss', clNSS, 'NSS Wing details updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save NSS
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── GOVT SCHOLARSHIPS ── */}
+            {clSubTab === 'sch_govt' && (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Intro Text</label>
+                  <textarea rows={3} value={clSchGovt.intro || ''}
+                    onChange={e => setClSchGovt({ ...clSchGovt, intro: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Email</label>
+                    <input type="text" value={clSchGovt.contactEmail || ''}
+                      onChange={e => setClSchGovt({ ...clSchGovt, contactEmail: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Phone</label>
+                    <input type="text" value={clSchGovt.contactPhone || ''}
+                      onChange={e => setClSchGovt({ ...clSchGovt, contactPhone: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Scholarship Entries</label>
+                    <button onClick={() => setClSchGovt({ ...clSchGovt, scholarships: [...(clSchGovt.scholarships||[]), { title: '', description: '', eligibility: '', portalUrl: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-600 flex items-center gap-1">
+                      <Icons.Plus size={11} /> Add Scholarship
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(clSchGovt.scholarships || []).map((s: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-400 font-mono">SCHOLARSHIP #{idx + 1}</span>
+                          <button onClick={() => { const list=clSchGovt.scholarships.filter((_:any,i:number)=>i!==idx); setClSchGovt({...clSchGovt,scholarships:list}) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-400 uppercase">Title</label>
+                            <input type="text" value={s.title}
+                              onChange={e => { const list=[...clSchGovt.scholarships]; list[idx]={...list[idx],title:e.target.value}; setClSchGovt({...clSchGovt,scholarships:list}) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm mt-0.5 focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-400 uppercase">Eligibility</label>
+                            <input type="text" value={s.eligibility||''}
+                              onChange={e => { const list=[...clSchGovt.scholarships]; list[idx]={...list[idx],eligibility:e.target.value}; setClSchGovt({...clSchGovt,scholarships:list}) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm mt-0.5 focus:outline-none focus:border-primary" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-400 uppercase">Description</label>
+                          <textarea rows={2} value={s.description}
+                            onChange={e => { const list=[...clSchGovt.scholarships]; list[idx]={...list[idx],description:e.target.value}; setClSchGovt({...clSchGovt,scholarships:list}) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm mt-0.5 focus:outline-none focus:border-primary" />
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-400 uppercase">Portal URL</label>
+                          <input type="text" value={s.portalUrl||''}
+                            onChange={e => { const list=[...clSchGovt.scholarships]; list[idx]={...list[idx],portalUrl:e.target.value}; setClSchGovt({...clSchGovt,scholarships:list}) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm mt-0.5 focus:outline-none focus:border-primary" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button onClick={() => triggerSave('campus_sch_govt', clSchGovt, 'Government Scholarships updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save Govt Scholarships
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── INSTITUTE SCHOLARSHIPS ── */}
+            {clSubTab === 'sch_inst' && (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Intro Text</label>
+                  <textarea rows={3} value={clSchInst.intro || ''}
+                    onChange={e => setClSchInst({ ...clSchInst, intro: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Scholarship Entries</label>
+                    <button onClick={() => setClSchInst({ ...clSchInst, scholarships: [...(clSchInst.scholarships||[]), { title: '', description: '', criteria: '', amount: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-600 flex items-center gap-1">
+                      <Icons.Plus size={11} /> Add Scholarship
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(clSchInst.scholarships || []).map((s: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-400 font-mono">SCHOLARSHIP #{idx + 1}</span>
+                          <button onClick={() => { const list=clSchInst.scholarships.filter((_:any,i:number)=>i!==idx); setClSchInst({...clSchInst,scholarships:list}) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-400 uppercase">Title</label>
+                            <input type="text" value={s.title}
+                              onChange={e => { const list=[...clSchInst.scholarships]; list[idx]={...list[idx],title:e.target.value}; setClSchInst({...clSchInst,scholarships:list}) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm mt-0.5 focus:outline-none focus:border-primary" />
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-400 uppercase">Amount</label>
+                            <input type="text" value={s.amount||''}
+                              onChange={e => { const list=[...clSchInst.scholarships]; list[idx]={...list[idx],amount:e.target.value}; setClSchInst({...clSchInst,scholarships:list}) }}
+                              className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm mt-0.5 focus:outline-none focus:border-primary" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-400 uppercase">Criteria</label>
+                          <input type="text" value={s.criteria||''}
+                            onChange={e => { const list=[...clSchInst.scholarships]; list[idx]={...list[idx],criteria:e.target.value}; setClSchInst({...clSchInst,scholarships:list}) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm mt-0.5 focus:outline-none focus:border-primary" />
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-400 uppercase">Description</label>
+                          <textarea rows={2} value={s.description}
+                            onChange={e => { const list=[...clSchInst.scholarships]; list[idx]={...list[idx],description:e.target.value}; setClSchInst({...clSchInst,scholarships:list}) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm mt-0.5 focus:outline-none focus:border-primary" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button onClick={() => triggerSave('campus_sch_inst', clSchInst, 'Institute Scholarships updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save Institute Scholarships
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── SSS (Support Services) ── */}
+            {clSubTab === 'sss' && (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase block mb-1">About / Description</label>
+                  <textarea rows={4} value={clSSS.about || ''}
+                    onChange={e => setClSSS({ ...clSSS, about: e.target.value })}
+                    className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Email</label>
+                    <input type="text" value={clSSS.contactEmail || ''}
+                      onChange={e => setClSSS({ ...clSSS, contactEmail: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contact Phone</label>
+                    <input type="text" value={clSSS.contactPhone || ''}
+                      onChange={e => setClSSS({ ...clSSS, contactPhone: e.target.value })}
+                      className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase">Services Cards</label>
+                    <button onClick={() => setClSSS({ ...clSSS, services: [...(clSSS.services||[]), { title: '', description: '' }] })}
+                      className="px-2 py-1 border border-dashed border-slate-350 rounded text-xs font-semibold text-slate-600 flex items-center gap-1">
+                      <Icons.Plus size={11} /> Add Service
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {(clSSS.services || []).map((svc: any, idx: number) => (
+                      <div key={idx} className="border border-slate-200 rounded p-3 bg-slate-50/40 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-400 font-mono">SERVICE #{idx + 1}</span>
+                          <button onClick={() => { const list=clSSS.services.filter((_:any,i:number)=>i!==idx); setClSSS({...clSSS,services:list}) }}
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Icons.Trash2 size={13}/></button>
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-400 uppercase">Title</label>
+                          <input type="text" value={svc.title}
+                            onChange={e => { const list=[...clSSS.services]; list[idx]={...list[idx],title:e.target.value}; setClSSS({...clSSS,services:list}) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm mt-0.5 focus:outline-none focus:border-primary" />
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-slate-400 uppercase">Description</label>
+                          <textarea rows={2} value={svc.description}
+                            onChange={e => { const list=[...clSSS.services]; list[idx]={...list[idx],description:e.target.value}; setClSSS({...clSSS,services:list}) }}
+                            className="w-full border border-slate-200 rounded px-2 py-1.5 text-sm mt-0.5 focus:outline-none focus:border-primary" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                  <button onClick={() => triggerSave('campus_sss', clSSS, 'Student Support Services updated!')}
+                    className="px-6 py-2 bg-[#0b2545] text-white font-semibold text-xs uppercase tracking-widest rounded-lg flex items-center gap-2 border border-[#bfa15f]/20 shadow-md">
+                    <Icons.Save size={14} className="text-[#bfa15f]" /> Save SSS
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+      </div>
+
+      {/* Toast Notice */}
+      {toast && <Toast message={toast} onClose={() => setToast('')} />}
+    </div>
+  )
+}
+

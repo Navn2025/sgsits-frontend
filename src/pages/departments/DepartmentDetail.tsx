@@ -111,7 +111,6 @@ const DepartmentDetail: React.FC = () => {
       {/* ── DEPARTMENT HERO BANNER ── */}
       <section className="bg-slate-50 border border-slate-200 rounded p-6 md:p-8 relative">
         <div className="relative space-y-4 max-w-4xl">
-          {/* Badge */}
           <span className="inline-block px-2.5 py-0.5 bg-slate-200/85 text-slate-800 rounded border border-slate-300 text-[9px] font-bold uppercase tracking-wider">
             {dept.programsOffered.join(' • ')} Programs
           </span>
@@ -121,7 +120,7 @@ const DepartmentDetail: React.FC = () => {
               Department of <span className="font-serif italic font-semibold text-primary">{dept.name}</span>
             </h1>
             <p className="text-xs md:text-sm text-slate-550 leading-relaxed font-sans max-w-2xl font-medium">
-              Fostering engineering breakthroughs, industrial leadership, and comprehensive research in {dept.shortName} sciences since the establishment.
+              {dept.description || `Fostering engineering breakthroughs, industrial leadership, and comprehensive research in ${dept.shortName} sciences since the establishment.`}
             </p>
           </div>
 
@@ -165,7 +164,7 @@ const DepartmentDetail: React.FC = () => {
                     className={`w-full flex items-center gap-2.5 px-3 py-2 rounded text-xs font-bold text-left transition-colors duration-150 ${
                       activeTab === tab.id
                         ? 'bg-slate-50 text-primary border-l-2 border-accent'
-                        : 'text-slate-650 hover:bg-slate-50'
+                        : 'text-slate-655 hover:bg-slate-50'
                     }`}
                   >
                     <Icon className="w-4 h-4 flex-shrink-0" />
@@ -187,19 +186,53 @@ const DepartmentDetail: React.FC = () => {
                   Overview & Academic Mission
                 </h2>
               </div>
-              <p className="text-xs md:text-sm text-slate-650 leading-relaxed font-sans text-justify">
-                The Department of <strong>{dept.name}</strong> at Shri G. S. Institute of Technology & Science remains a cornerstone of scholastic excellence. The division offers premium engineering tracks coupled with robust research infrastructure, ensuring that graduating students possess elite design skills, theoretical expertise, and practical insight.
-              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-2 space-y-4">
+                  {dept.aboutParagraphs && dept.aboutParagraphs.length > 0 ? (
+                    dept.aboutParagraphs.map((para, i) => (
+                      <p key={i} className="text-xs md:text-sm text-slate-655 leading-relaxed font-sans text-justify" dangerouslySetInnerHTML={{ __html: para }} />
+                    ))
+                  ) : (
+                    <p className="text-xs md:text-sm text-slate-655 leading-relaxed font-sans text-justify">
+                      The Department of <strong>{dept.name}</strong> at Shri G. S. Institute of Technology & Science remains a cornerstone of scholastic excellence. The division offers premium engineering tracks coupled with robust research infrastructure, ensuring that graduating students possess elite design skills, theoretical expertise, and practical insight.
+                    </p>
+                  )}
+                </div>
+                <div className="md:col-span-1">
+                  <div className="rounded border border-slate-200 overflow-hidden shadow-xs bg-slate-50">
+                    <div className="aspect-[4/3] bg-slate-100 relative">
+                      <img
+                        src={dept.imageUrl || "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=800&auto=format&fit=crop"}
+                        alt={`${dept.name} Representative Image`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-3 bg-white text-center border-t border-slate-200">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">
+                        Branch Representative
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                 <div className="p-5 bg-white rounded border border-slate-200/80 space-y-3 flex flex-col hover:border-slate-350 transition-colors duration-200">
                   <h3 className="text-xs font-bold text-accent uppercase tracking-wider">
                     Infrastructure Highlights
                   </h3>
                   <ul className="text-xs text-slate-500 space-y-2 font-sans font-medium">
-                    <li className="flex items-start gap-1.5">• Dedicated Department Computer Center</li>
-                    <li className="flex items-start gap-1.5">• Advanced Hardware / Research Laboratories</li>
-                    <li className="flex items-start gap-1.5">• Comprehensive Reference Library with 5000+ volumes</li>
-                    <li className="flex items-start gap-1.5">• High-Speed Wi-Fi & LAN connectivity (10 Gbps backbone)</li>
+                    {dept.infraHighlights && dept.infraHighlights.length > 0 ? (
+                      dept.infraHighlights.map((hl, i) => (
+                        <li key={i} className="flex items-start gap-1.5">• {hl}</li>
+                      ))
+                    ) : (
+                      <>
+                        <li className="flex items-start gap-1.5">• Dedicated Department Computer Center</li>
+                        <li className="flex items-start gap-1.5">• Advanced Hardware / Research Laboratories</li>
+                        <li className="flex items-start gap-1.5">• Comprehensive Reference Library with 5000+ volumes</li>
+                        <li className="flex items-start gap-1.5">• High-Speed Wi-Fi & LAN connectivity (10 Gbps backbone)</li>
+                      </>
+                    )}
                   </ul>
                 </div>
                 <div className="p-5 bg-white rounded border border-slate-200/80 space-y-3 flex flex-col hover:border-slate-350 transition-colors duration-200">
@@ -207,10 +240,18 @@ const DepartmentDetail: React.FC = () => {
                     Offered Programs & Intake
                   </h3>
                   <ul className="text-xs text-slate-500 space-y-2 font-sans font-medium">
-                    <li className="flex items-start gap-1.5">• B.Tech / B.Pharma (4-Year Degree) - {dept.programsOffered.includes('UG') ? '120 Intake' : 'N/A'}</li>
-                    <li className="flex items-start gap-1.5">• M.Tech / M.Pharma / MBA (2-Year Degree) - {dept.programsOffered.includes('PG') ? '18-25 Intake' : 'N/A'}</li>
-                    <li className="flex items-start gap-1.5">• Ph.D (Doctoral Research) - {dept.programsOffered.includes('PhD') ? 'Active Scholars' : 'N/A'}</li>
-                    <li className="flex items-start gap-1.5">• Part-Time Degree Courses (PTDC) - {dept.programsOffered.includes('PTDC') ? 'Active Schemes' : 'N/A'}</li>
+                    {dept.programsIntake && dept.programsIntake.length > 0 ? (
+                      dept.programsIntake.map((pi, i) => (
+                        <li key={i} className="flex items-start gap-1.5">• {pi}</li>
+                      ))
+                    ) : (
+                      <>
+                        <li className="flex items-start gap-1.5">• B.Tech / B.Pharma (4-Year Degree) - {dept.programsOffered.includes('UG') ? '120 Intake' : 'N/A'}</li>
+                        <li className="flex items-start gap-1.5">• M.Tech / M.Pharma / MBA (2-Year Degree) - {dept.programsOffered.includes('PG') ? '18-25 Intake' : 'N/A'}</li>
+                        <li className="flex items-start gap-1.5">• Ph.D (Doctoral Research) - {dept.programsOffered.includes('PhD') ? 'Active Scholars' : 'N/A'}</li>
+                        <li className="flex items-start gap-1.5">• Part-Time Degree Courses (PTDC) - {dept.programsOffered.includes('PTDC') ? 'Active Schemes' : 'N/A'}</li>
+                      </>
+                    )}
                   </ul>
                 </div>
               </div>
@@ -225,8 +266,8 @@ const DepartmentDetail: React.FC = () => {
                   Outcome Based Education (OBE)
                 </h2>
               </div>
-              <p className="text-xs md:text-sm text-slate-650 leading-relaxed font-sans text-justify">
-                Adhering to National Board of Accreditation (NBA) standards and the NEP 2020 layout, the department implements a structured Outcome-Based Education model. Program Outcomes (POs) and course metrics are continuously tracked to improve technical training.
+              <p className="text-xs md:text-sm text-slate-655 leading-relaxed font-sans text-justify">
+                Adhering to National Board of Accreditation (NBA) standards and the NEP 2020 layout, the department implements a structured Outcome-Based Education model. Program Outcomes (PEOs / POs) and course metrics are continuously tracked to improve technical training.
               </p>
               <div className="space-y-4 pt-4">
                 <div className="p-4 bg-slate-50 rounded border border-slate-200">
@@ -234,7 +275,7 @@ const DepartmentDetail: React.FC = () => {
                     Departmental Vision
                   </h4>
                   <p className="text-xs text-slate-600 leading-relaxed font-sans text-justify font-medium">
-                    "To emerge as a premier center of technical education and research in {dept.shortName} sciences, creating ethically sound professionals equipped to handle global industrial demands."
+                    "{dept.vision || `To emerge as a premier center of technical education and research in ${dept.shortName} sciences, creating ethically sound professionals equipped to handle global industrial demands.`}"
                   </p>
                 </div>
                 <div className="p-4 bg-slate-50 rounded border border-slate-200">
@@ -242,7 +283,7 @@ const DepartmentDetail: React.FC = () => {
                     Departmental Mission
                   </h4>
                   <p className="text-xs text-slate-600 leading-relaxed font-sans text-justify font-medium">
-                    "Providing rich academic environments through advanced labs and Outcome-Based curriculums, fostering collaborative industrial projects, and instilling technical values conducive to social prosperity."
+                    "{dept.mission || `Providing rich academic environments through advanced labs and Outcome-Based curriculums, fostering collaborative industrial projects, and instilling technical values conducive to social prosperity.`}"
                   </p>
                 </div>
               </div>

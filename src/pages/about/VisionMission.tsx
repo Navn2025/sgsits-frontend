@@ -1,30 +1,14 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Eye, Target, Quote } from 'lucide-react'
-
-const missionPoints = [
-  {
-    num: '1',
-    text: 'Provide high-quality technical education through a meticulously designed curriculum, advanced outcome-based teaching-learning methodologies, and state-of-the-art laboratory infrastructure.'
-  },
-  {
-    num: '2',
-    text: 'Foster a vibrant ecosystem for high-impact research, pioneering innovation, and student-led entrepreneurship in collaboration with global scientific institutions.'
-  },
-  {
-    num: '3',
-    text: 'Cultivate strong industry-academia synergies to drive technology transfer, consultancies, industrial internships, and exceptional student placement programs.'
-  },
-  {
-    num: '4',
-    text: 'Inculcate deep-seated ethical values, professional integrity, a sense of social responsibility, and future-ready leadership capabilities.'
-  },
-  {
-    num: '5',
-    text: 'Encourage comprehensive and holistic development through outstanding sports facilities, cultural forums, and active community outreach initiatives.'
-  }
-]
+import { aboutService, visionMissionDefault, type VisionMissionData } from '../../services/aboutService'
 
 const VisionMission: React.FC = () => {
+  const [data, setData] = useState<VisionMissionData>(visionMissionDefault)
+
+  useEffect(() => {
+    aboutService.getVisionMission().then(setData)
+  }, [])
+
   return (
     <div className="space-y-10">
       {/* Page Header */}
@@ -59,7 +43,7 @@ const VisionMission: React.FC = () => {
                 <Quote size={14} className="text-accent/30" />
               </div>
               <p className="text-slate-700 text-[14.5px] font-medium leading-relaxed italic">
-                "To be a centre of excellence in education, research and innovation, creating competent professionals with ethical values who contribute to the development of society and the nation."
+                {data.visionEnglish}
               </p>
             </div>
 
@@ -70,7 +54,7 @@ const VisionMission: React.FC = () => {
                 <Quote size={14} className="text-accent/30" />
               </div>
               <p className="text-slate-700 text-[14.5px] font-medium leading-relaxed italic">
-                "शिक्षा, अनुसंधान और नवाचार में उत्कृष्टता का केंद्र बनना, नैतिक मूल्यों के साथ सक्षम पेशेवरों का निर्माण करना जो समाज और राष्ट्र के विकास में योगदान दें।"
+                {data.visionHindi}
               </p>
             </div>
           </div>
@@ -90,12 +74,11 @@ const VisionMission: React.FC = () => {
         </div>
 
         <div className="space-y-3">
-          {missionPoints.map((item, idx) => (
-            <div 
+          {data.missionPoints.map((item, idx) => (
+            <div
               key={idx}
               className="flex items-start gap-4 p-4 rounded-md bg-white border border-gray-150 shadow-sm"
             >
-              {/* Standard flat number square */}
               <div className="w-8 h-8 rounded bg-white text-primary font-extrabold flex items-center justify-center shrink-0 border border-gray-200 text-sm shadow-sm">
                 {item.num}
               </div>

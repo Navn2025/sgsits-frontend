@@ -1,46 +1,41 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { GraduationCap, CheckCircle2, ExternalLink } from 'lucide-react'
-
-const mTechPrograms = [
-  { program: 'M.Tech — Computer Engineering', dept: 'Computer Engineering', intake: 18, eligibility: 'B.E./B.Tech in CS/IT, GATE' },
-  { program: 'M.Tech — Information Technology', dept: 'Information Technology', intake: 18, eligibility: 'B.E./B.Tech in IT/CS, GATE' },
-  { program: 'M.Tech — Structural Engineering', dept: 'Civil Engineering', intake: 18, eligibility: 'B.E./B.Tech Civil Engg, GATE' },
-  { program: 'M.Tech — Power Systems', dept: 'Electrical Engineering', intake: 18, eligibility: 'B.E./B.Tech Electrical, GATE' },
-  { program: 'M.Tech — Machine Design', dept: 'Mechanical Engineering', intake: 18, eligibility: 'B.E./B.Tech Mechanical, GATE' },
-  { program: 'M.Tech — VLSI Design', dept: 'Electronics & Telecomm', intake: 18, eligibility: 'B.E./B.Tech EC/EI/EE, GATE' },
-  { program: 'M.Tech — Signal Processing', dept: 'Electronics & Instrumentation', intake: 18, eligibility: 'B.E./B.Tech EC/EI, GATE' },
-  { program: 'M.Tech — Thermal Engineering', dept: 'Mechanical Engineering', intake: 18, eligibility: 'B.E./B.Tech Mechanical, GATE' },
-  { program: 'M.Pharm — Pharmaceutical Sciences', dept: 'Pharmacy', intake: 15, eligibility: 'B.Pharm, GPAT' },
-  { program: 'MBA — Business Administration', dept: 'Management Studies', intake: 120, eligibility: 'Any Graduate, MAT/CAT/MP PET' },
-  { program: 'MCA — Computer Applications', dept: 'CTA', intake: 60, eligibility: 'B.Sc. with Maths, NIMCET/MP PET' },
-]
+import { academicsService, pgCoursesDefault } from '../../services/academicsService'
+import type { PGCoursesData } from '../../services/academicsService'
 
 const PGCourses: React.FC = () => {
+  const [pgData, setPgData] = useState<PGCoursesData>(pgCoursesDefault)
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const data = await academicsService.getPGCourses()
+        setPgData(data)
+      } catch (error) {
+        console.error('Failed to load PG courses:', error)
+      }
+    }
+    fetchCourses()
+  }, [])
+
   return (
     <div className="space-y-10">
       <div className="border-b border-slate-200 pb-5">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Academics</span>
         <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">Postgraduate Programs</h2>
-        <p className="text-sm text-slate-500 mt-1 font-medium">M.Tech / M.Pharm / MBA / MCA Programs — SGSITS Indore</p>
+        <p className="text-sm text-slate-500 mt-1 font-medium font-sans">M.Tech / M.Pharm / MBA / MCA Programs — SGSITS Indore</p>
       </div>
 
       <div className="border-l-2 border-accent pl-5">
-        <p className="text-sm text-slate-700 leading-relaxed font-sans">
-          SGSITS offers a comprehensive range of <strong>postgraduate programs</strong> across engineering, management, and pharmacy disciplines.
-          M.Tech programs are primarily GATE-based with seats filled through CCMT (Centralized Counselling for M.Tech/M.Arch/M.Plan)
-          or RGPV counseling. MBA and MCA admissions are through MP PET or national-level entrance examinations.
-          All programs are 2 years (4 semesters) in duration.
+        <p className="text-sm text-slate-700 leading-relaxed font-sans font-medium">
+          {pgData.intro}
         </p>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-4">
-        {[
-          { value: '11+', label: 'PG Programs' },
-          { value: '2 Years', label: 'Program Duration' },
-          { value: 'GATE/MAT', label: 'Primary Entrance' },
-        ].map((s) => (
-          <div key={s.label} className="bg-white border border-slate-200 rounded p-4 text-center shadow-sm">
+        {pgData.stats.map((s, idx) => (
+          <div key={idx} className="bg-white border border-slate-200 rounded p-4 text-center shadow-sm">
             <p className="text-xl font-display font-bold text-primary">{s.value}</p>
             <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider font-sans mt-1">{s.label}</p>
           </div>
@@ -62,7 +57,7 @@ const PGCourses: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {mTechPrograms.map((prog, i) => (
+              {pgData.programs.map((prog, i) => (
                 <tr key={i} className="bg-white hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3 border-b border-slate-100 font-medium text-primary">{prog.program}</td>
                   <td className="px-4 py-3 border-b border-slate-100 text-slate-600">{prog.dept}</td>
@@ -80,7 +75,7 @@ const PGCourses: React.FC = () => {
         <div className="bg-slate-50 border border-slate-200 rounded p-5">
           <div className="flex items-center gap-2 border-b border-slate-200 pb-2 mb-3">
             <GraduationCap size={16} className="text-accent" />
-            <h4 className="font-bold text-sm text-primary uppercase tracking-wider">General Eligibility</h4>
+            <h4 className="font-bold text-sm text-primary uppercase tracking-wider font-display">General Eligibility</h4>
           </div>
           <div className="space-y-2 text-sm text-slate-600 font-sans">
             {[
@@ -98,7 +93,7 @@ const PGCourses: React.FC = () => {
           </div>
         </div>
         <div className="bg-white border border-slate-200 rounded p-5">
-          <h4 className="font-bold text-sm text-primary uppercase tracking-wider border-b border-slate-200 pb-2 mb-3">Fee Structure</h4>
+          <h4 className="font-bold text-sm text-primary uppercase tracking-wider border-b border-slate-200 pb-2 mb-3 font-display">Fee Structure</h4>
           <div className="text-sm space-y-2 font-sans text-slate-600">
             <div className="flex justify-between">
               <span>M.Tech Annual Fee</span>
@@ -112,7 +107,7 @@ const PGCourses: React.FC = () => {
               <span>GATE Scholars (Full-time)</span>
               <span className="font-semibold text-[#bfa15f]">₹12,400/month stipend</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-2 italic">*Fee subject to SFRC revision</p>
+            <p className="text-[11px] text-slate-400 mt-2 italic font-sans">*Fee subject to SFRC revision</p>
           </div>
         </div>
       </div>
@@ -121,10 +116,10 @@ const PGCourses: React.FC = () => {
       <div className="bg-primary text-white rounded p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
           <h4 className="font-bold font-display text-base">CCMT — Centralized Counselling for M.Tech</h4>
-          <p className="text-sm text-slate-300 mt-1">M.Tech admissions at SGSITS are through CCMT portal</p>
+          <p className="text-sm text-slate-300 mt-1 font-sans">M.Tech admissions at SGSITS are through CCMT portal</p>
         </div>
         <a href="https://ccmt.admissions.nic.in" target="_blank" rel="noreferrer"
-          className="inline-flex items-center gap-2 bg-accent text-primary px-4 py-2 rounded text-xs font-bold hover:bg-accent/90 transition-colors shrink-0">
+          className="inline-flex items-center gap-2 bg-accent text-primary px-4 py-2 rounded text-xs font-bold hover:bg-accent/90 transition-colors shrink-0 font-sans">
           CCMT Portal <ExternalLink size={12} />
         </a>
       </div>

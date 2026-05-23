@@ -12,6 +12,7 @@ export interface NavChild {
 }
 
 export interface NavItem {
+  id?: string
   label: string
   path?: string          // if present → direct link, no dropdown
   children?: NavChild[]
@@ -23,6 +24,7 @@ export const mockNavItems: NavItem[] = [
     path: '/',
   },
   {
+    id: 'about',
     label: 'About Us',
     children: [
       { label: 'About Institute',             path: '/about/institute' },
@@ -79,6 +81,7 @@ export const mockNavItems: NavItem[] = [
     ],
   },
   {
+    id: 'admission',
     label: 'Admissions',
     children: [
       { label: 'UG Admissions',          path: '/admission/ug' },
@@ -88,6 +91,7 @@ export const mockNavItems: NavItem[] = [
     ],
   },
   {
+    id: 'placement',
     label: 'Placements',
     children: [
       { label: 'T&P Cell Overview',     path: '/placement/tnp-cell' },
@@ -97,6 +101,7 @@ export const mockNavItems: NavItem[] = [
     ],
   },
   {
+    id: 'campus-life',
     label: 'Campus Life',
     children: [
       { label: 'Student Activities',             path: '/students/activities' },

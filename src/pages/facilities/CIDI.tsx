@@ -1,50 +1,27 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Lightbulb, Rocket, CheckCircle2, ExternalLink, Phone, Mail } from 'lucide-react'
-
-const facilities = [
-  'Co-working space with 40+ hot-desks and dedicated startup bays',
-  '3D Printers (FDM & SLA) for rapid prototyping',
-  'Electronics prototyping lab with oscilloscopes, soldering stations',
-  'IoT development kits — Arduino, Raspberry Pi, ESP32, NodeMCU',
-  'PCB fabrication facility',
-  'High-speed internet (1 Gbps) and video conferencing room',
-  'Presentation and mentorship meeting rooms',
-  'Library with startup, entrepreneurship and business books',
-]
-
-const programs = [
-  { title: 'Idea Pitching Bootcamp', desc: 'Monthly sessions where students pitch business ideas to industry mentors and investors', freq: 'Monthly' },
-  { title: 'Startup Incubation Program', desc: '6-month mentored incubation with seed funding assistance and market entry support', freq: 'Bi-annual' },
-  { title: 'IPR & Patent Workshop', desc: 'Guidance on filing patents, copyrights, and trademarks for student innovations', freq: 'Quarterly' },
-  { title: 'Hackathon & Smart India', desc: 'Internal qualifying rounds for Smart India Hackathon and AICTE competitions', freq: 'Annual' },
-]
+import { mockStore } from '../../data/mockStore'
 
 const CIDI: React.FC = () => {
+  const [data, setData] = useState<any>(null)
+  useEffect(() => { setData(mockStore.getCIDI()) }, [])
+  if (!data) return null
+
   return (
     <div className="space-y-10">
       <div className="border-b border-slate-200 pb-5">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Facilities</span>
-        <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">CIDI — Centre for Innovation, Design & Incubation</h2>
-        <p className="text-sm text-slate-500 mt-1 font-medium">Student Startup & Innovation Ecosystem — SGSITS Indore</p>
+        <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">CIDI — Centre for Innovation, Design &amp; Incubation</h2>
+        <p className="text-sm text-slate-500 mt-1 font-medium">Student Startup &amp; Innovation Ecosystem — SGSITS Indore</p>
       </div>
 
       <div className="border-l-2 border-accent pl-5">
-        <p className="text-sm text-slate-700 leading-relaxed font-sans">
-          The <strong>Centre for Innovation, Design & Incubation (CIDI)</strong> at SGSITS is the institute's dedicated innovation hub,
-          providing end-to-end support for students and faculty who want to turn ideas into products. From prototyping
-          to market entry, CIDI connects innovators with mentors, funding agencies, government schemes (Startup India,
-          Startup MP), and incubation infrastructure. Since inception, CIDI has successfully incubated over <strong>10+ student startups</strong>.
-        </p>
+        <p className="text-sm text-slate-700 leading-relaxed font-sans">{data.about}</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { value: '10+', label: 'Incubated Startups' },
-          { value: '40+', label: 'Co-work Desks' },
-          { value: '₹50L+', label: 'Seed Funding Facilitated' },
-          { value: '50+', label: 'Mentors Network' },
-        ].map((s) => (
+        {(data.stats || []).map((s: any) => (
           <div key={s.label} className="bg-white border border-slate-200 rounded p-4 text-center shadow-sm">
             <p className="text-2xl font-display font-bold text-primary">{s.value}</p>
             <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider font-sans mt-1">{s.label}</p>
@@ -57,7 +34,7 @@ const CIDI: React.FC = () => {
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Infrastructure</span>
         <h3 className="text-xl font-display font-bold text-slate-900 mb-4">Facilities Available</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {facilities.map((item) => (
+          {(data.facilities || []).map((item: string) => (
             <div key={item} className="flex items-start gap-2.5 bg-white border border-slate-200 rounded p-3 text-sm">
               <CheckCircle2 size={14} className="text-slate-600 shrink-0 mt-0.5" />
               <span className="text-slate-700 font-medium font-sans">{item}</span>
@@ -71,7 +48,7 @@ const CIDI: React.FC = () => {
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Programs</span>
         <h3 className="text-xl font-display font-bold text-slate-900 mb-4">Innovation Programs</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {programs.map((prog) => (
+          {(data.programs || []).map((prog: any) => (
             <div key={prog.title} className="bg-white border border-slate-200 rounded p-4 hover:border-slate-400 transition-colors">
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
@@ -97,11 +74,11 @@ const CIDI: React.FC = () => {
           <div className="flex flex-wrap gap-4 mt-3 text-sm">
             <div className="flex items-center gap-1.5">
               <Phone size={13} className="text-accent" />
-              <span>0731-2582160</span>
+              <span>{data.contactPhone}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Mail size={13} className="text-accent" />
-              <a href="mailto:cidi@sgsits.ac.in" className="hover:underline">cidi@sgsits.ac.in</a>
+              <a href={`mailto:${data.contactEmail}`} className="hover:underline">{data.contactEmail}</a>
             </div>
           </div>
         </div>

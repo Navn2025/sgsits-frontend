@@ -1,18 +1,6 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Shield, CheckCircle2, Phone, Mail, AlertCircle } from 'lucide-react'
-
-const amenities = [
-  'Furnished rooms with bed, wardrobe, study table & chair',
-  'Wi-Fi connectivity in all rooms (campus network)',
-  'Dedicated girls mess — hygienic veg and non-veg menu',
-  'Common room with TV, indoor games (TT, Carrom, Chess)',
-  'Recreation room with yoga space',
-  'Laundry facility within premises',
-  '24×7 CCTV surveillance — entire premises monitored',
-  'Female warden resident in hostel (round the clock)',
-  'Hot water supply (solar-powered geysers)',
-  'Generator backup for uninterrupted power supply',
-]
+import { mockStore } from '../../data/mockStore'
 
 const securityRules = [
   'Hostel entry/exit register mandatory for all students',
@@ -23,6 +11,10 @@ const securityRules = [
 ]
 
 const GirlsHostel: React.FC = () => {
+  const [data, setData] = useState<any>(null)
+  useEffect(() => { setData(mockStore.getGirlsHostel()) }, [])
+  if (!data) return null
+
   return (
     <div className="space-y-10">
       <div className="border-b border-slate-200 pb-5">
@@ -32,21 +24,12 @@ const GirlsHostel: React.FC = () => {
       </div>
 
       <div className="border-l-2 border-accent pl-5">
-        <p className="text-sm text-slate-700 leading-relaxed font-sans">
-          SGSITS provides <strong>2 separate girls hostel blocks</strong> with a total capacity of <strong>400+ female students</strong>,
-          located within the campus with dedicated security. The girls hostel is managed by a female Chief Warden
-          and resident lady wardens. Safety and comfort are top priorities with round-the-clock security, CCTV
-          monitoring, and strict visitor protocols.
-        </p>
+        <p className="text-sm text-slate-700 leading-relaxed font-sans">{data.intro}</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
-        {[
-          { value: '2', label: 'Hostel Blocks' },
-          { value: '400+', label: 'Capacity (Students)' },
-          { value: '24×7', label: 'Lady Warden Presence' },
-        ].map((s) => (
+        {(data.stats || []).map((s: any) => (
           <div key={s.label} className="bg-white border border-slate-200 rounded p-4 text-center shadow-sm">
             <p className="text-2xl font-display font-bold text-primary">{s.value}</p>
             <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider font-sans mt-1">{s.label}</p>
@@ -65,16 +48,13 @@ const GirlsHostel: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            <tr className="bg-white hover:bg-slate-50">
-              <td className="px-4 py-3 border-b border-slate-100 font-bold text-primary">Girls Hostel-1</td>
-              <td className="px-4 py-3 border-b border-slate-100 text-center font-medium">220 students</td>
-              <td className="px-4 py-3 border-b border-slate-100 text-slate-600">Double & Triple Sharing</td>
-            </tr>
-            <tr className="bg-white hover:bg-slate-50">
-              <td className="px-4 py-3 border-b border-slate-100 font-bold text-primary">Girls Hostel-2 (New)</td>
-              <td className="px-4 py-3 border-b border-slate-100 text-center font-medium">200 students</td>
-              <td className="px-4 py-3 border-b border-slate-100 text-slate-600">Double Sharing</td>
-            </tr>
+            {(data.blocks || []).map((h: any, i: number) => (
+              <tr key={i} className="bg-white hover:bg-slate-50">
+                <td className="px-4 py-3 border-b border-slate-100 font-bold text-primary">{h.name}</td>
+                <td className="px-4 py-3 border-b border-slate-100 text-center font-medium">{h.capacity} students</td>
+                <td className="px-4 py-3 border-b border-slate-100 text-slate-600">{h.rooms}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -82,9 +62,9 @@ const GirlsHostel: React.FC = () => {
       {/* Amenities */}
       <div>
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Amenities</span>
-        <h3 className="text-xl font-display font-bold text-slate-900 mb-4">Facilities & Amenities</h3>
+        <h3 className="text-xl font-display font-bold text-slate-900 mb-4">Facilities &amp; Amenities</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {amenities.map((item) => (
+          {(data.amenities || []).map((item: string) => (
             <div key={item} className="flex items-start gap-2.5 bg-white border border-slate-200 rounded p-3 text-sm">
               <CheckCircle2 size={14} className="text-slate-600 shrink-0 mt-0.5" />
               <span className="text-slate-700 font-medium font-sans">{item}</span>
@@ -97,7 +77,7 @@ const GirlsHostel: React.FC = () => {
       <div className="bg-slate-50 border border-slate-200 rounded p-5">
         <div className="flex items-center gap-2 border-b border-slate-200 pb-2 mb-3">
           <Shield size={16} className="text-accent" />
-          <h4 className="font-bold text-sm text-primary uppercase tracking-wider">Safety & Security Rules</h4>
+          <h4 className="font-bold text-sm text-primary uppercase tracking-wider">Safety &amp; Security Rules</h4>
         </div>
         <div className="space-y-2">
           {securityRules.map((rule, i) => (
@@ -130,12 +110,13 @@ const GirlsHostel: React.FC = () => {
           <div className="space-y-2 text-sm font-sans">
             <div className="flex items-center gap-2">
               <Phone size={13} className="text-accent shrink-0" />
-              <span className="text-slate-600">0731-2582230 (Girls Hostel)</span>
+              <span className="text-slate-600">{data.wardenPhone}</span>
             </div>
             <div className="flex items-center gap-2">
               <Mail size={13} className="text-accent shrink-0" />
-              <a href="mailto:girlshostel@sgsits.ac.in" className="text-accent-blue hover:underline">girlshostel@sgsits.ac.in</a>
+              <a href={`mailto:${data.wardenEmail}`} className="text-accent-blue hover:underline">{data.wardenEmail}</a>
             </div>
+            <p className="text-xs text-slate-500 mt-2">Warden: {data.wardenName}</p>
           </div>
         </div>
       </div>

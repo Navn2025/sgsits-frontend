@@ -76,9 +76,9 @@ const DepartmentLanding: React.FC = () => {
     departmentService.getDepartments().then(setAllDepts)
   }, [])
 
-  const engineeringDepts = allDepts.filter(d => ENGINEERING_SLUGS.includes(d.slug))
-  const scienceDepts     = allDepts.filter(d => SCIENCE_SLUGS.includes(d.slug))
-  const otherDepts       = allDepts.filter(d => OTHER_SLUGS.includes(d.slug))
+  const engineeringDepts = allDepts.filter(d => d.category === 'engineering' || ENGINEERING_SLUGS.includes(d.slug))
+  const scienceDepts     = allDepts.filter(d => d.category === 'science' || SCIENCE_SLUGS.includes(d.slug))
+  const otherDepts       = allDepts.filter(d => d.category === 'other' || (!d.category && OTHER_SLUGS.includes(d.slug)))
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 lg:px-12 py-8">

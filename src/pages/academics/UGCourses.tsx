@@ -1,59 +1,54 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { GraduationCap } from 'lucide-react'
-
-const courses = [
-  { name: 'Computer Engineering', seats: 120, code: 'CSE' },
-  { name: 'Civil Engineering & Applied Mechanics', seats: 120, code: 'CE' },
-  { name: 'Electrical Engineering', seats: 120, code: 'EE' },
-  { name: 'Mechanical Engineering', seats: 120, code: 'ME' },
-  { name: 'Electronics & Telecommunication Engg', seats: 60, code: 'ETC' },
-  { name: 'Electronics & Instrumentation Engg', seats: 60, code: 'EI' },
-  { name: 'Information Technology', seats: 60, code: 'IT' },
-  { name: 'Biomedical Engineering', seats: 30, code: 'BM' },
-  { name: 'Industrial & Production Engineering', seats: 30, code: 'IP' },
-  { name: 'B.Pharm (Pharmacy)', seats: 60, code: 'PH' },
-]
+import { academicsService, ugCoursesDefault } from '../../services/academicsService'
+import type { UGCoursesData } from '../../services/academicsService'
 
 const UGCourses: React.FC = () => {
+  const [ugData, setUgData] = useState<UGCoursesData>(ugCoursesDefault)
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const data = await academicsService.getUGCourses()
+        setUgData(data)
+      } catch (error) {
+        console.error('Failed to load UG courses:', error)
+      }
+    }
+    fetchCourses()
+  }, [])
+
   return (
     <div className="space-y-8">
       <div className="border-b border-gray-200 pb-4">
         <h2 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>Undergraduate Programs</h2>
-        <p className="text-sm text-gray-500 mt-1">B.Tech / B.Pharm programs offered at SGSITS</p>
+        <p className="text-sm text-gray-500 mt-2 leading-relaxed">{ugData.intro}</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-md p-4 text-center border border-slate-200 shadow-sm">
-          <p className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>10</p>
-          <p className="text-xs text-gray-500 mt-1">Programs</p>
-        </div>
-        <div className="bg-white rounded-md p-4 text-center border border-slate-200 shadow-sm">
-          <p className="text-2xl font-bold" style={{ color: 'var(--color-accent)' }}>780</p>
-          <p className="text-xs text-gray-500 mt-1">Total Seats</p>
-        </div>
-        <div className="bg-white rounded-md p-4 text-center border border-slate-200 shadow-sm">
-          <p className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>4 Years</p>
-          <p className="text-xs text-gray-500 mt-1">Duration</p>
-        </div>
-        <div className="bg-white rounded-md p-4 text-center border border-slate-200 shadow-sm">
-          <p className="text-2xl font-bold" style={{ color: 'var(--color-accent)' }}>8</p>
-          <p className="text-xs text-gray-500 mt-1">Semesters</p>
-        </div>
+        {ugData.stats.map((stat, idx) => (
+          <div key={idx} className="bg-white rounded-md p-4 text-center border border-slate-200 shadow-sm">
+            <p className="text-2xl font-bold" style={{ color: idx % 2 === 0 ? 'var(--color-primary)' : 'var(--color-accent)' }}>
+              {stat.value}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
+          </div>
+        ))}
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm border-collapse">
           <thead>
             <tr style={{ backgroundColor: 'var(--color-primary)' }}>
-              <th className="text-left text-white px-4 py-3 font-semibold">#</th>
+              <th className="text-left text-white px-4 py-3 font-semibold w-12">#</th>
               <th className="text-left text-white px-4 py-3 font-semibold">Program</th>
               <th className="text-left text-white px-4 py-3 font-semibold">Code</th>
               <th className="text-left text-white px-4 py-3 font-semibold">Intake</th>
             </tr>
           </thead>
           <tbody>
-            {courses.map((c, i) => (
-              <tr key={c.code} className="bg-white hover:bg-slate-50 transition-colors duration-150">
+            {ugData.courses.map((c, i) => (
+              <tr key={c.code || i} className="bg-white hover:bg-slate-50 transition-colors duration-150">
                 <td className="px-4 py-3 border-b border-gray-100 text-gray-500">{i + 1}</td>
                 <td className="px-4 py-3 border-b border-gray-100 font-medium flex items-center gap-2">
                   <GraduationCap size={16} style={{ color: 'var(--color-accent)' }} />

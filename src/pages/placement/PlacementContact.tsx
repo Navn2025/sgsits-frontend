@@ -1,34 +1,20 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Phone, Mail, MapPin, Clock, Building2, User } from 'lucide-react'
-
-const contacts = [
-  {
-    name: 'Prof. V.K. Sharma',
-    designation: 'Training & Placement Officer (TPO)',
-    dept: 'Department of Computer Engineering',
-    phone: '0731-2582150',
-    email: 'tpo@sgsits.ac.in',
-    role: 'primary',
-  },
-  {
-    name: 'Placement Coordinator (UG)',
-    designation: 'UG Placement In-Charge',
-    dept: 'T&P Cell',
-    phone: '0731-2582151',
-    email: 'placement.ug@sgsits.ac.in',
-    role: 'secondary',
-  },
-  {
-    name: 'Placement Coordinator (PG)',
-    designation: 'PG & PhD Placement In-Charge',
-    dept: 'T&P Cell',
-    phone: '0731-2582152',
-    email: 'placement.pg@sgsits.ac.in',
-    role: 'secondary',
-  },
-]
+import {
+  placementService,
+  placementContactsDefault,    type PlacementContactPerson,
+  placementOfficeInfoDefault,  type PlacementOfficeInfo,
+} from '../../services/placementService'
 
 const PlacementContact: React.FC = () => {
+  const [contacts, setContacts]   = useState<PlacementContactPerson[]>(placementContactsDefault)
+  const [office,   setOffice]     = useState<PlacementOfficeInfo>(placementOfficeInfoDefault)
+
+  useEffect(() => {
+    placementService.getPlacementContacts().then(setContacts)
+    placementService.getPlacementOfficeInfo().then(setOffice)
+  }, [])
+
   return (
     <div className="space-y-10">
       <div className="border-b border-slate-200 pb-5">
@@ -89,7 +75,7 @@ const PlacementContact: React.FC = () => {
           </div>
           <div className="flex items-start gap-2 text-sm text-slate-600 font-sans">
             <MapPin size={14} className="text-accent shrink-0 mt-0.5" />
-            <span>Training & Placement Cell, Ground Floor, Administrative Block, SGSITS Campus, 23 Park Road, Indore - 452003 (M.P.)</span>
+            <span>{office.address}</span>
           </div>
         </div>
         <div className="bg-white border border-slate-200 rounded p-5 space-y-3">
@@ -100,15 +86,15 @@ const PlacementContact: React.FC = () => {
           <div className="text-sm space-y-2 font-sans text-slate-600">
             <div className="flex justify-between">
               <span>Monday – Friday</span>
-              <span className="font-semibold">9:30 AM – 5:30 PM</span>
+              <span className="font-semibold">{office.mondayFridayHours}</span>
             </div>
             <div className="flex justify-between">
               <span>Saturday</span>
-              <span className="font-semibold">9:30 AM – 1:00 PM</span>
+              <span className="font-semibold">{office.saturdayHours}</span>
             </div>
             <div className="flex justify-between">
               <span>Sunday & Holidays</span>
-              <span className="font-semibold text-[#0b2545]">Closed</span>
+              <span className="font-semibold text-[#0b2545]">{office.sundayStatus}</span>
             </div>
           </div>
         </div>
@@ -121,7 +107,9 @@ const PlacementContact: React.FC = () => {
           Organizations wishing to participate in campus placements at SGSITS should:
         </p>
         <ol className="text-sm text-slate-200 space-y-1 font-sans">
-          <li>1. Email the Job Description (JD) and package details to <a href="mailto:tpo@sgsits.ac.in" className="text-accent hover:underline">tpo@sgsits.ac.in</a></li>
+          {contacts[0] && (
+            <li>1. Email the Job Description (JD) and package details to <a href={`mailto:${contacts[0].email}`} className="text-accent hover:underline">{contacts[0].email}</a></li>
+          )}
           <li>2. Confirm preferred dates for PPT and recruitment drive</li>
           <li>3. Campus visits can be arranged for company representatives</li>
           <li>4. Virtual recruitment drives are also supported</li>

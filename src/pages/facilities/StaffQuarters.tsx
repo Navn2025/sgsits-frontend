@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Home, CheckCircle2, Phone, Mail } from 'lucide-react'
+import { mockStore } from '../../data/mockStore'
 
 const quarterTypes = [
   { type: 'Type D', for: 'Director & Senior Officers', units: 2, desc: 'Bungalow-style with garden, multiple bedrooms, servant quarters' },
@@ -9,29 +10,25 @@ const quarterTypes = [
 ]
 
 const StaffQuarters: React.FC = () => {
+  const [data, setData] = useState<any>(null)
+  useEffect(() => { setData(mockStore.getStaffQuarters()) }, [])
+  if (!data) return null
+
   return (
     <div className="space-y-10">
       <div className="border-b border-slate-200 pb-5">
         <span className="text-[10px] uppercase font-bold tracking-widest text-accent block mb-1">Facilities</span>
         <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">Staff Quarters</h2>
-        <p className="text-sm text-slate-500 mt-1 font-medium">On-Campus Residential Quarters for Faculty & Staff — SGSITS Indore</p>
+        <p className="text-sm text-slate-500 mt-1 font-medium">On-Campus Residential Quarters for Faculty &amp; Staff — SGSITS Indore</p>
       </div>
 
       <div className="border-l-2 border-accent pl-5">
-        <p className="text-sm text-slate-700 leading-relaxed font-sans">
-          SGSITS maintains <strong>110 residential quarters</strong> on campus for faculty and staff, offering convenient proximity to the workplace.
-          Quarters are classified into 4 types (A–D) based on designation level, and are allocated by the
-          Estate Committee as per government housing norms. Rent is deducted from monthly salary.
-        </p>
+        <p className="text-sm text-slate-700 leading-relaxed font-sans">{data.about}</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
-        {[
-          { value: '110+', label: 'Total Quarters' },
-          { value: '4', label: 'Types (A to D)' },
-          { value: 'Campus', label: 'On-Campus Location' },
-        ].map((s) => (
+        {(data.stats || []).map((s: any) => (
           <div key={s.label} className="bg-white border border-slate-200 rounded p-4 text-center shadow-sm">
             <p className="text-xl font-display font-bold text-primary">{s.value}</p>
             <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider font-sans mt-1">{s.label}</p>
@@ -75,15 +72,7 @@ const StaffQuarters: React.FC = () => {
             <h4 className="font-bold text-sm text-primary uppercase tracking-wider">Common Amenities</h4>
           </div>
           <div className="space-y-2">
-            {[
-              'Water supply (municipal + campus borewell backup)',
-              'Electricity (campus grid with backup generator)',
-              'Underground drainage and sewage system',
-              'Garbage collection and campus housekeeping',
-              "Children's play area and park",
-              'Campus security patrol (24×7)',
-              'Maintenance team for plumbing, electrical repairs',
-            ].map((item, i) => (
+            {(data.amenities || []).map((item: string, i: number) => (
               <div key={i} className="flex items-start gap-2 text-sm">
                 <CheckCircle2 size={14} className="text-slate-500 shrink-0 mt-0.5" />
                 <span className="text-slate-600 font-medium font-sans">{item}</span>
@@ -106,11 +95,11 @@ const StaffQuarters: React.FC = () => {
           <div className="mt-4 space-y-2 text-sm font-sans">
             <div className="flex items-center gap-2">
               <Phone size={13} className="text-accent" />
-              <span className="text-slate-600">0731-2582124 (Registrar Office)</span>
+              <span className="text-slate-600">{data.contactPhone}</span>
             </div>
             <div className="flex items-center gap-2">
               <Mail size={13} className="text-accent" />
-              <a href="mailto:estate@sgsits.ac.in" className="text-accent-blue hover:underline">estate@sgsits.ac.in</a>
+              <a href={`mailto:${data.contactEmail}`} className="text-accent-blue hover:underline">{data.contactEmail}</a>
             </div>
           </div>
         </div>
