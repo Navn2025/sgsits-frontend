@@ -1,13 +1,46 @@
 import React, { useState, useEffect } from 'react'
 import { Pencil, Trash2, Plus, X, ArrowUp, ArrowDown, Link as LinkIcon } from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
-import type { Alert } from '../../data/mockStore'
+import { alertsAPI } from '../../api/index'
 
-const EMPTY: Omit<Alert, 'id'> = {
-  text: '',
+// ── Local shape used by the UI form (priority is integer for ordering) ──────
+interface LocalAlert {
+  id: string
+  text: string
+  isActive: boolean
+  priority: number
+  link: string
+}
+
+// Map backend priority string → integer (lower number = higher priority)
+function prioToNum(p: unknown): number {
+  if (typeof p === 'number') return p
+  const map: Record<string, number> = { urgent: 1, high: 2, normal: 3, low: 4 }
+  return map[String(p).toLowerCase()] ?? 3
+}
+
+// Map integer priority → backend string
+function numToPrio(n: number): string {
+  if (n <= 1) return 'urgent'
+  if (n === 2) return 'high'
+  if (n === 3) return 'normal'
+  return 'low'
+}
+
+function mapFromApi(a: Record<string, unknown>): LocalAlert {
+  return {
+    id:       String(a.id ?? ''),
+    text:     String(a.text ?? a.message ?? ''),
+    isActive: a.is_active !== false && a.isActive !== false && a.status !== 'INACTIVE',
+    priority: prioToNum(a.priority),
+    link:     String(a.link ?? a.url ?? ''),
+  }
+}
+
+const EMPTY: Omit<LocalAlert, 'id'> = {
+  text:     '',
   isActive: true,
   priority: 1,
-  link: '',
+  link:     '',
 }
 
 function Toast({ message, onClose }: { message: string; onClose: () => void }) {
@@ -20,14 +53,23 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 }
 
 export default function AdminAlerts() {
-  const [alerts, setAlerts] = useState<Alert[]>([])
+  const [alerts, setAlerts] = useState<LocalAlert[]>([])
   const [showModal, setShowModal] = useState(false)
-  const [editItem, setEditItem] = useState<Alert | null>(null)
-  const [form, setForm] = useState<Omit<Alert, 'id'>>(EMPTY)
-  const [deleteTarget, setDeleteTarget] = useState<Alert | null>(null)
+  const [editItem, setEditItem] = useState<LocalAlert | null>(null)
+  const [form, setForm] = useState<Omit<LocalAlert, 'id'>>(EMPTY)
+  const [deleteTarget, setDeleteTarget] = useState<LocalAlert | null>(null)
   const [toast, setToast] = useState('')
 
-  const load = () => setAlerts([...mockStore.getAlerts()].sort((a, b) => a.priority - b.priority))
+  const load = async () => {
+    try {
+      const items = await alertsAPI.getAll()
+      const mapped = items.map(i => mapFromApi(i as unknown as Record<string, unknown>))
+      setAlerts([...mapped].sort((a, b) => a.priority - b.priority))
+    } catch {
+      setAlerts([])
+    }
+  }
+
   useEffect(() => { load() }, [])
 
   const openAdd = () => {
@@ -36,37 +78,69 @@ export default function AdminAlerts() {
     setForm({ ...EMPTY, priority: maxPriority + 1 })
     setShowModal(true)
   }
-  const openEdit = (a: Alert) => { setEditItem(a); setForm({ text: a.text, isActive: a.isActive, priority: a.priority, link: a.link ?? '' }); setShowModal(true) }
+  const openEdit = (a: LocalAlert) => {
+    setEditItem(a)
+    setForm({ text: a.text, isActive: a.isActive, priority: a.priority, link: a.link })
+    setShowModal(true)
+  }
   const closeModal = () => { setShowModal(false); setEditItem(null) }
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (editItem) { mockStore.updateAlert(editItem.id, form); setToast('Alert updated!') }
-    else { mockStore.addAlert(form); setToast('Alert added!') }
-    load(); closeModal()
+    const payload = {
+      text:     form.text,
+      link:     form.link || undefined,
+      priority: numToPrio(form.priority),
+      isActive: form.isActive,
+    }
+    try {
+      if (editItem) {
+        await alertsAPI.update(editItem.id, payload as any)
+        setToast('Alert updated!')
+      } else {
+        await alertsAPI.create(payload as any)
+        setToast('Alert added!')
+      }
+      await load()
+    } catch {
+      setToast('Failed to save alert.')
+    }
+    closeModal()
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteTarget) return
-    mockStore.deleteAlert(deleteTarget.id)
-    load(); setDeleteTarget(null); setToast('Alert deleted.')
+    try {
+      await alertsAPI.delete(deleteTarget.id)
+      setToast('Alert deleted.')
+      await load()
+    } catch {
+      setToast('Failed to delete alert.')
+    }
+    setDeleteTarget(null)
   }
 
-  const toggleActive = (id: string, cur: boolean) => {
-    mockStore.updateAlert(id, { isActive: !cur })
-    load()
+  const toggleActive = async (id: string, cur: boolean) => {
+    try {
+      await alertsAPI.update(id, { isActive: !cur } as any)
+      await load()
+    } catch { /* ignore */ }
   }
 
-  const movePriority = (id: string, dir: 'up' | 'down') => {
+  const movePriority = async (id: string, dir: 'up' | 'down') => {
     const sorted = [...alerts].sort((a, b) => a.priority - b.priority)
     const idx = sorted.findIndex(a => a.id === id)
     const swapIdx = dir === 'up' ? idx - 1 : idx + 1
     if (swapIdx < 0 || swapIdx >= sorted.length) return
     const p1 = sorted[idx].priority
     const p2 = sorted[swapIdx].priority
-    mockStore.updateAlert(sorted[idx].id, { priority: p2 })
-    mockStore.updateAlert(sorted[swapIdx].id, { priority: p1 })
-    load()
+    try {
+      await Promise.all([
+        alertsAPI.update(sorted[idx].id,    { priority: numToPrio(p2) } as any),
+        alertsAPI.update(sorted[swapIdx].id, { priority: numToPrio(p1) } as any),
+      ])
+      await load()
+    } catch { /* ignore */ }
   }
 
   return (
@@ -148,7 +222,7 @@ export default function AdminAlerts() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Link URL (optional)</label>
-                  <input className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.link ?? ''} onChange={e => setForm(f => ({ ...f, link: e.target.value }))} placeholder="https://..." />
+                  <input className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.link} onChange={e => setForm(f => ({ ...f, link: e.target.value }))} placeholder="https://..." />
                 </div>
               </div>
               <label className="flex items-center gap-2 cursor-pointer">

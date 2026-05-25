@@ -1,7 +1,7 @@
 ﻿import React, { useEffect, useState } from 'react'
 import PageSeo from '../../components/global/PageSeo'
 import { Shield, CheckCircle2, Award, Phone, Mail } from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
+import { getNCC } from '../../services/studentsService'
 
 const benefits = [
   { cert: 'A Certificate', desc: 'After 1st year — basic eligibility for government benefits' },
@@ -13,7 +13,7 @@ const NCC: React.FC = () => {
   const [data, setData] = useState<any>(null)
 
   useEffect(() => {
-    setData(mockStore.getNCC())
+    getNCC().then(setData)
   }, [])
 
   if (!data) return null

@@ -169,6 +169,10 @@ export interface HomePageData {
   campusLifeSection: CampusLifeSection
   faqsSection: FaqsSection
   gallerySection: GallerySection
+  preFooter?: {
+    imageUrl: string
+    label: string
+  }
 }
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
@@ -426,5 +430,9 @@ export const mockHomePageData: HomePageData = {
     accentText: 'Gallery',
     subLabel: 'Multi-Hued Reflections',
     viewAllLink: '/explore/gallery',
+  },
+  preFooter: {
+    imageUrl: '/assets/campus-panorama.png',
+    label: 'SGSITS Campus Sunset Panorama',
   },
 }

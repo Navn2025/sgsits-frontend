@@ -1,19 +1,28 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalTable, Badge } from '../../components/layout/PortalLayout'
-import { STUDENTS } from '../../data/mockPortalData'
+import { getStudents, type Student } from '../../services/examService'
+import { useAdminStore } from '../../store/adminStore'
 import { Search, GraduationCap, Mail } from 'lucide-react'
 
 const HOD_BRANCH = 'CSE'
 
 const HodStudents: React.FC = () => {
+  const { user } = useAdminStore()
+  const hodBranch = user?.department_id ? String(user.department_id) : HOD_BRANCH
+  const [allStudents, setAllStudents] = useState<Student[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [semFilter, setSemFilter] = useState<'all' | number>('all')
   const [sectionFilter, setSectionFilter] = useState<'all' | string>('all')
   const [atktOnly, setAtktOnly] = useState(false)
 
+  useEffect(() => {
+    getStudents(hodBranch).then(s => { setAllStudents(s); setLoading(false) })
+  }, [hodBranch])
+
   const branchStudents = useMemo(
-    () => STUDENTS.filter(s => s.branch_id === HOD_BRANCH),
-    []
+    () => allStudents.filter(s => s.branch_id === hodBranch),
+    [allStudents, hodBranch]
   )
 
   const visible = useMemo(() => {
@@ -23,7 +32,7 @@ const HodStudents: React.FC = () => {
       if (atktOnly && !s.hasATKT) return false
       if (search.trim()) {
         const q = search.toLowerCase()
-        if (!s.name.toLowerCase().includes(q) && !s.enrollment.toLowerCase().includes(q)) return false
+        if (!s.student_name.toLowerCase().includes(q) && !s.enrollment_no.toLowerCase().includes(q)) return false
       }
       return true
     })
@@ -32,7 +41,7 @@ const HodStudents: React.FC = () => {
   const stats = {
     total: branchStudents.length,
     atkt: branchStudents.filter(s => s.hasATKT).length,
-    sections: new Set(branchStudents.map(s => `${s.semester}-${s.section}`)).size,
+    sections: new Set(branchStudents.map(s => `${s.semester}-${s.section ?? ''}`)).size,
   }
 
   return (
@@ -109,15 +118,15 @@ const HodStudents: React.FC = () => {
           rows={visible}
           empty="No students match the filters."
           renderRow={(s) => (
-            <tr key={s.enrollment} className="hover:bg-slate-50/60 transition-colors">
-              <td className="px-4 py-2.5 text-xs font-mono font-bold text-[#0b2545]">{s.enrollment}</td>
-              <td className="px-4 py-2.5 text-sm font-medium text-slate-800">{s.name}</td>
+            <tr key={s.enrollment_no} className="hover:bg-slate-50/60 transition-colors">
+              <td className="px-4 py-2.5 text-xs font-mono font-bold text-[#0b2545]">{s.enrollment_no}</td>
+              <td className="px-4 py-2.5 text-sm font-medium text-slate-800">{s.student_name}</td>
               <td className="px-4 py-2.5 text-sm text-slate-600">Sem {s.semester}</td>
-              <td className="px-4 py-2.5 text-sm text-slate-600">Section {s.section}</td>
+              <td className="px-4 py-2.5 text-sm text-slate-600">Section {s.section ?? '—'}</td>
               <td className="px-4 py-2.5 text-xs text-slate-600">
                 <div className="flex items-center gap-1.5">
                   <Mail size={11} className="text-slate-400" />
-                  <span>{s.email}</span>
+                  <span>—</span>
                 </div>
               </td>
               <td className="px-4 py-2.5">

@@ -10,7 +10,8 @@ const ExamProtectedRoute: React.FC = () => {
     return <Navigate to="/login" replace />
   }
 
-  if (user?.role !== 'exam_controller' && user?.role !== 'super_admin') {
+  const roleLower = user?.role?.toLowerCase()
+  if (roleLower !== 'exam_controller' && roleLower !== 'super_admin') {
     return <Navigate to="/login" replace />
   }
 

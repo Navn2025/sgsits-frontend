@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import {
   PageHeader, PortalCard, PortalTable, PortalModal,
 } from '../../components/layout/PortalLayout'
-import { SUBJECTS, FACULTY_MEMBERS, type Subject } from '../../data/mockPortalData'
+import { getSubjects, getFacultyMembers, type Subject, type FacultyMember } from '../../services/examService'
+import { useAdminStore } from '../../store/adminStore'
 import { Plus, Pencil, Trash2, Search, BookOpen } from 'lucide-react'
 
 const HOD_BRANCH = 'CSE'
@@ -24,9 +25,14 @@ const EMPTY_FORM: SubjectForm = {
 }
 
 const HodSubjects: React.FC = () => {
-  const [subjects, setSubjects] = useState<Subject[]>(() =>
-    SUBJECTS.filter(s => s.branch_id === HOD_BRANCH)
-  )
+  const { user } = useAdminStore()
+  const hodBranch = user?.department_id ? String(user.department_id) : HOD_BRANCH
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getSubjects(hodBranch).then(s => { setSubjects(s.filter(sub => sub.branch_id === hodBranch)); setLoading(false) })
+  }, [hodBranch])
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Subject | null>(null)
   const [form, setForm] = useState<SubjectForm>(EMPTY_FORM)
@@ -36,9 +42,13 @@ const HodSubjects: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<Subject | null>(null)
   const [toast, setToast] = useState('')
 
+  const [facultyList, setFacultyList] = useState<FacultyMember[]>([])
+  useEffect(() => {
+    getFacultyMembers(hodBranch).then(setFacultyList)
+  }, [hodBranch])
   const facultyOptions = useMemo(
-    () => FACULTY_MEMBERS.filter(f => f.branch_id === HOD_BRANCH),
-    []
+    () => facultyList.filter(f => f.branch_id === hodBranch),
+    [facultyList, hodBranch]
   )
 
   const visible = useMemo(() => {
@@ -82,7 +92,7 @@ const HodSubjects: React.FC = () => {
       name: form.name.trim(),
       type: form.type,
       semester: form.semester,
-      branch_id: HOD_BRANCH,
+      branch_id: hodBranch,
       credits: form.credits,
       facultyId: fac?.id,
       facultyName: fac?.name,

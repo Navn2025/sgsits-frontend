@@ -1,33 +1,22 @@
 /**
  * Branding Service — Institute identity & visual branding config
  *
- * ╔══════════════════════════════════════════════════════════╗
- * ║  MOCK MODE                                              ║
- * ║  Replace with: apiClient.get('/settings/branding')      ║
- * ╚══════════════════════════════════════════════════════════╝
- *
- * Controls ALL institution identity visible in the UI:
- * - Logo URL, short name, full name, tagline
- * - Establishment year
- * - Mobile drawer title/footer text
- * - Sub-taglines and suffix labels
+ * Backend: GET/PUT /api/v1/settings/cms/branding
+ * Falls back to mock defaults when backend unreachable.
  */
 
+import { getCmsSection, saveCmsSection } from './settingsService'
 import { mockBrandingConfig, type BrandingConfig } from '../mock/branding/brandingData'
-import { mockStore } from '../data/mockStore'
 
-/**
- * GET /api/settings/branding
- */
+const KEY = 'branding'
+
 export const getBranding = async (): Promise<BrandingConfig> => {
-  return mockStore.getBranding()
+  const data = await getCmsSection<BrandingConfig>(KEY, mockBrandingConfig)
+  return { ...mockBrandingConfig, ...data }
 }
 
-/**
- * PUT /api/settings/branding
- */
 export const saveBranding = async (data: BrandingConfig): Promise<void> => {
-  mockStore.saveBranding(data)
+  await saveCmsSection(KEY, data)
 }
 
 /** Synchronous default — prevents flash on first render */

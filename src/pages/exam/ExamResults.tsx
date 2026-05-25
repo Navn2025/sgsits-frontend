@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalModal, Badge } from '../../components/layout/PortalLayout'
-import { BRANCHES, COURSES } from '../../data/mockPortalData'
+import { getBranches, getCourses, type Branch, type Course } from '../../services/examService'
 import { Plus, Search, Trash2, Globe, X } from 'lucide-react'
 
 // Simple local Toast component
@@ -70,9 +70,17 @@ const MOCK_RESULTS: ResultItem[] = [
 
 const ExamResults: React.FC = () => {
   const [results, setResults] = useState<ResultItem[]>(MOCK_RESULTS)
+  const [branches, setBranches] = useState<Branch[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
   const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [toast, setToast] = useState('')
+
+  useEffect(() => {
+    Promise.all([getBranches(), getCourses()]).then(([b, c]) => {
+      setBranches(b); setCourses(c)
+    })
+  }, [])
 
   // Form State
   const [title, setTitle] = useState('')
@@ -129,7 +137,7 @@ const ExamResults: React.FC = () => {
     r.branch_id.toLowerCase().includes(search.toLowerCase())
   )
 
-  const filteredCourses = COURSES.filter(c => c.branch_id === branch)
+  const filteredCourses = courses.filter(c => c.branch_id === branch)
 
   return (
     <div className="space-y-5">
@@ -192,7 +200,7 @@ const ExamResults: React.FC = () => {
                       </a>
                     </td>
                     <td className="px-4 py-3 text-slate-600 text-xs font-semibold">
-                      {COURSES.find(c => c.id === res.course_id)?.name || res.course_id} ({res.branch_id})
+                      {courses.find(c => c.id === res.course_id)?.name || res.course_id} ({res.branch_id})
                     </td>
                     <td className="px-4 py-3 text-center text-slate-600 text-xs font-bold">
                       {res.semester}
@@ -263,7 +271,7 @@ const ExamResults: React.FC = () => {
                 className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-primary"
               >
                 <option value="">Select Branch</option>
-                {BRANCHES.map(b => (
+                {branches.map(b => (
                   <option key={b.id} value={b.id}>
                     {b.shortName}
                   </option>

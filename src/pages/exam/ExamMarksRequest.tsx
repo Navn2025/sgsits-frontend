@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { PageHeader, PortalCard, Badge, SessionBanner } from '../../components/layout/PortalLayout'
-import { BRANCHES, COURSES, SUBJECTS, MARKS_REQUESTS, CURRENT_SESSION } from '../../data/mockPortalData'
-import type { MarksRequest } from '../../data/mockPortalData'
+import {
+  getBranches, getCourses, getSubjects, getMarksRequests, getActiveSession,
+  type Branch, type Course, type Subject, type MarksRequest, type Session,
+} from '../../services/examService'
 import { PlusCircle, X } from 'lucide-react'
 
 // Simple local Toast component
@@ -39,7 +41,12 @@ const subComponentMap: Record<string, string[]> = {
 }
 
 const ExamMarksRequest: React.FC = () => {
-  const [requests, setRequests] = useState<MarksRequest[]>(MARKS_REQUESTS)
+  const [requests, setRequests] = useState<MarksRequest[]>([])
+  const [branches, setBranches] = useState<Branch[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [activeSession, setActiveSession] = useState<Session | undefined>(undefined)
+  const [loading, setLoading] = useState(true)
   const [selectedBranch, setSelectedBranch] = useState('')
   const [selectedCourse, setSelectedCourse] = useState('')
   const [selectedSubject, setSelectedSubject] = useState('')
@@ -47,13 +54,19 @@ const ExamMarksRequest: React.FC = () => {
   const [component, setComponent] = useState('')
   const [subComponent, setSubComponent] = useState('')
   const [dueDate, setDueDate] = useState('')
-  
+
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState('')
 
+  useEffect(() => {
+    Promise.all([getBranches(), getCourses(), getSubjects(), getMarksRequests(), getActiveSession()]).then(([b, c, s, mr, ses]) => {
+      setBranches(b); setCourses(c); setSubjects(s); setRequests(mr); setActiveSession(ses); setLoading(false)
+    })
+  }, [])
+
   // Filter courses & subjects based on selected branch
-  const filteredCourses = COURSES.filter(c => c.branch_id === selectedBranch)
-  const filteredSubjects = SUBJECTS.filter(s => s.branch_id === selectedBranch)
+  const filteredCourses = courses.filter(c => c.branch_id === selectedBranch)
+  const filteredSubjects = subjects.filter(s => s.branch_id === selectedBranch)
 
   // Reset dependent fields when branch changes
   useEffect(() => {
@@ -84,7 +97,7 @@ const ExamMarksRequest: React.FC = () => {
     // Simulate network latency
     await new Promise(resolve => setTimeout(resolve, 1000))
 
-    const subjectObj = SUBJECTS.find(s => s.id === selectedSubject)
+    const subjectObj = subjects.find(s => s.id === selectedSubject)
     const newReq: MarksRequest = {
       id: `MR0${requests.length + 1}`,
       subjectId: selectedSubject,
@@ -119,7 +132,7 @@ const ExamMarksRequest: React.FC = () => {
         subtitle="Instruct faculty members to submit marks for specific branches, courses, and components before a due date"
       />
 
-      <SessionBanner session={CURRENT_SESSION.label} />
+      {activeSession && <SessionBanner session={activeSession.label} />}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Form Column */}
@@ -140,7 +153,7 @@ const ExamMarksRequest: React.FC = () => {
                   className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-primary"
                 >
                   <option value="">Select Branch</option>
-                  {BRANCHES.map(b => (
+                  {branches.map(b => (
                     <option key={b.id} value={b.id}>
                       {b.name}
                     </option>

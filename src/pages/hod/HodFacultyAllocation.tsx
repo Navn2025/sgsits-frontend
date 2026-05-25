@@ -1,9 +1,11 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { PageHeader, PortalCard, PortalModal } from '../../components/layout/PortalLayout'
-import { SUBJECTS, FACULTY_MEMBERS, type Subject } from '../../data/mockPortalData'
 import { Search, Users, X, Save, BookOpen, AlertCircle } from 'lucide-react'
-
-const HOD_BRANCH = 'CSE'
+import { useAdminStore } from '../../store/adminStore'
+import {
+  getSubjects, getFacultyMembers, assignFacultyToSubject,
+  type Subject, type FacultyMember,
+} from '../../services/examService'
 
 interface Allocation {
   subjectId: string
@@ -12,19 +14,36 @@ interface Allocation {
   section?: 'A' | 'B' | 'all'
 }
 
-const seedAllocations = (): Record<string, Allocation> => {
-  const out: Record<string, Allocation> = {}
-  SUBJECTS.filter(s => s.branch_id === HOD_BRANCH).forEach(s => {
-    out[s.id] = { subjectId: s.id, primary: s.facultyId, section: 'all' }
-  })
-  return out
-}
-
 const HodFacultyAllocation: React.FC = () => {
-  const branchFaculty = useMemo(() => FACULTY_MEMBERS.filter(f => f.branch_id === HOD_BRANCH), [])
-  const branchSubjects = useMemo(() => SUBJECTS.filter(s => s.branch_id === HOD_BRANCH), [])
+  const { user } = useAdminStore()
+  const deptId = user?.department_id ? String(user.department_id) : undefined
 
-  const [allocations, setAllocations] = useState<Record<string, Allocation>>(seedAllocations)
+  const [branchSubjects, setBranchSubjects] = useState<Subject[]>([])
+  const [branchFaculty,  setBranchFaculty]  = useState<FacultyMember[]>([])
+
+  // Load subjects and faculty from backend on mount
+  useEffect(() => {
+    let alive = true
+    Promise.all([
+      getSubjects(deptId),
+      getFacultyMembers(deptId),
+    ]).then(([subs, fac]) => {
+      if (!alive) return
+      setBranchSubjects(subs)
+      setBranchFaculty(fac)
+      // Seed allocations from loaded subjects
+      setAllocations(prev => {
+        const next = { ...prev }
+        subs.forEach(s => {
+          if (!next[s.id]) next[s.id] = { subjectId: s.id, section: 'all' }
+        })
+        return next
+      })
+    }).catch(console.error)
+    return () => { alive = false }
+  }, [deptId])
+
+  const [allocations, setAllocations] = useState<Record<string, Allocation>>({})
   const [search, setSearch] = useState('')
   const [semFilter, setSemFilter] = useState<'all' | number>('all')
   const [editing, setEditing] = useState<Subject | null>(null)
@@ -54,14 +73,32 @@ const HodFacultyAllocation: React.FC = () => {
     setForm(allocations[s.id] ?? { subjectId: s.id })
   }
 
-  const save = () => {
+  const save = async () => {
     if (!editing) return
     if (form.primary && form.secondary && form.primary === form.secondary) {
       showToast('Primary and secondary faculty must differ.')
       return
     }
+    // Optimistically update local state
     setAllocations(prev => ({ ...prev, [editing.id]: { ...form, subjectId: editing.id } }))
-    showToast(`Allocation saved for ${editing.id}.`)
+
+    // Persist to backend via examService
+    try {
+      const facultyIds = [
+        ...(form.primary   ? [Number(form.primary)]   : []),
+        ...(form.secondary ? [Number(form.secondary)] : []),
+      ]
+      if (facultyIds.length > 0) {
+        await assignFacultyToSubject(
+          editing.id,
+          facultyIds,
+          { sectionId: form.section !== 'all' ? form.section : undefined }
+        )
+      }
+      showToast(`Allocation saved for ${editing.id}.`)
+    } catch {
+      showToast(`Saved locally — backend sync pending.`)
+    }
     setEditing(null)
   }
 

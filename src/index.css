@@ -48,11 +48,14 @@
   --color-brand-light: #f7f8fa;
 }
 
+html,
 body {
   background-color: var(--color-sgsits-bg);
   color: var(--color-heading);
   margin: 0;
   font-family: var(--font-sans);
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* Premium Scrollbar Style */

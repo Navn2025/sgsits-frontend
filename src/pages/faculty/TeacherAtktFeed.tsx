@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalTable } from '../../components/layout/PortalLayout'
-import { SUBJECTS, STUDENTS } from '../../data/mockPortalData'
+import { getSubjects, getStudents, type Subject, type Student } from '../../services/examService'
+import { useAdminStore } from '../../store/adminStore'
 import { CURRENT_TEACHER_ID } from '../../data/mockTeacherContent'
 import { Save, Send, CheckCircle2, Search, AlertCircle } from 'lucide-react'
 
@@ -13,22 +14,37 @@ interface AtktMarkRow {
 }
 
 const TeacherAtktFeed: React.FC = () => {
+  const { user } = useAdminStore()
+  const teacherId = user?.employeeId ?? CURRENT_TEACHER_ID
+
+  const [allSubjects, setAllSubjects] = useState<Subject[]>([])
+  const [allStudents, setAllStudents] = useState<Student[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([getSubjects(), getStudents()]).then(([subs, studs]) => {
+      setAllSubjects(subs)
+      setAllStudents(studs)
+      setLoading(false)
+    })
+  }, [])
+
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('CS301')
   const [searchQuery, setSearchQuery] = useState('')
   const [toast, setToast] = useState('')
   const [submittedStatus, setSubmittedStatus] = useState<Record<string, 'draft' | 'submitted'>>({})
 
   // Fetch subjects taught by the teacher
-  const mineSubjects = useMemo(() => SUBJECTS.filter(s => s.facultyId === CURRENT_TEACHER_ID), [])
+  const mineSubjects = useMemo(() => allSubjects.filter(s => s.facultyId === teacherId), [allSubjects, teacherId])
   const selectedSubject = useMemo(() => mineSubjects.find(s => s.id === selectedSubjectId), [mineSubjects, selectedSubjectId])
 
   // Get ATKT-eligible students in this branch & semester
   const atktStudents = useMemo(() => {
     if (!selectedSubject) return []
-    return STUDENTS.filter(
+    return allStudents.filter(
       s => s.branch_id === selectedSubject.branch_id && s.semester === selectedSubject.semester && s.hasATKT
     )
-  }, [selectedSubject])
+  }, [allStudents, selectedSubject])
 
   // Track ATKT marks state
   const [marksState, setMarksState] = useState<Record<string, Record<string, AtktMarkRow>>>({})

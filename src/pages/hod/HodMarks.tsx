@@ -1,16 +1,28 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { PageHeader, PortalCard } from '../../components/layout/PortalLayout'
-import { MARKS_REQUESTS, SUBJECTS } from '../../data/mockPortalData'
+import { getMarksRequests, getSubjects, type MarksRequest, type Subject } from '../../services/examService'
+import { useAdminStore } from '../../store/adminStore'
 import { Search, ClipboardList, CheckCircle2, Clock, AlertTriangle, Download } from 'lucide-react'
 
 const HOD_BRANCH = 'CSE'
 
 const HodMarks: React.FC = () => {
+  const { user } = useAdminStore()
+  const hodBranch = user?.department_id ? String(user.department_id) : HOD_BRANCH
+  const [marksRequests, setMarksRequests] = useState<MarksRequest[]>([])
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'submitted' | 'overdue'>('all')
   const [semFilter, setSemFilter] = useState<'all' | number>('all')
 
-  const branchMarks = useMemo(() => MARKS_REQUESTS.filter(m => m.branch_id === HOD_BRANCH), [])
+  useEffect(() => {
+    Promise.all([getMarksRequests(hodBranch), getSubjects(hodBranch)]).then(([mr, sub]) => {
+      setMarksRequests(mr); setSubjects(sub); setLoading(false)
+    })
+  }, [hodBranch])
+
+  const branchMarks = useMemo(() => marksRequests.filter(m => m.branch_id === hodBranch), [marksRequests, hodBranch])
 
   const visible = useMemo(() => branchMarks.filter(m => {
     if (statusFilter !== 'all' && m.status !== statusFilter) return false
@@ -26,7 +38,7 @@ const HodMarks: React.FC = () => {
     submitted: branchMarks.filter(m => m.status === 'submitted').length,
     pending:   branchMarks.filter(m => m.status === 'pending').length,
     overdue:   branchMarks.filter(m => m.status === 'overdue').length,
-    subjects:  SUBJECTS.filter(s => s.branch_id === HOD_BRANCH).length,
+    subjects:  subjects.filter(s => s.branch_id === hodBranch).length,
   }
 
   const exportCsv = () => {

@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react'
+import { brandingService } from '../../services/brandingService'
 
 const Preloader: React.FC = () => {
   const [activeIconIndex, setActiveIconIndex] = useState(0)
-  const [isVisible, setIsVisible] = useState(true)
+  const [isVisible, setIsVisible] = useState(() => {
+    // Skip if already shown in this browser session
+    const shown = sessionStorage.getItem('preloader_shown')
+    if (shown === 'true') {
+      return false
+    }
+    return true
+  })
   const [isFadingOut, setIsFadingOut] = useState(false)
 
   // 1. Array of images cycling through the official logo and the four custom SVGs from public/svgs/
@@ -60,6 +68,22 @@ const Preloader: React.FC = () => {
 
   // 3. Fade out after 2.8 seconds, complete unmount after 3.5 seconds
   useEffect(() => {
+    if (!isVisible) return
+
+    // Set sessionStorage flag on mount so it doesn't show again in this session
+    sessionStorage.setItem('preloader_shown', 'true')
+
+    // Fetch dynamic branding config to check if admin has disabled the preloader
+    let active = true
+    brandingService.getBranding().then((config) => {
+      if (!active) return
+      if (config.preloaderEnabled === false) {
+        setIsVisible(false)
+      }
+    }).catch(err => {
+      console.error('Failed to load branding preloader config:', err)
+    })
+
     const fadeTimer = setTimeout(() => {
       setIsFadingOut(true)
     }, 2800)
@@ -69,10 +93,11 @@ const Preloader: React.FC = () => {
     }, 3500)
 
     return () => {
+      active = false
       clearTimeout(fadeTimer)
       clearTimeout(destroyTimer)
     }
-  }, [])
+  }, [isVisible])
 
   // Immediate dismiss action
   const handleDismiss = () => {

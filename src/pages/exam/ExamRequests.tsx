@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalModal, Badge, SessionBanner } from '../../components/layout/PortalLayout'
-import { CORRECTION_REQUESTS, FACULTY_MEMBERS, CURRENT_SESSION } from '../../data/mockPortalData'
-import type { CorrectionRequest } from '../../data/mockPortalData'
+import {
+  getCorrectionRequests, getFacultyMembers, getActiveSession,
+  type CorrectionRequest, type FacultyMember, type Session,
+} from '../../services/examService'
 import { Eye, Check, X as XIcon } from 'lucide-react'
 
 // Simple local Toast component
@@ -26,9 +28,18 @@ const Toast: React.FC<ToastProps> = ({ message, onClose }) => {
 }
 
 const ExamRequests: React.FC = () => {
-  const [requests, setRequests] = useState<CorrectionRequest[]>(CORRECTION_REQUESTS)
+  const [requests, setRequests] = useState<CorrectionRequest[]>([])
+  const [facultyMembers, setFacultyMembers] = useState<FacultyMember[]>([])
+  const [activeSession, setActiveSession] = useState<Session | undefined>(undefined)
+  const [loading, setLoading] = useState(true)
   const [selectedReq, setSelectedReq] = useState<CorrectionRequest | null>(null)
   const [toast, setToast] = useState('')
+
+  useEffect(() => {
+    Promise.all([getCorrectionRequests(), getFacultyMembers(), getActiveSession()]).then(([cr, fm, s]) => {
+      setRequests(cr); setFacultyMembers(fm); setActiveSession(s); setLoading(false)
+    })
+  }, [])
 
   const handleUpdateStatus = (id: string, newStatus: 'approved' | 'rejected') => {
     setRequests(prev =>
@@ -38,7 +49,7 @@ const ExamRequests: React.FC = () => {
   }
 
   const getFacultyName = (facultyId: string) => {
-    const fac = FACULTY_MEMBERS.find(f => f.id === facultyId)
+    const fac = facultyMembers.find(f => f.id === facultyId)
     return fac ? fac.name : facultyId
   }
 
@@ -49,7 +60,7 @@ const ExamRequests: React.FC = () => {
         subtitle="Review and approve or reject marks correction requests submitted by faculty members"
       />
 
-      <SessionBanner session={CURRENT_SESSION.label} />
+      {activeSession && <SessionBanner session={activeSession.label} />}
 
       <PortalCard>
         <div className="overflow-x-auto">

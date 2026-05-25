@@ -1,16 +1,34 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { PageHeader, PortalCard } from '../../components/layout/PortalLayout'
-import { SUBJECTS, STUDENTS, MARKS_REQUESTS } from '../../data/mockPortalData'
+import { getSubjects, getStudents, getMarksRequests, type Subject, type Student, type MarksRequest } from '../../services/examService'
+import { useAdminStore } from '../../store/adminStore'
 import { CURRENT_TEACHER_ID, SUBJECT_COS } from '../../data/mockTeacherContent'
 import { BookOpen, Users, ClipboardList, Search, ChevronRight, CheckCircle2, Clock, AlertTriangle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const TeacherSubjects: React.FC = () => {
+  const { user } = useAdminStore()
+  const teacherId = user?.employeeId ?? CURRENT_TEACHER_ID
+
+  const [allSubjects, setAllSubjects] = useState<Subject[]>([])
+  const [allStudents, setAllStudents] = useState<Student[]>([])
+  const [allMarksRequests, setAllMarksRequests] = useState<MarksRequest[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([getSubjects(), getStudents(), getMarksRequests()]).then(([subs, studs, mrs]) => {
+      setAllSubjects(subs)
+      setAllStudents(studs)
+      setAllMarksRequests(mrs)
+      setLoading(false)
+    })
+  }, [])
+
   const [search, setSearch] = useState('')
   const [semFilter, setSemFilter] = useState<'all' | number>('all')
   const [typeFilter, setTypeFilter] = useState<'all' | 'Theory' | 'Practical' | 'Elective'>('all')
 
-  const mine = useMemo(() => SUBJECTS.filter(s => s.facultyId === CURRENT_TEACHER_ID), [])
+  const mine = useMemo(() => allSubjects.filter(s => s.facultyId === teacherId), [allSubjects, teacherId])
 
   const visible = useMemo(() => mine.filter(s => {
     if (semFilter !== 'all' && s.semester !== semFilter) return false
@@ -23,10 +41,10 @@ const TeacherSubjects: React.FC = () => {
   }), [mine, semFilter, typeFilter, search])
 
   const studentCount = (branch: string, semester: number) =>
-    STUDENTS.filter(s => s.branch_id === branch && s.semester === semester).length
+    allStudents.filter(s => s.branch_id === branch && s.semester === semester).length
 
   const marksStatus = (subjectId: string) => {
-    const reqs = MARKS_REQUESTS.filter(r => r.subjectId === subjectId && r.facultyId === CURRENT_TEACHER_ID)
+    const reqs = allMarksRequests.filter(r => r.subjectId === subjectId && r.facultyId === teacherId)
     return {
       total: reqs.length,
       submitted: reqs.filter(r => r.status === 'submitted').length,

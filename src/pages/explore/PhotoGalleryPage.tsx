@@ -1,13 +1,14 @@
-﻿import React, { useState } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import PageSeo from '../../components/global/PageSeo'
 import { Link } from 'react-router-dom'
 import { Image as ImageIcon, Calendar, ChevronRight, Camera, Filter } from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
+import { getGalleryAlbums } from '../../services/mediaService'
 
 const CATEGORIES = ['All', 'Technical Fest', 'Cultural', 'Sports', 'Convocation', 'Campus', 'Social']
 
 const PhotoGalleryPage: React.FC = () => {
-  const albums = mockStore.getAlbums()
+  const [albums, setAlbums] = useState<any[]>([])
+  useEffect(() => { getGalleryAlbums().then(setAlbums).catch(() => {}) }, [])
   const [activeCategory, setActiveCategory] = useState('All')
 
   const filtered = activeCategory === 'All'

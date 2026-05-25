@@ -1,12 +1,9 @@
 /**
- * Media Service — Gallery albums, photos, and image references
- *
- * ╔══════════════════════════════════════════════════════════╗
- * ║  MOCK MODE                                              ║
- * ║  Replace with: apiClient.get('/gallery/albums')         ║
- * ╚══════════════════════════════════════════════════════════╝
+ * Media / Gallery Service — wired to GS-Website backend
+ * Backend: GET /api/v1/gallery
  */
 
+import apiClient from '../api/client'
 import {
   mockGalleryAlbums,
   mockGalleryPhotos,
@@ -15,35 +12,68 @@ import {
 } from '../mock/gallery/galleryData'
 import type { GalleryAlbum, GalleryPhoto } from '../types'
 
-/**
- * GET /api/gallery/albums
- */
+function mapGalleryItem(g: Record<string, unknown>): GalleryAlbum {
+  return {
+    id:          String(g.id),
+    title:       String(g.title || ''),
+    description: String(g.description || ''),
+    imageUrl:    String(g.file_url || g.imageUrl || ''),
+    isActive:    g.status === 'ACTIVE',
+    date:        String(g.created_at || ''),
+    photos:      [],
+  }
+}
+
 export const getGalleryAlbums = async (): Promise<GalleryAlbum[]> => {
-  return mockGalleryAlbums.filter(a => a.isActive)
-  // REAL: return apiClient.get('/gallery/albums').then(r => r.data.data)
+  try {
+    const res = await apiClient.get('/v1/gallery', { params: { status: 'ACTIVE', pageSize: 50 } })
+    const data = res.data?.data?.images ?? res.data?.data ?? []
+    return Array.isArray(data) ? data.map(mapGalleryItem) : []
+  } catch {
+    return mockGalleryAlbums.filter(a => a.isActive)
+  }
 }
 
-/**
- * GET /api/gallery/albums/:id/photos
- */
 export const getAlbumPhotos = async (albumId: string): Promise<GalleryPhoto[]> => {
-  return mockGalleryPhotos[albumId] ?? []
-  // REAL: return apiClient.get(`/gallery/albums/${albumId}/photos`).then(r => r.data.data)
+  try {
+    const res = await apiClient.get(`/v1/gallery/${albumId}`)
+    const d = res.data?.data
+    return d ? [{ id: String(d.id), url: String(d.file_url || ''), title: String(d.title || '') }] : []
+  } catch {
+    return mockGalleryPhotos[albumId] ?? []
+  }
 }
 
-/**
- * GET /api/gallery/home-thumbnails
- * Returns the 12 thumbnail objects shown in the home page gallery widget.
- */
 export const getHomeGalleryThumbnails = async (): Promise<GalleryThumbnail[]> => {
-  return [...mockHomeThumbnails]
-  // REAL: return apiClient.get('/gallery/home-thumbnails').then(r => r.data.data)
+  try {
+    const res = await apiClient.get('/v1/gallery', { params: { status: 'ACTIVE', pageSize: 12 } })
+    const data: Record<string, unknown>[] = res.data?.data?.images ?? res.data?.data ?? []
+    return data.slice(0, 12).map(g => ({
+      id:    String(g.id),
+      url:   String(g.file_url || ''),
+      title: String(g.title || ''),
+      thumb: String(g.file_url || ''),
+    }))
+  } catch {
+    return [...mockHomeThumbnails]
+  }
+}
+
+// Admin CRUD
+export const uploadGalleryImage = async (formData: FormData): Promise<GalleryAlbum> => {
+  const res = await apiClient.post('/v1/gallery', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return mapGalleryItem(res.data.data)
+}
+
+export const deleteGalleryImage = async (id: string | number): Promise<void> => {
+  await apiClient.delete(`/v1/gallery/${id}`)
 }
 
 export const mediaService = {
-  getGalleryAlbums,
-  getAlbumPhotos,
-  getHomeGalleryThumbnails,
+  getGalleryAlbums, getAlbumPhotos, getHomeGalleryThumbnails,
+  uploadGalleryImage, deleteGalleryImage,
 }
 
 export default mediaService

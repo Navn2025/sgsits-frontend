@@ -1,28 +1,25 @@
 /**
  * Nav Service — Site navigation / menu structure
+ *
+ * Backend: GET/PUT /api/v1/settings/cms/navigation.nav_tree
+ * Falls back to mock defaults when backend unreachable.
  */
 
+import { getCmsSection, saveCmsSection } from './settingsService'
 import { mockNavItems, type NavItem } from '../mock/navbar/navData'
-import { mockStore } from '../data/mockStore'
 
-/**
- * GET /api/navigation
- * Returns the full navigation tree.
- */
+const KEY = 'navigation.nav_tree'
+
 export const getNavItems = async (): Promise<NavItem[]> => {
-  return mockStore.getNavItems()
+  const data = await getCmsSection<NavItem[]>(KEY, mockNavItems)
+  return Array.isArray(data) ? data : mockNavItems
 }
 
-/**
- * POST /api/navigation
- * Saves the full navigation tree.
- */
 export const saveNavItems = async (data: NavItem[]): Promise<void> => {
-  mockStore.saveNavItems(data)
+  await saveCmsSection(KEY, data)
 }
 
-// Synchronous default — used as useState initial value to avoid flash
-// Populated with mock data so navbar renders correctly on first paint (no empty-array flash)
+/** Synchronous default — used as useState initial value to avoid flash */
 export const navItemsDefault: NavItem[] = mockNavItems
 
 export type { NavItem }

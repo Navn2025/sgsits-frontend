@@ -1,25 +1,45 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAdminStore } from '../../store/adminStore'
 import { PageHeader, PortalCard, SessionBanner } from '../../components/layout/PortalLayout'
-import { SESSIONS, BRANCHES, COURSES, SUBJECTS, STUDENTS, MARKS_REQUESTS } from '../../data/mockPortalData'
+import {
+  getSessions, getBranches, getCourses, getSubjects, getStudents, getMarksRequests,
+  type Session, type Branch, type Course, type Subject, type Student, type MarksRequest,
+} from '../../services/examService'
 import { Calendar, Building2, BookOpen, Users, FileText, AlertTriangle, CheckCircle, Clock, ChevronRight } from 'lucide-react'
 
 const ExamDashboard: React.FC = () => {
   const { user } = useAdminStore()
-  const currentSession = SESSIONS.find(s => s.is_active)
-  const pendingRequests = MARKS_REQUESTS.filter(r => r.status === 'pending').length
-  const overdueRequests = MARKS_REQUESTS.filter(r => r.status === 'overdue').length
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [branches, setBranches] = useState<Branch[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [students, setStudents] = useState<Student[]>([])
+  const [marksRequests, setMarksRequests] = useState<MarksRequest[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([
+      getSessions(), getBranches(), getCourses(), getSubjects(), getStudents(), getMarksRequests(),
+    ]).then(([s, b, c, sub, st, mr]) => {
+      setSessions(s); setBranches(b); setCourses(c); setSubjects(sub); setStudents(st); setMarksRequests(mr)
+      setLoading(false)
+    })
+  }, [])
+
+  const currentSession = sessions.find(s => s.is_active)
+  const pendingRequests = marksRequests.filter(r => r.status === 'pending').length
+  const overdueRequests = marksRequests.filter(r => r.status === 'overdue').length
 
   const stats = [
-    { label: 'Active Session', value: currentSession?.label ?? '—', icon: Calendar, color: 'bg-[#0b2545]/5 text-[#0b2545] border-[#0b2545]/15', link: '/dashboard/exam/session-management' },
-    { label: 'Branches', value: BRANCHES.length, icon: Building2, color: 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25', link: '/dashboard/exam/branch-management' },
-    { label: 'Courses', value: COURSES.length, icon: BookOpen, color: 'bg-[#bfa15f]/5 text-[#bfa15f] border-[#bfa15f]/20', link: '/dashboard/exam/course-management' },
-    { label: 'Subjects', value: SUBJECTS.length, icon: FileText, color: 'bg-[#0b2545]/15 text-[#0b2545] border-[#0b2545]/30', link: '/dashboard/exam/subject-upload' },
-    { label: 'Students', value: STUDENTS.length, icon: Users, color: 'bg-[#bfa15f]/10 text-[#bfa15f] border-[#bfa15f]/30', link: '/dashboard/exam/student-upload' },
+    { label: 'Active Session', value: loading ? '…' : (currentSession?.label ?? '—'), icon: Calendar, color: 'bg-[#0b2545]/5 text-[#0b2545] border-[#0b2545]/15', link: '/dashboard/exam/session-management' },
+    { label: 'Branches', value: branches.length, icon: Building2, color: 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25', link: '/dashboard/exam/branch-management' },
+    { label: 'Courses', value: courses.length, icon: BookOpen, color: 'bg-[#bfa15f]/5 text-[#bfa15f] border-[#bfa15f]/20', link: '/dashboard/exam/course-management' },
+    { label: 'Subjects', value: subjects.length, icon: FileText, color: 'bg-[#0b2545]/15 text-[#0b2545] border-[#0b2545]/30', link: '/dashboard/exam/subject-upload' },
+    { label: 'Students', value: students.length, icon: Users, color: 'bg-[#bfa15f]/10 text-[#bfa15f] border-[#bfa15f]/30', link: '/dashboard/exam/student-upload' },
     { label: 'Pending Marks', value: pendingRequests, icon: Clock, color: 'bg-[#bfa15f]/15 text-[#bfa15f] border-[#bfa15f]/40', link: '/dashboard/exam/marks-request' },
     { label: 'Overdue Marks', value: overdueRequests, icon: AlertTriangle, color: 'bg-[#0b2545]/10 text-[#0b2545] border-[#0b2545]/25', link: '/dashboard/exam/marks-request' },
-    { label: 'Submitted', value: MARKS_REQUESTS.filter(r => r.status === 'submitted').length, icon: CheckCircle, color: 'bg-[#bfa15f]/20 text-[#bfa15f] border-[#bfa15f]/40', link: '/dashboard/exam/marks-request' },
+    { label: 'Submitted', value: marksRequests.filter(r => r.status === 'submitted').length, icon: CheckCircle, color: 'bg-[#bfa15f]/20 text-[#bfa15f] border-[#bfa15f]/40', link: '/dashboard/exam/marks-request' },
   ]
 
   const quickLinks = [
@@ -103,7 +123,7 @@ const ExamDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {MARKS_REQUESTS.slice(0, 5).map(r => (
+              {marksRequests.slice(0, 5).map(r => (
                 <tr key={r.id} className="hover:bg-slate-50/60">
                   <td className="px-3 py-2.5">
                     <p className="font-semibold text-slate-700 text-xs">{r.subjectId}</p>

@@ -1,24 +1,31 @@
 import React, { useState, useEffect } from 'react'
 import { PageHeader, PortalCard, Badge, SessionBanner } from '../../components/layout/PortalLayout'
-import { BRANCHES, COURSES, STUDENTS, CURRENT_SESSION } from '../../data/mockPortalData'
-import type { Student } from '../../data/mockPortalData'
+import { getBranches, getCourses, getStudents, getActiveSession, type Branch, type Course, type Student, type Session } from '../../services/examService'
 import { Upload, FileSpreadsheet, AlertCircle, Trash2, CheckCircle } from 'lucide-react'
 
 const ExamAtktUpload: React.FC = () => {
+  const [branches, setBranches] = useState<Branch[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
+  const [activeSession, setActiveSession] = useState<Session | undefined>(undefined)
+  const [loading, setLoading] = useState(true)
   const [selectedBranch, setSelectedBranch] = useState('')
   const [selectedCourse, setSelectedCourse] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
-  
-  // Local list of ATKT students initialized from STUDENTS where hasATKT is true
-  const [atktStudents, setAtktStudents] = useState<Student[]>(
-    STUDENTS.filter(s => s.hasATKT)
-  )
+
+  // Local list of ATKT students
+  const [atktStudents, setAtktStudents] = useState<Student[]>([])
+
+  useEffect(() => {
+    Promise.all([getBranches(), getCourses(), getStudents(), getActiveSession()]).then(([b, c, st, s]) => {
+      setBranches(b); setCourses(c); setAtktStudents(st.filter(s => s.hasATKT)); setActiveSession(s); setLoading(false)
+    })
+  }, [])
 
   // Filter courses based on selected branch
-  const filteredCourses = COURSES.filter(c => c.branch_id === selectedBranch)
+  const filteredCourses = courses.filter(c => c.branch_id === selectedBranch)
 
   // Clean course when branch changes
   useEffect(() => {
@@ -84,7 +91,7 @@ const ExamAtktUpload: React.FC = () => {
         subtitle="Upload list of students eligible for ATKT/back-paper examinations via CSV"
       />
 
-      <SessionBanner session={CURRENT_SESSION.label} />
+      {activeSession && <SessionBanner session={activeSession.label} />}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Upload Form */}
@@ -103,7 +110,7 @@ const ExamAtktUpload: React.FC = () => {
                   className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-primary"
                 >
                   <option value="">Select Branch</option>
-                  {BRANCHES.map(b => (
+                  {branches.map(b => (
                     <option key={b.id} value={b.id}>
                       {b.name} ({b.shortName})
                     </option>

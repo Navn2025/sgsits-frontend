@@ -1,11 +1,11 @@
 ﻿import React, { useEffect, useState } from 'react'
 import PageSeo from '../../components/global/PageSeo'
 import { Lightbulb, Rocket, CheckCircle2, ExternalLink, Phone, Mail } from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
+import { getCIDI } from '../../services/facilitiesService'
 
 const CIDI: React.FC = () => {
   const [data, setData] = useState<any>(null)
-  useEffect(() => { setData(mockStore.getCIDI()) }, [])
+  useEffect(() => { getCIDI().then(setData) }, [])
   if (!data) return null
 
   return (

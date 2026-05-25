@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import PageSeo from '../../components/global/PageSeo'
 import { ChevronRight, FileText } from 'lucide-react';
 

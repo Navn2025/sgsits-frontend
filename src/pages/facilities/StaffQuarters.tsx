@@ -1,7 +1,7 @@
 ﻿import React, { useEffect, useState } from 'react'
 import PageSeo from '../../components/global/PageSeo'
 import { Home, CheckCircle2, Phone, Mail } from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
+import { getStaffQuarters } from '../../services/facilitiesService'
 
 const quarterTypes = [
   { type: 'Type D', for: 'Director & Senior Officers', units: 2, desc: 'Bungalow-style with garden, multiple bedrooms, servant quarters' },
@@ -12,7 +12,7 @@ const quarterTypes = [
 
 const StaffQuarters: React.FC = () => {
   const [data, setData] = useState<any>(null)
-  useEffect(() => { setData(mockStore.getStaffQuarters()) }, [])
+  useEffect(() => { getStaffQuarters().then(setData) }, [])
   if (!data) return null
 
   return (

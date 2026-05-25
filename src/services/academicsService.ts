@@ -1,10 +1,20 @@
 /**
- * Academics Service — Courses, calendar, programs
+ * Academics Service — wired to backend CMS sections
  *
- * MOCK MODE — Returns mock data instantly.
- * Components MUST call this service — never import mock data directly.
+ * Backend: GET/PUT /api/v1/settings/cms/<key>
+ *
+ * Section keys:
+ *   academics.ug_courses        — UG course data
+ *   academics.pg_courses        — PG course data
+ *   academics.phd_courses       — PhD course data
+ *   academics.ptdc_courses      — PTDC diploma courses
+ *   academics.academic_calendar — Academic calendar events
+ *   academics.online_courses    — Online course links
+ *
+ * Falls back to mock data when backend unreachable.
  */
 
+import { getCmsSection, saveCmsSection } from './settingsService'
 import {
   mockUGCourses,         type UGCoursesData,
   mockPGCourses,         type PGCoursesData,
@@ -13,48 +23,85 @@ import {
   mockAcademicCalendar,  type AcademicCalendarEvent,
   mockOnlineCourses,     type OnlineCourseLink,
 } from '../mock/academics/academicsData'
-import { mockStore } from '../data/mockStore'
 
 export type {
   UGCoursesData, PGCoursesData, PhDCoursesData, PTDCCourse,
   AcademicCalendarEvent, OnlineCourseLink,
 }
 
+// ─── Reads ────────────────────────────────────────────────────────────────────
+
 export const getUGCourses = async (): Promise<UGCoursesData> => {
-  return mockStore.getUGCourses()
+  const data = await getCmsSection<UGCoursesData>('academics.ug_courses', mockUGCourses)
+  return data ?? mockUGCourses
 }
 
 export const getPGCourses = async (): Promise<PGCoursesData> => {
-  return mockStore.getPGCourses()
+  const data = await getCmsSection<PGCoursesData>('academics.pg_courses', mockPGCourses)
+  return data ?? mockPGCourses
 }
 
 export const getPhDCourses = async (): Promise<PhDCoursesData> => {
-  return mockStore.getPhDCourses()
+  const data = await getCmsSection<PhDCoursesData>('academics.phd_courses', mockPhDCourses)
+  return data ?? mockPhDCourses
 }
 
 export const getPTDCCourses = async (): Promise<PTDCCourse[]> => {
-  return mockStore.getPTDCCourses()
+  const data = await getCmsSection<PTDCCourse[]>('academics.ptdc_courses', mockPTDCCourses)
+  return Array.isArray(data) ? data : mockPTDCCourses
 }
 
 export const getAcademicCalendar = async (): Promise<AcademicCalendarEvent[]> => {
-  return mockStore.getAcademicCalendar()
+  const data = await getCmsSection<AcademicCalendarEvent[]>('academics.academic_calendar', mockAcademicCalendar)
+  return Array.isArray(data) ? data : mockAcademicCalendar
 }
 
 export const getOnlineCourses = async (): Promise<OnlineCourseLink[]> => {
-  return mockStore.getOnlineCourses()
+  const data = await getCmsSection<OnlineCourseLink[]>('academics.online_courses', mockOnlineCourses)
+  return Array.isArray(data) ? data : mockOnlineCourses
 }
 
-// ─── Defaults ────────────────────────────────────────────────────────────────
-export const ugCoursesDefault: UGCoursesData                = mockUGCourses
-export const pgCoursesDefault: PGCoursesData                = mockPGCourses
-export const phdCoursesDefault: PhDCoursesData              = mockPhDCourses
-export const ptdcCoursesDefault: PTDCCourse[]               = mockPTDCCourses
+// ─── Admin writes ─────────────────────────────────────────────────────────────
+
+export const saveUGCourses = async (data: UGCoursesData): Promise<void> => {
+  await saveCmsSection('academics.ug_courses', data)
+}
+
+export const savePGCourses = async (data: PGCoursesData): Promise<void> => {
+  await saveCmsSection('academics.pg_courses', data)
+}
+
+export const savePhDCourses = async (data: PhDCoursesData): Promise<void> => {
+  await saveCmsSection('academics.phd_courses', data)
+}
+
+export const savePTDCCourses = async (data: PTDCCourse[]): Promise<void> => {
+  await saveCmsSection('academics.ptdc_courses', data)
+}
+
+export const saveAcademicCalendar = async (data: AcademicCalendarEvent[]): Promise<void> => {
+  await saveCmsSection('academics.academic_calendar', data)
+}
+
+export const saveOnlineCourses = async (data: OnlineCourseLink[]): Promise<void> => {
+  await saveCmsSection('academics.online_courses', data)
+}
+
+// ─── Sync defaults (no-flash initial render) ──────────────────────────────────
+export const ugCoursesDefault: UGCoursesData                 = mockUGCourses
+export const pgCoursesDefault: PGCoursesData                 = mockPGCourses
+export const phdCoursesDefault: PhDCoursesData               = mockPhDCourses
+export const ptdcCoursesDefault: PTDCCourse[]                = mockPTDCCourses
 export const academicCalendarDefault: AcademicCalendarEvent[] = mockAcademicCalendar
-export const onlineCoursesDefault: OnlineCourseLink[]       = mockOnlineCourses
+export const onlineCoursesDefault: OnlineCourseLink[]        = mockOnlineCourses
 
 export const academicsService = {
-  getUGCourses, getPGCourses, getPhDCourses, getPTDCCourses,
-  getAcademicCalendar, getOnlineCourses,
+  getUGCourses,     saveUGCourses,
+  getPGCourses,     savePGCourses,
+  getPhDCourses,    savePhDCourses,
+  getPTDCCourses,   savePTDCCourses,
+  getAcademicCalendar, saveAcademicCalendar,
+  getOnlineCourses, saveOnlineCourses,
 }
 
 export default academicsService

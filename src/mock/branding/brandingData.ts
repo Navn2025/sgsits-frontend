@@ -37,6 +37,7 @@ export interface BrandingConfig {
   mobileDrawerFooter: string
   /** Label shown at top of mobile menu section */
   mobileNavSectionLabel: string
+  preloaderEnabled?: boolean
 }
 
 export const mockBrandingConfig: BrandingConfig = {
@@ -46,10 +47,11 @@ export const mockBrandingConfig: BrandingConfig = {
   establishedYear: '1952',
   subTagline: 'Govt. Aided Autonomous Institute, Indore (M.P.) - Estd. 1952',
   tagline: 'An Institute of National Standing',
-  logoUrl: '/assets/image.png',
+  logoUrl: '/image.png',
   logoAlt: 'SGSITS Indore Logo',
   logoSuffix: 'Autonomous Grant-in-Aid Institute',
   mobileDrawerTitle: 'SGSITS NAVIGATION',
   mobileDrawerFooter: 'Shri G. S. Institute • Estd. 1952',
   mobileNavSectionLabel: 'Section Menu',
+  preloaderEnabled: true,
 }

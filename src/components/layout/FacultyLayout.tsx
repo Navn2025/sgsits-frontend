@@ -12,6 +12,7 @@ import {
   CalendarDays,
   FileCheck2,
   Megaphone,
+  ClipboardCheck,
 } from 'lucide-react'
 
 /**
@@ -33,6 +34,7 @@ const navItems: PortalNavItem[] = [
   { label: 'Timetable',            path: '/dashboard/teacher/timetable',           icon: CalendarDays },
   { label: 'Leave Application',    path: '/dashboard/teacher/leave',               icon: FileCheck2 },
   { label: 'Notices',              path: '/dashboard/teacher/notices',             icon: Megaphone },
+  { label: 'Exam Timetable',       path: '/dashboard/teacher/exam-timetable',      icon: ClipboardCheck },
 ]
 
 const FacultyLayout: React.FC = () => (

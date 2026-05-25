@@ -2,13 +2,13 @@
 import PageSeo from '../../components/global/PageSeo'
 import { Link } from 'react-router-dom';
 import * as Icons from 'lucide-react';
-import { mockStore } from '../../data/mockStore';
+import { getPGAdmission } from '../../services/adminContentService';
 
 export default function PGAdmission() {
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    setData(mockStore.getPGAdmission());
+    getPGAdmission().then(setData);
   }, []);
 
   if (!data) {

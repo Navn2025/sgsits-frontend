@@ -18,6 +18,7 @@ import {
   FileEdit,
   UserPlus,
   BarChart3,
+  ClipboardCheck,
 } from 'lucide-react'
 
 /**
@@ -46,6 +47,7 @@ const navItems: PortalNavItem[] = [
   { label: 'Faculty Allocation',     path: '/dashboard/hod/faculty-allocation',  icon: Users },
   { label: 'Elective Data Upload',   path: '/dashboard/hod/elective-data',       icon: BookOpen },
   { label: 'Result Summary',         path: '/dashboard/hod/results',             icon: BarChart3 },
+  { label: 'Exam Timetable',         path: '/dashboard/hod/exam-timetable',      icon: ClipboardCheck },
 ]
 
 const HodLayout: React.FC = () => (

@@ -18,6 +18,7 @@ export { default as newsService } from './newsService'
 export { default as eventsService } from './eventsService'
 export { default as mediaService } from './mediaService'
 export { default as departmentService, departmentsDefault } from './departmentService'
+export { default as footerService, footerCmsDefaults } from './footerService'
 
 // Re-export types used by components
 export type { NavItem } from './navService'

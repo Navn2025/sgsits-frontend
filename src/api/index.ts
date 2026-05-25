@@ -1,145 +1,101 @@
 /**
- * SGSITS Frontend — Mock API Functions
+ * SGSITS Frontend — API Functions
  *
- * ⚠️  MOCK MODE: All functions here return mock data using simulated delays.
- * When the backend is ready, replace the mock implementations with:
- *   return apiClient.post('/endpoint', data).then(r => r.data)
+ * All functions now call the real GS-Website backend.
+ * Mock fallback is used only when the backend is unreachable.
  *
- * The function signatures and return types should remain the same.
- * See: src/types/index.ts for all data models.
+ * Backend base URL: VITE_API_BASE_URL (defaults to http://localhost:8000/api)
+ * All backend routes are /api/v1/* so apiClient baseURL should be
+ *   http://localhost:8000/api  →  apiClient.get('/v1/notices')
+ * or
+ *   http://localhost:8000  →  apiClient.get('/api/v1/notices')
+ *
+ * Current setup: VITE_API_BASE_URL=http://localhost:8000/api  (no trailing /v1)
  */
 
 import apiClient from './client'
-import { mockStore } from '../data/mockStore'
 import type {
   LoginResponse, Notice, NewsItem, Event, Tender, Alert,
   Faculty, GalleryAlbum, PlacementRecord, SiteSettings
 } from '../types'
 
-// ── Utility: simulate network delay ───────────────────────────────────────
-const delay = (ms = 400) => new Promise(res => setTimeout(res, ms))
-const generateId = () => Math.random().toString(36).slice(2, 10)
+const DEFAULT_SETTINGS: SiteSettings = {
+  siteName: 'SGSITS Indore',
+  tagline: 'Shri G.S. Institute of Technology & Science',
+  directorName: '',
+  contactEmail: 'info@sgsits.ac.in',
+  contactPhone: '0731-2582700',
+  address: 'Park Road, Indore - 452003, Madhya Pradesh, India',
+  marqueeEnabled: true,
+  maintenanceMode: false,
+  socialLinks: {},
+}
+
+// ── Role → Dashboard route map ────────────────────────────────────────────────
+const ROLE_ROUTES: Record<string, string> = {
+  CENTRAL_ADMIN:     '/dashboard/central-admin/dashboard',
+  EXAM_CONTROLLER:   '/dashboard/exam/dashboard',
+  PLACEMENT_OFFICER: '/dashboard/placement/dashboard',
+  HOD:               '/dashboard/hod/dashboard',
+  TEACHER:           '/dashboard/teacher/dashboard',
+  // Legacy fallback
+  super_admin: '/dashboard/central-admin/dashboard',
+  editor:      '/dashboard/central-admin/dashboard',
+  faculty:     '/dashboard/teacher/dashboard',
+  hod:         '/dashboard/hod/dashboard',
+  exam_controller:   '/dashboard/exam/dashboard',
+  placement_officer: '/dashboard/placement/dashboard',
+}
+
+// ── Shared login — single backend endpoint for ALL roles ──────────────────────
+async function singleLogin(email: string, password: string): Promise<LoginResponse & { redirectTo: string }> {
+  const res = await apiClient.post('/v1/auth/login', { email, password })
+  const { token, user } = res.data.data
+  const redirectTo = ROLE_ROUTES[user.role] || '/dashboard/central-admin/dashboard'
+  return { token, user, redirectTo }
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════════════════════════════════════
 export const authAPI = {
   /**
-   * Admin login
-   * Backend endpoint: POST /api/auth/admin/login
-   * Body: { email, password }
-   * Returns: { token, user }
+   * Single login endpoint for all roles.
+   * Backend: POST /api/v1/auth/login
+   * Response: { success, data: { token, user: { id, name, email, role, department_id } } }
    */
   adminLogin: async (email: string, password: string): Promise<LoginResponse> => {
-    // ── MOCK ──
-    await delay(1000)
-    if (!email || !password || password.length < 4) {
-      throw new Error('Invalid credentials')
-    }
-    const roleMap: Record<string, 'super_admin' | 'editor'> = {
-      'admin@sgsits.ac.in': 'super_admin',
-      'director@sgsits.ac.in': 'super_admin',
-    }
-    return {
-      token: `mock-jwt-${generateId()}`,
-      user: {
-        id: 'admin-001',
-        name: email.split('@')[0].split('.').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-        email,
-        role: roleMap[email] ?? 'editor',
-      }
-    }
-    // ── REAL: return apiClient.post('/auth/admin/login', { email, password }).then(r => r.data) ──
+    return singleLogin(email, password)
   },
 
-  /**
-   * Faculty login
-   * Backend endpoint: POST /api/auth/faculty/login
-   * Body: { employeeId, password }
-   */
-  facultyLogin: async (employeeId: string, password: string): Promise<LoginResponse> => {
-    await delay(800)
-    if (!employeeId || !password) throw new Error('Invalid credentials')
-    return {
-      token: `mock-faculty-jwt-${generateId()}`,
-      user: {
-        id: `fac-${generateId()}`,
-        name: 'Faculty Member',
-        email: `${employeeId.toLowerCase()}@sgsits.ac.in`,
-        role: 'faculty',
-        employeeId,
-        department: 'Computer Engineering',
-      }
-    }
+  facultyLogin: async (email: string, password: string): Promise<LoginResponse> => {
+    return singleLogin(email, password)
   },
 
-  /**
-   * HOD (Head of Department) login
-   * Backend endpoint: POST /api/auth/hod/login
-   * Body: { employeeId, password }
-   */
-  hodLogin: async (employeeId: string, password: string): Promise<LoginResponse> => {
-    await delay(800)
-    if (!employeeId || !password) throw new Error('Invalid credentials')
-    return {
-      token: `mock-hod-jwt-${generateId()}`,
-      user: {
-        id: `hod-${generateId()}`,
-        name: 'Head of Department',
-        email: `${employeeId.toLowerCase()}@sgsits.ac.in`,
-        role: 'hod',
-        employeeId,
-        department: 'Computer Engineering',
-      }
-    }
+  hodLogin: async (email: string, password: string): Promise<LoginResponse> => {
+    return singleLogin(email, password)
   },
 
-  /**
-   * Exam Department / Exam Controller login
-   * Backend endpoint: POST /api/auth/exam/login
-   * Body: { employeeId, password }
-   */
-  examLogin: async (employeeId: string, password: string): Promise<LoginResponse> => {
-    await delay(800)
-    if (!employeeId || !password) throw new Error('Invalid credentials')
-    return {
-      token: `mock-exam-jwt-${generateId()}`,
-      user: {
-        id: `exam-${generateId()}`,
-        name: 'Exam Controller',
-        email: `${employeeId.toLowerCase()}@sgsits.ac.in`,
-        role: 'exam_controller',
-        employeeId,
-        department: 'Examination Cell',
-      }
-    }
+  examLogin: async (email: string, password: string): Promise<LoginResponse> => {
+    return singleLogin(email, password)
   },
 
-  /**
-   * Placement Officer login (Training & Placement cell)
-   * Backend endpoint: POST /api/auth/placement/login
-   * Body: { employeeId, password }
-   */
-  placementLogin: async (employeeId: string, password: string): Promise<LoginResponse> => {
-    await delay(800)
-    if (!employeeId || !password) throw new Error('Invalid credentials')
-    return {
-      token: `mock-placement-jwt-${generateId()}`,
-      user: {
-        id: `plc-${generateId()}`,
-        name: 'Placement Officer',
-        email: `${employeeId.toLowerCase()}@sgsits.ac.in`,
-        role: 'placement_officer',
-        employeeId,
-        department: 'Training & Placement Cell',
-      }
-    }
+  placementLogin: async (email: string, password: string): Promise<LoginResponse> => {
+    return singleLogin(email, password)
   },
 
-  logout: async () => {
-    await delay(200)
-    // REAL: return apiClient.post('/auth/logout')
-  }
+  getMe: async (): Promise<LoginResponse['user']> => {
+    const res = await apiClient.get('/v1/auth/me')
+    return res.data.data
+  },
+
+  changePassword: async (oldPassword: string, newPassword: string): Promise<void> => {
+    await apiClient.post('/v1/auth/change-password', { oldPassword, newPassword })
+  },
+
+  logout: async (): Promise<void> => {
+    try { await apiClient.post('/v1/auth/logout') } catch { /* ignore */ }
+  },
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -147,26 +103,32 @@ export const authAPI = {
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const noticesAPI = {
-  /** GET /api/notices */
   getAll: async (): Promise<Notice[]> => {
-    await delay()
-    return mockStore.getNotices() as any
+    try {
+      const res = await apiClient.get('/v1/notices', { params: { pageSize: 100 } })
+      return res.data?.data?.notices ?? res.data?.data ?? []
+    } catch {
+      return []
+    }
   },
-  /** POST /api/notices */
+
   create: async (data: Omit<Notice, 'id'>): Promise<Notice> => {
-    await delay()
-    return mockStore.addNotice(data as any) as any
+    const res = await apiClient.post('/v1/notices', {
+      title:       (data as Record<string, unknown>).title,
+      description: (data as Record<string, unknown>).description,
+      notice_type: (data as Record<string, unknown>).type || 'GENERAL',
+      status:      (data as Record<string, unknown>).isActive ? 'PUBLISHED' : 'DRAFT',
+    })
+    return res.data.data
   },
-  /** PUT /api/notices/:id */
+
   update: async (id: string, data: Partial<Notice>): Promise<Notice> => {
-    await delay()
-    mockStore.updateNotice(id, data as any)
-    return { id, ...data } as any
+    const res = await apiClient.put(`/v1/notices/${id}`, data)
+    return res.data.data
   },
-  /** DELETE /api/notices/:id */
+
   delete: async (id: string): Promise<void> => {
-    await delay()
-    mockStore.deleteNotice(id)
+    await apiClient.delete(`/v1/notices/${id}`)
   },
 }
 
@@ -176,21 +138,31 @@ export const noticesAPI = {
 
 export const newsAPI = {
   getAll: async (): Promise<NewsItem[]> => {
-    await delay()
-    return mockStore.getNews() as any
+    try {
+      const res = await apiClient.get('/v1/news', { params: { pageSize: 50 } })
+      return res.data?.data?.articles ?? res.data?.data ?? []
+    } catch {
+      return []
+    }
   },
+
   create: async (data: Omit<NewsItem, 'id'>): Promise<NewsItem> => {
-    await delay()
-    return mockStore.addNews(data as any) as any
+    const res = await apiClient.post('/v1/news', {
+      title:   (data as Record<string, unknown>).title,
+      excerpt: (data as Record<string, unknown>).excerpt,
+      content: (data as Record<string, unknown>).content,
+      status:  (data as Record<string, unknown>).isActive ? 'PUBLISHED' : 'DRAFT',
+    })
+    return res.data.data
   },
+
   update: async (id: string, data: Partial<NewsItem>): Promise<NewsItem> => {
-    await delay()
-    mockStore.updateNews(id, data as any)
-    return { id, ...data } as any
+    const res = await apiClient.put(`/v1/news/${id}`, data)
+    return res.data.data
   },
+
   delete: async (id: string): Promise<void> => {
-    await delay()
-    mockStore.deleteNews(id)
+    await apiClient.delete(`/v1/news/${id}`)
   },
 }
 
@@ -200,21 +172,31 @@ export const newsAPI = {
 
 export const eventsAPI = {
   getAll: async (): Promise<Event[]> => {
-    await delay()
-    return mockStore.getEvents() as any
+    try {
+      const res = await apiClient.get('/v1/events', { params: { pageSize: 50 } })
+      return res.data?.data?.events ?? res.data?.data ?? []
+    } catch {
+      return []
+    }
   },
+
   create: async (data: Omit<Event, 'id'>): Promise<Event> => {
-    await delay()
-    return mockStore.addEvent(data as any) as any
+    const res = await apiClient.post('/v1/events', {
+      title:      (data as Record<string, unknown>).title,
+      description:(data as Record<string, unknown>).description,
+      event_date: (data as Record<string, unknown>).date,
+      status:     (data as Record<string, unknown>).isActive ? 'PUBLISHED' : 'DRAFT',
+    })
+    return res.data.data
   },
+
   update: async (id: string, data: Partial<Event>): Promise<Event> => {
-    await delay()
-    mockStore.updateEvent(id, data as any)
-    return { id, ...data } as any
+    const res = await apiClient.put(`/v1/events/${id}`, data)
+    return res.data.data
   },
+
   delete: async (id: string): Promise<void> => {
-    await delay()
-    mockStore.deleteEvent(id)
+    await apiClient.delete(`/v1/events/${id}`)
   },
 }
 
@@ -224,21 +206,26 @@ export const eventsAPI = {
 
 export const tendersAPI = {
   getAll: async (): Promise<Tender[]> => {
-    await delay()
-    return mockStore.getTenders() as any
+    try {
+      const res = await apiClient.get('/v1/tenders', { params: { pageSize: 50 } })
+      return res.data?.data?.tenders ?? res.data?.data ?? []
+    } catch {
+      return []
+    }
   },
+
   create: async (data: Omit<Tender, 'id'>): Promise<Tender> => {
-    await delay()
-    return mockStore.addTender(data as any) as any
+    const res = await apiClient.post('/v1/tenders', data)
+    return res.data.data
   },
+
   update: async (id: string, data: Partial<Tender>): Promise<Tender> => {
-    await delay()
-    mockStore.updateTender(id, data as any)
-    return { id, ...data } as any
+    const res = await apiClient.put(`/v1/tenders/${id}`, data)
+    return res.data.data
   },
+
   delete: async (id: string): Promise<void> => {
-    await delay()
-    mockStore.deleteTender(id)
+    await apiClient.delete(`/v1/tenders/${id}`)
   },
 }
 
@@ -248,21 +235,26 @@ export const tendersAPI = {
 
 export const alertsAPI = {
   getAll: async (): Promise<Alert[]> => {
-    await delay()
-    return mockStore.getAlerts() as any
+    try {
+      const res = await apiClient.get('/v1/alerts')
+      return res.data?.data ?? []
+    } catch {
+      return []
+    }
   },
+
   create: async (data: Omit<Alert, 'id'>): Promise<Alert> => {
-    await delay()
-    return mockStore.addAlert(data as any) as any
+    const res = await apiClient.post('/v1/alerts', data)
+    return res.data.data
   },
+
   update: async (id: string, data: Partial<Alert>): Promise<Alert> => {
-    await delay()
-    mockStore.updateAlert(id, data as any)
-    return { id, ...data } as any
+    const res = await apiClient.put(`/v1/alerts/${id}`, data)
+    return res.data.data
   },
+
   delete: async (id: string): Promise<void> => {
-    await delay()
-    mockStore.deleteAlert(id)
+    await apiClient.delete(`/v1/alerts/${id}`)
   },
 }
 
@@ -272,21 +264,26 @@ export const alertsAPI = {
 
 export const facultyAPI = {
   getAll: async (): Promise<Faculty[]> => {
-    await delay()
-    return mockStore.getFaculty() as any
+    try {
+      const res = await apiClient.get('/v1/faculty', { params: { pageSize: 200 } })
+      return res.data?.data?.faculty ?? res.data?.data ?? []
+    } catch {
+      return []
+    }
   },
+
   create: async (data: Omit<Faculty, 'id'>): Promise<Faculty> => {
-    await delay()
-    return mockStore.addFaculty(data as any) as any
+    const res = await apiClient.post('/v1/faculty', data)
+    return res.data.data
   },
+
   update: async (id: string, data: Partial<Faculty>): Promise<Faculty> => {
-    await delay()
-    mockStore.updateFaculty(id, data as any)
-    return { id, ...data } as any
+    const res = await apiClient.put(`/v1/faculty/${id}`, data)
+    return res.data.data
   },
+
   delete: async (id: string): Promise<void> => {
-    await delay()
-    mockStore.deleteFaculty(id)
+    await apiClient.delete(`/v1/faculty/${id}`)
   },
 }
 
@@ -296,21 +293,26 @@ export const facultyAPI = {
 
 export const galleryAPI = {
   getAlbums: async (): Promise<GalleryAlbum[]> => {
-    await delay()
-    return mockStore.getAlbums() as any
+    try {
+      const res = await apiClient.get('/v1/gallery', { params: { pageSize: 50 } })
+      return res.data?.data?.images ?? res.data?.data ?? []
+    } catch {
+      return []
+    }
   },
+
   createAlbum: async (data: Omit<GalleryAlbum, 'id'>): Promise<GalleryAlbum> => {
-    await delay()
-    return mockStore.addAlbum(data as any) as any
+    const res = await apiClient.post('/v1/gallery', data)
+    return res.data.data
   },
+
   updateAlbum: async (id: string, data: Partial<GalleryAlbum>): Promise<GalleryAlbum> => {
-    await delay()
-    mockStore.updateAlbum(id, data as any)
-    return { id, ...data } as any
+    const res = await apiClient.put(`/v1/gallery/${id}`, data)
+    return res.data.data
   },
+
   deleteAlbum: async (id: string): Promise<void> => {
-    await delay()
-    mockStore.deleteAlbum(id)
+    await apiClient.delete(`/v1/gallery/${id}`)
   },
 }
 
@@ -320,26 +322,26 @@ export const galleryAPI = {
 
 export const placementAPI = {
   getRecords: async (): Promise<PlacementRecord[]> => {
-    await delay()
-    return mockStore.getPlacement() as any
+    try {
+      const res = await apiClient.get('/v1/placement/records', { params: { pageSize: 100 } })
+      return res.data?.data?.records ?? res.data?.data ?? []
+    } catch {
+      return []
+    }
   },
+
   createRecord: async (data: Omit<PlacementRecord, 'id'>): Promise<PlacementRecord> => {
-    await delay()
-    const records = mockStore.getPlacement()
-    const n = { ...data, id: generateId() }
-    localStorage.setItem('sgsits_placement', JSON.stringify([n, ...records]))
-    return n as any
+    const res = await apiClient.post('/v1/placement', data)
+    return res.data.data
   },
+
   updateRecord: async (id: string, data: Partial<PlacementRecord>): Promise<PlacementRecord> => {
-    await delay()
-    const records = mockStore.getPlacement()
-    const updated = records.map(r => r.year === id ? { ...r, ...data } : r)
-    localStorage.setItem('sgsits_placement', JSON.stringify(updated))
-    return { id, ...data } as any
+    const res = await apiClient.put(`/v1/placement/${id}`, data)
+    return res.data.data
   },
+
   deleteRecord: async (id: string): Promise<void> => {
-    await delay()
-    mockStore.deletePlacementYear(id)
+    await apiClient.delete(`/v1/placement/${id}`)
   },
 }
 
@@ -349,17 +351,194 @@ export const placementAPI = {
 
 export const settingsAPI = {
   get: async (): Promise<SiteSettings> => {
-    await delay()
-    return mockStore.getSiteSettings()
+    try {
+      const res = await apiClient.get('/v1/settings')
+      const data = res.data?.data
+      if (!data || Object.keys(data).length === 0) {
+        return DEFAULT_SETTINGS
+      }
+
+      // Parse marqueeEnabled and maintenanceMode to boolean if they are strings
+      const marqueeEnabled = data.marqueeEnabled === 'true' || data.marqueeEnabled === true || (data.marqueeEnabled !== 'false' && data.marqueeEnabled !== false && DEFAULT_SETTINGS.marqueeEnabled)
+      const maintenanceMode = data.maintenanceMode === 'true' || data.maintenanceMode === true || (data.maintenanceMode !== 'false' && data.maintenanceMode !== false && DEFAULT_SETTINGS.maintenanceMode)
+
+      // Parse socialLinks if it comes back as a string
+      let socialLinks = data.socialLinks
+      if (typeof socialLinks === 'string') {
+        try {
+          socialLinks = JSON.parse(socialLinks)
+        } catch {
+          socialLinks = {}
+        }
+      }
+
+      return {
+        ...DEFAULT_SETTINGS,
+        ...data,
+        marqueeEnabled,
+        maintenanceMode,
+        socialLinks: {
+          ...DEFAULT_SETTINGS.socialLinks,
+          ...(socialLinks || {})
+        }
+      }
+    } catch {
+      return DEFAULT_SETTINGS
+    }
   },
+
   update: async (data: Partial<SiteSettings>): Promise<SiteSettings> => {
-    await delay()
-    const settings = mockStore.getSiteSettings()
-    const updated = { ...settings, ...data }
-    mockStore.saveSiteSettings(updated)
-    return updated
+    const res = await apiClient.put('/v1/settings', data)
+    const returnedData = res.data?.data
+    if (!returnedData || Object.keys(returnedData).length === 0) {
+      return data as SiteSettings
+    }
+
+    let socialLinks = returnedData.socialLinks
+    if (typeof socialLinks === 'string') {
+      try {
+        socialLinks = JSON.parse(socialLinks)
+      } catch {
+        socialLinks = {}
+      }
+    }
+
+    return {
+      ...DEFAULT_SETTINGS,
+      ...returnedData,
+      marqueeEnabled: returnedData.marqueeEnabled === 'true' || returnedData.marqueeEnabled === true,
+      maintenanceMode: returnedData.maintenanceMode === 'true' || returnedData.maintenanceMode === true,
+      socialLinks: {
+        ...DEFAULT_SETTINGS.socialLinks,
+        ...(socialLinks || {})
+      }
+    }
   },
 }
 
-// ── Re-export everything ───────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// CMS Sections (Footer, Home, etc.)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const cmsAPI = {
+  getSection: async (sectionKey: string): Promise<unknown> => {
+    try {
+      const res = await apiClient.get(`/v1/settings/cms/${sectionKey}`)
+      return res.data?.data
+    } catch {
+      return null
+    }
+  },
+
+  saveSection: async (sectionKey: string, data: unknown): Promise<void> => {
+    await apiClient.put(`/v1/settings/cms/${sectionKey}`, data)
+  },
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FILE / ATTACHMENT API  (2-step: register attachment → get file_id → pass to resource)
+//
+// Supports BOTH:
+//   A. Real file upload  → POST /v1/files/upload  (multipart/form-data)
+//   B. External link     → POST /v1/files/link    (JSON)
+//
+// Both return a file_id that any module (notices, downloads, events…) uses.
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface AttachmentRecord {
+  id: number
+  attachment_type: 'FILE' | 'EXTERNAL_LINK'
+  original_name: string
+  stored_name: string | null
+  file_url: string
+  external_url: string | null
+  thumbnail_url: string | null
+  alt_text: string | null
+  meta_title: string | null
+  meta_description: string | null
+  file_type: string | null
+  file_size: number | null
+  storage_type: 'LOCAL' | 'CLOUDINARY' | 'EXTERNAL'
+  uploaded_by: number
+  uploader_name: string
+  created_at: string
+}
+
+export const filesAPI = {
+  /**
+   * Upload a real binary file.
+   * Returns the full AttachmentRecord (use .id as file_id when linking to a resource).
+   */
+  upload: async (
+    file: File,
+    usage?: string,
+    onProgress?: (pct: number) => void
+  ): Promise<AttachmentRecord> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (usage) formData.append('usage', usage)
+
+    const res = await apiClient.post('/v1/files/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: onProgress
+        ? (evt) => {
+            if (evt.total) onProgress(Math.round((evt.loaded * 100) / evt.total))
+          }
+        : undefined,
+    })
+    return res.data.data
+  },
+
+  /**
+   * Register an external URL as an attachment.
+   * Returns the full AttachmentRecord (use .id as file_id when linking to a resource).
+   */
+  registerLink: async (payload: {
+    external_url: string
+    original_name?: string
+    alt_text?: string
+    thumbnail_url?: string
+    meta_title?: string
+    meta_description?: string
+    usage?: string
+  }): Promise<AttachmentRecord> => {
+    const res = await apiClient.post('/v1/files/link', payload)
+    return res.data.data
+  },
+
+  /**
+   * Update metadata on an existing EXTERNAL_LINK attachment.
+   */
+  updateLink: async (
+    id: number,
+    payload: Partial<{
+      external_url: string
+      original_name: string
+      alt_text: string
+      thumbnail_url: string
+      meta_title: string
+      meta_description: string
+    }>
+  ): Promise<AttachmentRecord> => {
+    const res = await apiClient.patch(`/v1/files/link/${id}`, payload)
+    return res.data.data
+  },
+
+  /**
+   * Fetch a single attachment record.
+   */
+  getOne: async (id: number): Promise<AttachmentRecord> => {
+    const res = await apiClient.get(`/v1/files/${id}`)
+    return res.data.data
+  },
+
+  /**
+   * Delete an attachment (owner or CENTRAL_ADMIN only).
+   */
+  delete: async (id: number): Promise<void> => {
+    await apiClient.delete(`/v1/files/${id}`)
+  },
+}
+
+// ── Re-export apiClient ────────────────────────────────────────────────────
 export { apiClient }

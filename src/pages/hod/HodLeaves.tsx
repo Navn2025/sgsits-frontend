@@ -1,15 +1,33 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { PageHeader, PortalCard, PortalTable, PortalModal, Badge } from '../../components/layout/PortalLayout'
-import { LEAVE_APPLICATIONS, type LeaveApplication } from '../../data/mockHodData'
+import { type LeaveApplication } from '../../services/hodService'
+import {
+  getLeaveApplications,
+  approveLeave,
+  rejectLeave,
+} from '../../services/hodService'
+import { useAdminStore } from '../../store/adminStore'
 import { Search, Check, X, FileCheck2 } from 'lucide-react'
 
 const HodLeaves: React.FC = () => {
-  const [leaves, setLeaves] = useState<LeaveApplication[]>(LEAVE_APPLICATIONS)
+  const { user } = useAdminStore()
+  const [leaves, setLeaves] = useState<LeaveApplication[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | LeaveApplication['status']>('all')
   const [reviewing, setReviewing] = useState<LeaveApplication | null>(null)
   const [remark, setRemark] = useState('')
   const [toast, setToast] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    let alive = true
+    setLoading(true)
+    getLeaveApplications(user?.department_id).then(data => {
+      if (alive) { setLeaves(data); setLoading(false) }
+    }).catch(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
+  }, [user?.department_id])
 
   const visible = useMemo(() => {
     return leaves.filter(l => {
@@ -23,20 +41,37 @@ const HodLeaves: React.FC = () => {
   }, [leaves, search, statusFilter])
 
   const stats = {
-    pending: leaves.filter(l => l.status === 'pending').length,
+    pending:  leaves.filter(l => l.status === 'pending').length,
     approved: leaves.filter(l => l.status === 'approved').length,
     rejected: leaves.filter(l => l.status === 'rejected').length,
   }
 
-  const decide = (decision: 'approved' | 'rejected') => {
-    if (!reviewing) return
-    setLeaves(prev => prev.map(l =>
-      l.id === reviewing.id ? { ...l, status: decision, remarks: remark || undefined } : l
-    ))
-    setToast(`Leave ${reviewing.id} ${decision}.`)
+  const showToast = (msg: string) => {
+    setToast(msg)
     setTimeout(() => setToast(''), 2400)
-    setReviewing(null)
-    setRemark('')
+  }
+
+  const decide = async (decision: 'approved' | 'rejected') => {
+    if (!reviewing || submitting) return
+    setSubmitting(true)
+    try {
+      if (decision === 'approved') {
+        await approveLeave(reviewing.id)
+      } else {
+        await rejectLeave(reviewing.id, remark || undefined)
+      }
+      setLeaves(prev => prev.map(l =>
+        l.id === reviewing.id ? { ...l, status: decision, remarks: remark || undefined } : l
+      ))
+      showToast(`Leave ${reviewing.id} ${decision}.`)
+      setReviewing(null)
+      setRemark('')
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      showToast(msg || `Failed to ${decision} leave. Please try again.`)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -87,40 +122,44 @@ const HodLeaves: React.FC = () => {
       </PortalCard>
 
       <PortalCard className="!p-0 overflow-hidden">
-        <PortalTable
-          headers={['Faculty', 'Type', 'Period', 'Days', 'Applied On', 'Status', 'Actions']}
-          rows={visible}
-          empty="No leave applications."
-          renderRow={(l) => (
-            <tr key={l.id} className="hover:bg-slate-50/60 transition-colors">
-              <td className="px-4 py-3">
-                <p className="text-sm font-semibold text-slate-800">{l.facultyName}</p>
-                <p className="text-[11px] text-slate-500">{l.designation}</p>
-              </td>
-              <td className="px-4 py-3 text-xs text-slate-600">{l.leaveType}</td>
-              <td className="px-4 py-3 text-xs text-slate-600">
-                <span className="font-medium">{l.fromDate}</span>
-                <span className="text-slate-400 mx-1">→</span>
-                <span className="font-medium">{l.toDate}</span>
-              </td>
-              <td className="px-4 py-3 text-sm font-bold text-slate-700">{l.days}</td>
-              <td className="px-4 py-3 text-xs text-slate-500">{l.appliedOn}</td>
-              <td className="px-4 py-3">
-                {l.status === 'pending'  && <Badge label="Pending"  variant="warning" />}
-                {l.status === 'approved' && <Badge label="Approved" variant="success" />}
-                {l.status === 'rejected' && <Badge label="Rejected" variant="error" />}
-              </td>
-              <td className="px-4 py-3">
-                <button
-                  onClick={() => { setReviewing(l); setRemark(l.remarks ?? '') }}
-                  className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0b2545] hover:bg-[#0b2545]/5 border border-[#0b2545]/20 px-2.5 py-1 rounded transition-colors"
-                >
-                  <FileCheck2 size={12} /> Review
-                </button>
-              </td>
-            </tr>
-          )}
-        />
+        {loading ? (
+          <div className="py-12 text-center text-sm text-slate-500">Loading leave applications…</div>
+        ) : (
+          <PortalTable
+            headers={['Faculty', 'Type', 'Period', 'Days', 'Applied On', 'Status', 'Actions']}
+            rows={visible}
+            empty="No leave applications."
+            renderRow={(l) => (
+              <tr key={l.id} className="hover:bg-slate-50/60 transition-colors">
+                <td className="px-4 py-3">
+                  <p className="text-sm font-semibold text-slate-800">{l.facultyName}</p>
+                  <p className="text-[11px] text-slate-500">{l.designation}</p>
+                </td>
+                <td className="px-4 py-3 text-xs text-slate-600">{l.leaveType}</td>
+                <td className="px-4 py-3 text-xs text-slate-600">
+                  <span className="font-medium">{l.fromDate}</span>
+                  <span className="text-slate-400 mx-1">→</span>
+                  <span className="font-medium">{l.toDate}</span>
+                </td>
+                <td className="px-4 py-3 text-sm font-bold text-slate-700">{l.days}</td>
+                <td className="px-4 py-3 text-xs text-slate-500">{l.appliedOn}</td>
+                <td className="px-4 py-3">
+                  {l.status === 'pending'  && <Badge label="Pending"  variant="warning" />}
+                  {l.status === 'approved' && <Badge label="Approved" variant="success" />}
+                  {l.status === 'rejected' && <Badge label="Rejected" variant="error" />}
+                </td>
+                <td className="px-4 py-3">
+                  <button
+                    onClick={() => { setReviewing(l); setRemark(l.remarks ?? '') }}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0b2545] hover:bg-[#0b2545]/5 border border-[#0b2545]/20 px-2.5 py-1 rounded transition-colors"
+                  >
+                    <FileCheck2 size={12} /> Review
+                  </button>
+                </td>
+              </tr>
+            )}
+          />
+        )}
       </PortalCard>
 
       {/* Review Modal */}
@@ -173,23 +212,24 @@ const HodLeaves: React.FC = () => {
             <div className="flex gap-2.5 pt-2 border-t border-slate-100">
               <button
                 onClick={() => { setReviewing(null); setRemark('') }}
-                className="flex-1 py-2 border border-slate-200 text-slate-700 text-sm font-semibold rounded hover:bg-slate-50 transition-colors"
+                disabled={submitting}
+                className="flex-1 py-2 border border-slate-200 text-slate-700 text-sm font-semibold rounded hover:bg-slate-50 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={() => decide('rejected')}
-                disabled={reviewing.status === 'rejected'}
+                disabled={reviewing.status === 'rejected' || submitting}
                 className="flex-1 py-2 border border-[#0b2545]/30 text-[#0b2545] text-sm font-bold rounded hover:bg-[#0b2545]/5 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
               >
-                <X size={14} /> Reject
+                <X size={14} /> {submitting ? '…' : 'Reject'}
               </button>
               <button
                 onClick={() => decide('approved')}
-                disabled={reviewing.status === 'approved'}
+                disabled={reviewing.status === 'approved' || submitting}
                 className="flex-1 py-2 bg-[#0b2545] text-white text-sm font-bold rounded hover:bg-[#0b2545]/90 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-1.5"
               >
-                <Check size={14} /> Approve
+                <Check size={14} /> {submitting ? '…' : 'Approve'}
               </button>
             </div>
           </div>

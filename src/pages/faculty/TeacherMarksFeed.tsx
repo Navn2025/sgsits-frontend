@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalTable } from '../../components/layout/PortalLayout'
-import { SUBJECTS, STUDENTS, MARKS_REQUESTS } from '../../data/mockPortalData'
+import { getSubjects, getStudents, getMarksRequests, type Subject, type Student, type MarksRequest } from '../../services/examService'
+import { useAdminStore } from '../../store/adminStore'
 import { CURRENT_TEACHER_ID, SUBJECT_COS, type CourseOutcome } from '../../data/mockTeacherContent'
 import { Save, Send, AlertTriangle, CheckCircle2, Search, ClipboardList } from 'lucide-react'
 
@@ -12,6 +13,23 @@ interface StudentMarkRow {
 }
 
 const TeacherMarksFeed: React.FC = () => {
+  const { user } = useAdminStore()
+  const teacherId = user?.employeeId ?? CURRENT_TEACHER_ID
+
+  const [allSubjects, setAllSubjects] = useState<Subject[]>([])
+  const [allStudents, setAllStudents] = useState<Student[]>([])
+  const [allMarksRequests, setAllMarksRequests] = useState<MarksRequest[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([getSubjects(), getStudents(), getMarksRequests()]).then(([subs, studs, mrs]) => {
+      setAllSubjects(subs)
+      setAllStudents(studs)
+      setAllMarksRequests(mrs)
+      setLoading(false)
+    })
+  }, [])
+
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('CS301')
   const [selectedSection, setSelectedSection] = useState<string>('A')
   const [selectedComponentId, setSelectedComponentId] = useState<string>('MR001') // MARKS_REQUESTS id
@@ -19,13 +37,13 @@ const TeacherMarksFeed: React.FC = () => {
   const [toast, setToast] = useState('')
 
   // Get subjects taught by this teacher
-  const mineSubjects = useMemo(() => SUBJECTS.filter(s => s.facultyId === CURRENT_TEACHER_ID), [])
+  const mineSubjects = useMemo(() => allSubjects.filter(s => s.facultyId === teacherId), [allSubjects, teacherId])
   const selectedSubject = useMemo(() => mineSubjects.find(s => s.id === selectedSubjectId), [mineSubjects, selectedSubjectId])
 
   // Get marks requests for selected subject
   const marksRequests = useMemo(() => {
-    return MARKS_REQUESTS.filter(r => r.subjectId === selectedSubjectId && r.facultyId === CURRENT_TEACHER_ID)
-  }, [selectedSubjectId])
+    return allMarksRequests.filter(r => r.subjectId === selectedSubjectId && r.facultyId === teacherId)
+  }, [allMarksRequests, selectedSubjectId, teacherId])
 
   const selectedRequest = useMemo(() => {
     return marksRequests.find(r => r.id === selectedComponentId) ?? marksRequests[0]
@@ -37,10 +55,10 @@ const TeacherMarksFeed: React.FC = () => {
   // Find students in this subject's branch, semester, and section
   const relevantStudents = useMemo(() => {
     if (!selectedSubject) return []
-    return STUDENTS.filter(
+    return allStudents.filter(
       s => s.branch_id === selectedSubject.branch_id && s.semester === selectedSubject.semester && s.section === selectedSection
     )
-  }, [selectedSubject, selectedSection])
+  }, [allStudents, selectedSubject, selectedSection])
 
   // Track page-level state of marks rows (initialized when subject/section/request changes)
   const [marksState, setMarksState] = useState<Record<string, Record<string, StudentMarkRow>>>({})
@@ -180,7 +198,7 @@ const TeacherMarksFeed: React.FC = () => {
                 value={selectedSubjectId}
                 onChange={e => {
                   setSelectedSubjectId(e.target.value)
-                  const subReqs = MARKS_REQUESTS.filter(r => r.subjectId === e.target.value && r.facultyId === CURRENT_TEACHER_ID)
+                  const subReqs = allMarksRequests.filter(r => r.subjectId === e.target.value && r.facultyId === teacherId)
                   setSelectedComponentId(subReqs[0]?.id ?? '')
                 }}
                 className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-[#0b2545]"

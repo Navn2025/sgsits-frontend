@@ -1,13 +1,15 @@
-﻿import React, { useState } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import PageSeo from '../../components/global/PageSeo'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, ZoomIn, X, ChevronLeft, ChevronRight, Calendar, Camera, Share2 } from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
+import { getGalleryAlbums } from '../../services/mediaService'
+
 
 const AlbumPage: React.FC = () => {
   const { albumSlug } = useParams<{ albumSlug: string }>()
-  const albums = mockStore.getAlbums()
-  const album = albums.find(a => a.id === albumSlug)
+  const [albums, setAlbums] = useState<any[]>([])
+  useEffect(() => { getGalleryAlbums().then(setAlbums).catch(() => {}) }, [])
+  const album = albums.find((a: any) => a.id === albumSlug)
 
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)

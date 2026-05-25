@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalModal, Badge } from '../../components/layout/PortalLayout'
-import { BRANCHES } from '../../data/mockPortalData'
+import { getBranches, type Branch } from '../../services/examService'
 import { Plus, Search, Edit2, Trash2, Calendar, X } from 'lucide-react'
 
 // Simple local Toast component
@@ -84,6 +84,11 @@ const MOCK_VISITS: CompanyVisit[] = [
 ]
 
 const PlacementCompanyVisits: React.FC = () => {
+  const [branches, setBranches] = useState<Branch[]>([])
+  useEffect(() => {
+    getBranches().then(setBranches)
+  }, [])
+
   const [visits, setVisits] = useState<CompanyVisit[]>(MOCK_VISITS)
   const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)
@@ -390,7 +395,7 @@ const PlacementCompanyVisits: React.FC = () => {
               Eligible Branches
             </label>
             <div className="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-lg border border-slate-100 max-h-32 overflow-y-auto">
-              {BRANCHES.map(b => (
+              {branches.map(b => (
                 <label key={b.id} className="flex items-center gap-1.5 cursor-pointer">
                   <input
                     type="checkbox"

@@ -11,6 +11,7 @@ import {
 import Chatbot from '../global/Chatbot'
 import { settingsService, siteSettingsDefaults, topBarDefaults, footerDefaults } from '../../services/settingsService'
 import { brandingService, brandingDefaults } from '../../services/brandingService'
+import { contentService } from '../../services/contentService'
 import { navigationService, quickLinksDefaults } from '../../services/navigationService'
 import { uiLabelsService, uiLabelsDefaults } from '../../services/uiLabelsService'
 import type { FooterData, TopBarData } from '../../mock/settings/settingsData'
@@ -393,7 +394,21 @@ const StickyNav: React.FC<StickyNavProps> = ({ mobileOpen, onMobileClose, navIte
 // --- CAMPUS REVEAL BANNER COMPONENT ---
 const CampusRevealBanner: React.FC = () => {
   const [isRevealed, setIsRevealed] = useState(false)
+  const [preFooter, setPreFooter] = useState({
+    imageUrl: '/assets/campus-panorama.png',
+    label: 'SGSITS Campus Sunset Panorama'
+  })
   const elementRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    contentService.getHomePage()
+      .then(home => {
+        if (home.preFooter) {
+          setPreFooter(home.preFooter)
+        }
+      })
+      .catch(err => console.error("Failed to load pre-footer reveal image:", err))
+  }, [])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -424,8 +439,8 @@ const CampusRevealBanner: React.FC = () => {
       }}
     >
       <img
-        src="/assets/campus-panorama.png"
-        alt="SGSITS Campus Sunset Panorama"
+        src={preFooter.imageUrl}
+        alt={preFooter.label}
         className="w-full h-full object-cover transition-transform duration-[2000ms] ease-out"
         style={{
           transform: isRevealed ? 'scale(1)' : 'scale(1.05)',
@@ -433,7 +448,7 @@ const CampusRevealBanner: React.FC = () => {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-[#f7f8fa]/20 via-transparent to-[#ffffff]/20 pointer-events-none" />
       <div className="absolute bottom-4 left-4 lg:left-12 bg-black/40 backdrop-blur-xs text-white px-3 py-1.5 rounded text-xs sm:text-sm font-semibold tracking-wide font-sans select-none pointer-events-none border border-white/10">
-        SGSITS Campus Sunset Panorama
+        {preFooter.label}
       </div>
     </div>
   )
@@ -677,7 +692,7 @@ const MainLayout: React.FC = () => {
     })
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-slate-800 bg-[#f7f8fa] transition-colors duration-300">
+    <div className="min-h-screen flex flex-col font-sans text-slate-800 bg-[#f7f8fa] transition-colors duration-300 w-full max-w-full overflow-x-hidden">
       <TopBar topBar={topBar} quickLinks={quickLinks} loginLabel={labels.header.loginLabel} />
       <LogoBanner
         onMobileToggle={() => setMobileOpen(o => !o)}

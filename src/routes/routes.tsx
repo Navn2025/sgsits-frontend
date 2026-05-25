@@ -40,6 +40,7 @@ const Home = lazy(() => import('../pages/Home'))
 const ContactUs = lazy(() => import('../pages/ContactUs'))
 const NotFound = lazy(() => import('../pages/NotFound'))
 const Login = lazy(() => import('../pages/Login'))
+const ResetPassword = lazy(() => import('../pages/ResetPassword'))
 
 // About Section Pages
 const AboutInstitute = lazy(() => import('../pages/about/AboutInstitute'))
@@ -157,6 +158,7 @@ const TeacherCorrections = lazy(() => import('../pages/faculty/TeacherCorrection
 const TeacherTimetable = lazy(() => import('../pages/faculty/TeacherTimetable'))
 const TeacherLeaves = lazy(() => import('../pages/faculty/TeacherLeaves'))
 const TeacherNotices = lazy(() => import('../pages/faculty/TeacherNotices'))
+const TeacherExamTimetable = lazy(() => import('../pages/faculty/TeacherExamTimetable'))
 
 // HOD Portal Pages
 const HodDashboard = lazy(() => import('../pages/hod/HodDashboard'))
@@ -178,6 +180,7 @@ const HodRegistration = lazy(() => import('../pages/hod/HodRegistration'))
 const HodFacultyAllocation = lazy(() => import('../pages/hod/HodFacultyAllocation'))
 const HodElectiveData = lazy(() => import('../pages/hod/HodElectiveData'))
 const HodResults = lazy(() => import('../pages/hod/HodResults'))
+const HodExamTimetable = lazy(() => import('../pages/hod/HodExamTimetable'))
 
 // Exam Department Pages
 const ExamDashboard = lazy(() => import('../pages/exam/ExamDashboard'))
@@ -204,8 +207,6 @@ const PlacementInternships = lazy(() => import('../pages/placementOfficer/Placem
 const PlacementCms = lazy(() => import('../pages/placementOfficer/PlacementCms'))
 
 
-// ── Admin Pages ───────────────────────────────────────────────────────────
-const AdminLogin = lazy(() => import('../pages/admin/AdminLogin'))
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'))
 const AdminNotices = lazy(() => import('../pages/admin/AdminNotices'))
 const AdminNews = lazy(() => import('../pages/admin/AdminNews'))
@@ -220,440 +221,453 @@ const AdminSettings = lazy(() => import('../pages/admin/AdminSettings'))
 const AdminUsers = lazy(() => import('../pages/admin/AdminUsers'))
 const AdminDownloads = lazy(() => import('../pages/admin/AdminDownloads'))
 const AdminStaticPages = lazy(() => import('../pages/admin/AdminStaticPages'))
+const AdminFooter = lazy(() => import('../pages/admin/AdminFooter'))
 
 const router = createBrowserRouter([
-  // ── PUBLIC ROUTES ──────────────────────────────────────────
   {
-    element: <MainLayout />,
+    path: '/',
     errorElement: <ErrorBoundary />,
     children: [
+      // ── PUBLIC ROUTES ──────────────────────────────────────────
       {
-        path: '/',
-        element: <S><Home /></S>,
-        handle: bc('Home'),
-      },
-      // About (with sidebar)
-      {
-        path: 'about',
-        element: <SidebarLayout section="about" />,
-        handle: bc('About'),
+        element: <MainLayout />,
         children: [
-          { index: true, element: <Navigate to="institute" replace /> },
-          { path: 'institute',            element: <S><AboutInstitute /></S>,   handle: bc('About Institute') },
-          { path: 'vision-mission',       element: <S><VisionMission /></S>,    handle: bc('Vision & Mission') },
-          { path: 'director-message',     element: <S><DirectorMessage /></S>,  handle: bc("Director's Message") },
-          { path: 'governing-body',       element: <S><GoverningBody /></S>,    handle: bc('Governing Body') },
-          { path: 'administration',       element: <S><Administration /></S>,   handle: bc('Administration') },
-          { path: 'committees',           element: <S><Committees /></S>,       handle: bc('Committees') },
-          { path: 'telephone-directory',  element: <S><TelephoneDir /></S>,     handle: bc('Telephone Directory') },
-          { path: 'infrastructure',       element: <S><Infrastructure /></S>,   handle: bc('Infrastructure') },
-          { path: 'iqac',                 element: <S><IQAC /></S>,             handle: bc('IQAC') },
-          { path: 'academic-council',     element: <S><AcademicCouncil /></S>,  handle: bc('Academic Council') },
-          { path: 'accreditation',        element: <S><Accreditation /></S>,    handle: bc('Accreditation') },
-          { path: ':customPath',          element: <S><CustomAboutPage /></S> },
-        ],
-      },
-
-      // Academics (with sidebar)
-      {
-        path: 'academics',
-        element: <SidebarLayout section="academics" />,
-        handle: bc('Academics'),
-        children: [
-          { index: true, element: <Navigate to="calendar" replace /> },
-          { path: 'calendar',           element: <S><AcademicCalendar /></S>, handle: bc('Academic Calendar') },
-          { path: 'courses/ug',         element: <S><UGCourses /></S>,        handle: bc('UG Courses') },
-          { path: 'courses/pg',         element: <S><PGCourses /></S>,        handle: bc('PG Courses') },
-          { path: 'courses/phd',        element: <S><PhDCourses /></S>,       handle: bc('PhD Courses') },
-          { path: 'courses/ptdc',       element: <S><PTDCCourses /></S>,      handle: bc('PTDC Courses') },
-          { path: 'courses/online',     element: <S><OnlineCourses /></S>,    handle: bc('Online Courses') },
-          { path: 'first-year',         element: <S><FirstYearInfo /></S>,    handle: bc('First Year Info') },
-          { path: 'exam-results',       element: <S><ExamResults /></S>,      handle: bc('Exam & Results') },
-          { path: 'ordinances',         element: <S><Ordinances /></S>,       handle: bc('Ordinances') },
-          { path: 'plagiarism-policy',  element: <S><PlagiarismPolicy /></S>, handle: bc('Plagiarism Policy') },
-          { path: 'code-of-conduct',    element: <S><CodeOfConduct /></S>,    handle: bc('Code of Conduct') },
-          { path: 'obe-nep-2020',       element: <S><OBENep2020 /></S>,       handle: bc('OBE & NEP 2020') },
-        ],
-      },
-
-      // Departments
-      {
-        path: 'departments',
-        handle: bc('Departments'),
-        children: [
-          { index: true, element: <S><DepartmentLanding /></S> },
           {
-            path: ':slug',
-            element: <SidebarLayout section="departments" />,
+            path: '/',
+            element: <S><Home /></S>,
+            handle: bc('Home'),
+          },
+          // About (with sidebar)
+          {
+            path: 'about',
+            element: <SidebarLayout section="about" />,
+            handle: bc('About'),
             children: [
-              { index: true, element: <S><DepartmentDetail /></S> },
+              { index: true, element: <Navigate to="institute" replace /> },
+              { path: 'institute',            element: <S><AboutInstitute /></S>,   handle: bc('About Institute') },
+              { path: 'vision-mission',       element: <S><VisionMission /></S>,    handle: bc('Vision & Mission') },
+              { path: 'director-message',     element: <S><DirectorMessage /></S>,  handle: bc("Director's Message") },
+              { path: 'governing-body',       element: <S><GoverningBody /></S>,    handle: bc('Governing Body') },
+              { path: 'administration',       element: <S><Administration /></S>,   handle: bc('Administration') },
+              { path: 'committees',           element: <S><Committees /></S>,       handle: bc('Committees') },
+              { path: 'telephone-directory',  element: <S><TelephoneDir /></S>,     handle: bc('Telephone Directory') },
+              { path: 'infrastructure',       element: <S><Infrastructure /></S>,   handle: bc('Infrastructure') },
+              { path: 'iqac',                 element: <S><IQAC /></S>,             handle: bc('IQAC') },
+              { path: 'academic-council',     element: <S><AcademicCouncil /></S>,  handle: bc('Academic Council') },
+              { path: 'accreditation',        element: <S><Accreditation /></S>,    handle: bc('Accreditation') },
+              { path: ':customPath',          element: <S><CustomAboutPage /></S> },
             ],
           },
-        ],
-      },
 
-      // Faculty Profile
-      {
-        path: 'faculty/:facultyId',
-        element: <S><FacultyProfile /></S>,
-        handle: bc('Faculty Profile'),
-      },
-
-      // Students (with sidebar)
-      {
-        path: 'students',
-        element: <SidebarLayout section="students" />,
-        handle: bc('Students'),
-        children: [
-          { index: true, element: <Navigate to="activities" replace /> },
-          { path: 'activities',               element: <S><Activities /></S>,           handle: bc('Activities') },
-          { path: 'scholarship/govt',         element: <S><ScholarshipGovt /></S>,      handle: bc('Govt. Scholarship') },
-          { path: 'scholarship/institute',    element: <S><ScholarshipInstitute /></S>, handle: bc('Institute Scholarship') },
-          { path: 'sss',                      element: <S><SSS /></S>,                  handle: bc('SSS') },
-          { path: 'ncc',                      element: <S><NCC /></S>,                  handle: bc('NCC') },
-          { path: 'nss',                      element: <S><NSS /></S>,                  handle: bc('NSS') },
-          { path: ':customPath',              element: <S><CustomCampusLifePage /></S> },
-        ],
-      },
-
-      // Facilities (with sidebar)
-      {
-        path: 'facilities',
-        element: <SidebarLayout section="facilities" />,
-        handle: bc('Facilities'),
-        children: [
-          { index: true, element: <Navigate to="computer-center" replace /> },
-          { path: 'computer-center',  element: <S><ComputerCenter /></S>, handle: bc('Computer Center') },
-          { path: 'library',          element: <S><Library /></S>,         handle: bc('Library') },
-          { path: 'workshop',         element: <S><Workshop /></S>,        handle: bc('Workshop') },
-          { path: 'gymnasium',        element: <S><Gymnasium /></S>,       handle: bc('Gymnasium') },
-          { path: 'dispensary',       element: <S><Dispensary /></S>,      handle: bc('Dispensary') },
-          { path: 'cidi',             element: <S><CIDI /></S>,            handle: bc('CIDI') },
-          { path: 'sports',           element: <S><GamesSports /></S>,     handle: bc('Games & Sports') },
-          { path: 'hostel/boys',      element: <S><BoysHostel /></S>,      handle: bc('Boys Hostel') },
-          { path: 'hostel/girls',     element: <S><GirlsHostel /></S>,     handle: bc('Girls Hostel') },
-          { path: 'hostel/transit',   element: <S><TransitHostel /></S>,   handle: bc('Transit Hostel') },
-          { path: 'hostel/staff',     element: <S><StaffQuarters /></S>,   handle: bc('Staff Quarters') },
-          { path: 'idea-lab',         element: <S><IDEALab /></S>,         handle: bc('IDEA Lab') },
-        ],
-      },
-
-      // Placement (with sidebar)
-      {
-        path: 'placement',
-        element: <SidebarLayout section="placement" />,
-        handle: bc('Placement'),
-        children: [
-          { index: true, element: <Navigate to="tnp-cell" replace /> },
-          { path: 'tnp-cell',         element: <S><TNPCell /></S>,           handle: bc('T&P Cell') },
-          { path: 'companies',        element: <S><LeadingCompanies /></S>,  handle: bc('Leading Companies') },
-          { path: 'record',           element: <S><PlacementRecord /></S>,   handle: bc('Placement Record') },
-          { path: 'contact',          element: <S><PlacementContact /></S>,  handle: bc('Contact Person') },
-          { path: ':customPath',      element: <S><CustomPlacementPage /></S> },
-        ],
-      },
-
-      // Admission (with sidebar)
-      {
-        path: 'admission',
-        element: <SidebarLayout section="admission" />,
-        handle: bc('Admission'),
-        children: [
-          { index: true, element: <Navigate to="ug" replace /> },
-          { path: 'ug',         element: <S><UGAdmission /></S>,  handle: bc('UG Admission') },
-          { path: 'pg',         element: <S><PGAdmission /></S>,  handle: bc('PG Admission') },
-          { path: 'phd',        element: <S><PhDAdmission /></S>, handle: bc('PhD Admission') },
-          { path: 'prospectus', element: <S><Prospectus /></S>,   handle: bc('Prospectus') },
-          { path: ':customPath', element: <S><CustomAdmissionPage /></S> },
-        ],
-      },
-
-      // Explore
-      {
-        path: 'explore',
-        element: <SidebarLayout section="explore" />,
-        handle: bc('Explore SGSITS'),
-        children: [
-          { index: true, element: <Navigate to="gallery" replace /> },
-          { path: 'campus-map',         element: <S><CampusMapPage /></S>,    handle: bc('Campus Map') },
-          { path: 'gallery',            element: <S><PhotoGalleryPage /></S>, handle: bc('Photo Gallery') },
-          { path: 'gallery/:albumSlug', element: <S><AlbumPage /></S>,        handle: bc('Album') },
-          { path: 'video-tour',         element: <S><VideoTourPage /></S>,    handle: bc('Video Tour') },
-          { path: 'anthem',             element: <S><AnthemPage /></S>,       handle: bc('SGSITS Anthem') },
-        ],
-      },
-
-      // Startup Cell (with sidebar)
-      {
-        path: 'startup-cell',
-        element: <SidebarLayout section="startup" />,
-        handle: bc('Startup Cell'),
-        children: [
-          { index: true, element: <S><StartupCellPage /></S> },
-        ],
-      },
-
-      // TEQIP (with sidebar)
-      {
-        path: 'teqip',
-        element: <SidebarLayout section="teqip" />,
-        handle: bc('TEQIP'),
-        children: [
-          { index: true, element: <Navigate to="about" replace /> },
-          { path: ':subpage', element: <S><TeqipPage /></S>, handle: bc('TEQIP') },
-        ],
-      },
-
-      // Live Feed category pages
-      {
-        path: 'news',
-        element: <SidebarLayout section="news" />,
-        handle: bc('News'),
-        children: [
-          { index: true, element: <S><NewsPage /></S> },
-          { path: ':id', element: <S><NewsDetailPage /></S>, handle: bc('News Details') },
-        ],
-      },
-      {
-        path: 'notices',
-        element: <SidebarLayout section="notices" />,
-        handle: bc('Notices'),
-        children: [
-          { index: true, element: <S><NoticesPage /></S> },
-        ],
-      },
-      {
-        path: 'events',
-        element: <SidebarLayout section="events" />,
-        handle: bc('Events'),
-        children: [
-          { index: true, element: <S><EventsPage /></S> },
-        ],
-      },
-      {
-        path: 'tenders',
-        element: <SidebarLayout section="tenders" />,
-        handle: bc('Tenders'),
-        children: [
-          { index: true, element: <S><TendersPage /></S> },
-        ],
-      },
-
-      // Policy Pages
-      {
-        path: 'policy',
-        handle: bc('Policy'),
-        children: [
-          { path: 'privacy',        element: <S><PrivacyPolicy /></S>,          handle: bc('Privacy Policy') },
-          { path: 'terms',          element: <S><TermsOfUse /></S>,             handle: bc('Terms of Use') },
-          { path: 'disclaimer',     element: <S><Disclaimer /></S>,             handle: bc('Disclaimer') },
-          { path: 'accessibility',  element: <S><AccessibilityStatement /></S>, handle: bc('Accessibility') },
-          { path: 'copyright',      element: <S><CopyrightPolicy /></S>,        handle: bc('Copyright Policy') },
-          { path: 'hyperlink',      element: <S><HyperlinkPolicy /></S>,        handle: bc('Hyperlink Policy') },
-          { path: 'security',       element: <S><SecurityPolicy /></S>,         handle: bc('Security Policy') },
-          { path: 'sitemap',        element: <S><SiteMapPage /></S>,            handle: bc('Site Map') },
-          { path: 'web-info-manager', element: <S><WebInfoManager /></S>,       handle: bc('Web Info Manager') },
-          { path: 'help',           element: <S><HelpPage /></S>,               handle: bc('Help') },
-          { path: 'feedback',       element: <S><FeedbackPage /></S>,           handle: bc('Feedback') },
-        ],
-      },
-
-      // Contact
-      { path: 'contact', element: <S><ContactUs /></S>, handle: bc('Contact Us') },
-
-      // 404
-      { path: '*', element: <S><NotFound /></S> },
-    ],
-  },
-  {
-    path: '/login',
-    element: <S><Login /></S>,
-  },
-
-  // ── ADMIN LOGIN (back-compat alias for /login) ──────────────
-  { path: '/admin/login', element: <S><AdminLogin /></S> },
-
-  // ── CANONICAL DASHBOARDS — /dashboard/{role}/* per Role-wise Actions doc ──
-  {
-    path: '/dashboard',
-    children: [
-
-      // ── 1. CENTRAL ADMIN ────────────────────────────────────
-      {
-        path: 'central-admin',
-        children: [
+          // Academics (with sidebar)
           {
-            element: <AdminProtectedRoute />,
+            path: 'academics',
+            element: <SidebarLayout section="academics" />,
+            handle: bc('Academics'),
             children: [
+              { index: true, element: <Navigate to="calendar" replace /> },
+              { path: 'calendar',           element: <S><AcademicCalendar /></S>, handle: bc('Academic Calendar') },
+              { path: 'courses/ug',         element: <S><UGCourses /></S>,        handle: bc('UG Courses') },
+              { path: 'courses/pg',         element: <S><PGCourses /></S>,        handle: bc('PG Courses') },
+              { path: 'courses/phd',        element: <S><PhDCourses /></S>,       handle: bc('PhD Courses') },
+              { path: 'courses/ptdc',       element: <S><PTDCCourses /></S>,      handle: bc('PTDC Courses') },
+              { path: 'courses/online',     element: <S><OnlineCourses /></S>,    handle: bc('Online Courses') },
+              { path: 'first-year',         element: <S><FirstYearInfo /></S>,    handle: bc('First Year Info') },
+              { path: 'exam-results',       element: <S><ExamResults /></S>,      handle: bc('Exam & Results') },
+              { path: 'ordinances',         element: <S><Ordinances /></S>,       handle: bc('Ordinances') },
+              { path: 'plagiarism-policy',  element: <S><PlagiarismPolicy /></S>, handle: bc('Plagiarism Policy') },
+              { path: 'code-of-conduct',    element: <S><CodeOfConduct /></S>,    handle: bc('Code of Conduct') },
+              { path: 'obe-nep-2020',       element: <S><OBENep2020 /></S>,       handle: bc('OBE & NEP 2020') },
+            ],
+          },
+
+          // Departments
+          {
+            path: 'departments',
+            handle: bc('Departments'),
+            children: [
+              { index: true, element: <S><DepartmentLanding /></S> },
               {
-                element: <AdminLayout />,
+                path: ':slug',
+                element: <SidebarLayout section="departments" />,
                 children: [
-                  { index: true, element: <Navigate to="dashboard" replace /> },
-                  // Doc-required pages
-                  { path: 'dashboard',   element: <S><AdminDashboard /></S> },
-                  { path: 'users',       element: <S><AdminUsers /></S> },
-                  { path: 'departments', element: <S><AdminDepartments /></S> },
-                  { path: 'notices',     element: <S><AdminNotices /></S> },
-                  { path: 'downloads',   element: <S><AdminDownloads /></S> },
-                  { path: 'events',      element: <S><AdminEvents /></S> },
-                  { path: 'gallery',     element: <S><AdminGallery /></S> },
-                  { path: 'pages',       element: <S><AdminStaticPages /></S> },
-                  // Existing CMS modules
-                  { path: 'news',        element: <S><AdminNews /></S> },
-                  { path: 'tenders',     element: <S><AdminTenders /></S> },
-                  { path: 'alerts',      element: <S><AdminAlerts /></S> },
-                  { path: 'faculty',     element: <S><AdminFaculty /></S> },
-                  { path: 'placement',   element: <S><AdminPlacement /></S> },
-                  { path: 'settings',    element: <S><AdminSettings /></S> },
+                  { index: true, element: <S><DepartmentDetail /></S> },
                 ],
               },
             ],
           },
+
+          // Faculty Profile
+          {
+            path: 'faculty/:facultyId',
+            element: <S><FacultyProfile /></S>,
+            handle: bc('Faculty Profile'),
+          },
+
+          // Students (with sidebar)
+          {
+            path: 'students',
+            element: <SidebarLayout section="students" />,
+            handle: bc('Students'),
+            children: [
+              { index: true, element: <Navigate to="activities" replace /> },
+              { path: 'activities',               element: <S><Activities /></S>,           handle: bc('Activities') },
+              { path: 'scholarship/govt',         element: <S><ScholarshipGovt /></S>,      handle: bc('Govt. Scholarship') },
+              { path: 'scholarship/institute',    element: <S><ScholarshipInstitute /></S>, handle: bc('Institute Scholarship') },
+              { path: 'sss',                      element: <S><SSS /></S>,                  handle: bc('SSS') },
+              { path: 'ncc',                      element: <S><NCC /></S>,                  handle: bc('NCC') },
+              { path: 'nss',                      element: <S><NSS /></S>,                  handle: bc('NSS') },
+              { path: ':customPath',              element: <S><CustomCampusLifePage /></S> },
+            ],
+          },
+
+          // Facilities (with sidebar)
+          {
+            path: 'facilities',
+            element: <SidebarLayout section="facilities" />,
+            handle: bc('Facilities'),
+            children: [
+              { index: true, element: <Navigate to="computer-center" replace /> },
+              { path: 'computer-center',  element: <S><ComputerCenter /></S>, handle: bc('Computer Center') },
+              { path: 'library',          element: <S><Library /></S>,         handle: bc('Library') },
+              { path: 'workshop',         element: <S><Workshop /></S>,        handle: bc('Workshop') },
+              { path: 'gymnasium',        element: <S><Gymnasium /></S>,       handle: bc('Gymnasium') },
+              { path: 'dispensary',       element: <S><Dispensary /></S>,      handle: bc('Dispensary') },
+              { path: 'cidi',             element: <S><CIDI /></S>,            handle: bc('CIDI') },
+              { path: 'sports',           element: <S><GamesSports /></S>,     handle: bc('Games & Sports') },
+              { path: 'hostel/boys',      element: <S><BoysHostel /></S>,      handle: bc('Boys Hostel') },
+              { path: 'hostel/girls',     element: <S><GirlsHostel /></S>,     handle: bc('Girls Hostel') },
+              { path: 'hostel/transit',   element: <S><TransitHostel /></S>,   handle: bc('Transit Hostel') },
+              { path: 'hostel/staff',     element: <S><StaffQuarters /></S>,   handle: bc('Staff Quarters') },
+              { path: 'idea-lab',         element: <S><IDEALab /></S>,         handle: bc('IDEA Lab') },
+            ],
+          },
+
+          // Placement (with sidebar)
+          {
+            path: 'placement',
+            element: <SidebarLayout section="placement" />,
+            handle: bc('Placement'),
+            children: [
+              { index: true, element: <Navigate to="tnp-cell" replace /> },
+              { path: 'tnp-cell',         element: <S><TNPCell /></S>,           handle: bc('T&P Cell') },
+              { path: 'companies',        element: <S><LeadingCompanies /></S>,  handle: bc('Leading Companies') },
+              { path: 'record',           element: <S><PlacementRecord /></S>,   handle: bc('Placement Record') },
+              { path: 'contact',          element: <S><PlacementContact /></S>,  handle: bc('Contact Person') },
+              { path: ':customPath',      element: <S><CustomPlacementPage /></S> },
+            ],
+          },
+
+          // Admission (with sidebar)
+          {
+            path: 'admission',
+            element: <SidebarLayout section="admission" />,
+            handle: bc('Admission'),
+            children: [
+              { index: true, element: <Navigate to="ug" replace /> },
+              { path: 'ug',         element: <S><UGAdmission /></S>,  handle: bc('UG Admission') },
+              { path: 'pg',         element: <S><PGAdmission /></S>,  handle: bc('PG Admission') },
+              { path: 'phd',        element: <S><PhDAdmission /></S>, handle: bc('PhD Admission') },
+              { path: 'prospectus', element: <S><Prospectus /></S>,   handle: bc('Prospectus') },
+              { path: ':customPath', element: <S><CustomAdmissionPage /></S> },
+            ],
+          },
+
+          // Explore
+          {
+            path: 'explore',
+            element: <SidebarLayout section="explore" />,
+            handle: bc('Explore SGSITS'),
+            children: [
+              { index: true, element: <Navigate to="gallery" replace /> },
+              { path: 'campus-map',         element: <S><CampusMapPage /></S>,    handle: bc('Campus Map') },
+              { path: 'gallery',            element: <S><PhotoGalleryPage /></S>, handle: bc('Photo Gallery') },
+              { path: 'gallery/:albumSlug', element: <S><AlbumPage /></S>,        handle: bc('Album') },
+              { path: 'video-tour',         element: <S><VideoTourPage /></S>,    handle: bc('Video Tour') },
+              { path: 'anthem',             element: <S><AnthemPage /></S>,       handle: bc('SGSITS Anthem') },
+            ],
+          },
+
+          // Startup Cell (with sidebar)
+          {
+            path: 'startup-cell',
+            element: <SidebarLayout section="startup" />,
+            handle: bc('Startup Cell'),
+            children: [
+              { index: true, element: <S><StartupCellPage /></S> },
+            ],
+          },
+
+          // TEQIP (with sidebar)
+          {
+            path: 'teqip',
+            element: <SidebarLayout section="teqip" />,
+            handle: bc('TEQIP'),
+            children: [
+              { index: true, element: <Navigate to="about" replace /> },
+              { path: ':subpage', element: <S><TeqipPage /></S>, handle: bc('TEQIP') },
+            ],
+          },
+
+          // Live Feed category pages
+          {
+            path: 'news',
+            element: <SidebarLayout section="news" />,
+            handle: bc('News'),
+            children: [
+              { index: true, element: <S><NewsPage /></S> },
+              { path: ':id', element: <S><NewsDetailPage /></S>, handle: bc('News Details') },
+            ],
+          },
+          {
+            path: 'notices',
+            element: <SidebarLayout section="notices" />,
+            handle: bc('Notices'),
+            children: [
+              { index: true, element: <S><NoticesPage /></S> },
+            ],
+          },
+          {
+            path: 'events',
+            element: <SidebarLayout section="events" />,
+            handle: bc('Events'),
+            children: [
+              { index: true, element: <S><EventsPage /></S> },
+            ],
+          },
+          {
+            path: 'tenders',
+            element: <SidebarLayout section="tenders" />,
+            handle: bc('Tenders'),
+            children: [
+              { index: true, element: <S><TendersPage /></S> },
+            ],
+          },
+
+          // Policy Pages
+          {
+            path: 'policy',
+            handle: bc('Policy'),
+            children: [
+              { path: 'privacy',        element: <S><PrivacyPolicy /></S>,          handle: bc('Privacy Policy') },
+              { path: 'terms',          element: <S><TermsOfUse /></S>,             handle: bc('Terms of Use') },
+              { path: 'disclaimer',     element: <S><Disclaimer /></S>,             handle: bc('Disclaimer') },
+              { path: 'accessibility',  element: <S><AccessibilityStatement /></S>, handle: bc('Accessibility') },
+              { path: 'copyright',      element: <S><CopyrightPolicy /></S>,        handle: bc('Copyright Policy') },
+              { path: 'hyperlink',      element: <S><HyperlinkPolicy /></S>,        handle: bc('Hyperlink Policy') },
+              { path: 'security',       element: <S><SecurityPolicy /></S>,         handle: bc('Security Policy') },
+              { path: 'sitemap',        element: <S><SiteMapPage /></S>,            handle: bc('Site Map') },
+              { path: 'web-info-manager', element: <S><WebInfoManager /></S>,       handle: bc('Web Info Manager') },
+              { path: 'help',           element: <S><HelpPage /></S>,               handle: bc('Help') },
+              { path: 'feedback',       element: <S><FeedbackPage /></S>,           handle: bc('Feedback') },
+            ],
+          },
+
+          // Contact
+          { path: 'contact', element: <S><ContactUs /></S>, handle: bc('Contact Us') },
+
+          // 404
+          { path: '*', element: <S><NotFound /></S> },
         ],
       },
-
-      // ── 2. HOD ──────────────────────────────────────────────
       {
-        path: 'hod',
+        path: '/login',
+        element: <S><Login /></S>,
+      },
+      {
+        path: '/reset-password',
+        element: <S><ResetPassword /></S>,
+      },
+
+      // ── ADMIN LOGIN (back-compat alias for /login) ──────────────
+      { path: '/admin/login', element: <Navigate to="/login" replace /> },
+
+      // ── CANONICAL DASHBOARDS — /dashboard/{role}/* per Role-wise Actions doc ──
+      {
+        path: '/dashboard',
         children: [
+
+          // ── 1. CENTRAL ADMIN ────────────────────────────────────
           {
-            element: <HodProtectedRoute />,
+            path: 'central-admin',
             children: [
               {
-                element: <HodLayout />,
+                element: <AdminProtectedRoute />,
                 children: [
-                  { index: true, element: <Navigate to="dashboard" replace /> },
-                  // Doc-required pages
-                  { path: 'dashboard',           element: <S><HodDashboard /></S> },
-                  { path: 'department-profile',  element: <S><HodDepartmentProfile /></S> },
-                  { path: 'teachers',            element: <S><HodFaculty /></S> },
-                  { path: 'notices',             element: <S><HodNotices /></S> },
-                  { path: 'downloads',           element: <S><HodDownloads /></S> },
-                  { path: 'events',              element: <S><HodEvents /></S> },
-                  { path: 'gallery',             element: <S><HodGallery /></S> },
-                  { path: 'labs',                element: <S><HodLabs /></S> },
-                  { path: 'achievements',        element: <S><HodAchievements /></S> },
-                  // Inherited exam-office workflow pages
-                  { path: 'subjects',            element: <S><HodSubjects /></S> },
-                  { path: 'students',            element: <S><HodStudents /></S> },
-                  { path: 'timetable',           element: <S><HodTimetable /></S> },
-                  { path: 'leaves',              element: <S><HodLeaves /></S> },
-                  { path: 'marks',               element: <S><HodMarks /></S> },
-                  { path: 'corrections',         element: <S><HodCorrections /></S> },
-                  { path: 'registration',        element: <S><HodRegistration /></S> },
-                  { path: 'faculty-allocation',  element: <S><HodFacultyAllocation /></S> },
-                  { path: 'elective-data',       element: <S><HodElectiveData /></S> },
-                  { path: 'results',             element: <S><HodResults /></S> },
+                  {
+                    element: <AdminLayout />,
+                    children: [
+                      { index: true, element: <Navigate to="dashboard" replace /> },
+                      // Doc-required pages
+                      { path: 'dashboard',   element: <S><AdminDashboard /></S> },
+                      { path: 'users',       element: <S><AdminUsers /></S> },
+                      { path: 'departments', element: <S><AdminDepartments /></S> },
+                      { path: 'notices',     element: <S><AdminNotices /></S> },
+                      { path: 'downloads',   element: <S><AdminDownloads /></S> },
+                      { path: 'events',      element: <S><AdminEvents /></S> },
+                      { path: 'gallery',     element: <S><AdminGallery /></S> },
+                      { path: 'pages',       element: <S><AdminStaticPages /></S> },
+                      // Existing CMS modules
+                      { path: 'news',        element: <S><AdminNews /></S> },
+                      { path: 'tenders',     element: <S><AdminTenders /></S> },
+                      { path: 'alerts',      element: <S><AdminAlerts /></S> },
+                      { path: 'faculty',     element: <S><AdminFaculty /></S> },
+                      { path: 'placement',   element: <S><AdminPlacement /></S> },
+                      { path: 'settings',    element: <S><AdminSettings /></S> },
+                      { path: 'footer',      element: <S><AdminFooter /></S> },
+                    ],
+                  },
                 ],
               },
             ],
           },
-        ],
-      },
 
-      // ── 3. TEACHER (a.k.a. Faculty) ─────────────────────────
-      {
-        path: 'teacher',
-        children: [
+          // ── 2. HOD ──────────────────────────────────────────────
           {
-            element: <FacultyProtectedRoute />,
+            path: 'hod',
             children: [
               {
-                element: <FacultyLayout />,
+                element: <HodProtectedRoute />,
                 children: [
-                  { index: true, element: <Navigate to="dashboard" replace /> },
-                  // Doc-required pages
-                  { path: 'dashboard',          element: <S><FacultyDashboard /></S> },
-                  { path: 'profile',            element: <S><TeacherProfile /></S> },
-                  { path: 'publications',       element: <S><TeacherPublications /></S> },
-                  { path: 'research',           element: <S><TeacherResearch /></S> },
-                  { path: 'subjects',           element: <S><TeacherSubjects /></S> },
-                  { path: 'qualifications',     element: <S><TeacherQualifications /></S> },
-                  // Inherited exam-office workflow pages
-                  { path: 'marks-feed',         element: <S><TeacherMarksFeed /></S> },
-                  { path: 'atkt-marks-feed',    element: <S><TeacherAtktFeed /></S> },
-                  { path: 'correction-request', element: <S><TeacherCorrections /></S> },
-                  { path: 'timetable',          element: <S><TeacherTimetable /></S> },
-                  { path: 'leave',              element: <S><TeacherLeaves /></S> },
-                  { path: 'notices',            element: <S><TeacherNotices /></S> },
+                  {
+                    element: <HodLayout />,
+                    children: [
+                      { index: true, element: <Navigate to="dashboard" replace /> },
+                      // Doc-required pages
+                      { path: 'dashboard',           element: <S><HodDashboard /></S> },
+                      { path: 'department-profile',  element: <S><HodDepartmentProfile /></S> },
+                      { path: 'teachers',            element: <S><HodFaculty /></S> },
+                      { path: 'notices',             element: <S><HodNotices /></S> },
+                      { path: 'downloads',           element: <S><HodDownloads /></S> },
+                      { path: 'events',              element: <S><HodEvents /></S> },
+                      { path: 'gallery',             element: <S><HodGallery /></S> },
+                      { path: 'labs',                element: <S><HodLabs /></S> },
+                      { path: 'achievements',        element: <S><HodAchievements /></S> },
+                      // Inherited exam-office workflow pages
+                      { path: 'subjects',            element: <S><HodSubjects /></S> },
+                      { path: 'students',            element: <S><HodStudents /></S> },
+                      { path: 'timetable',           element: <S><HodTimetable /></S> },
+                      { path: 'leaves',              element: <S><HodLeaves /></S> },
+                      { path: 'marks',               element: <S><HodMarks /></S> },
+                      { path: 'corrections',         element: <S><HodCorrections /></S> },
+                      { path: 'registration',        element: <S><HodRegistration /></S> },
+                      { path: 'faculty-allocation',  element: <S><HodFacultyAllocation /></S> },
+                      { path: 'elective-data',       element: <S><HodElectiveData /></S> },
+                      { path: 'results',             element: <S><HodResults /></S> },
+                      { path: 'exam-timetable',      element: <S><HodExamTimetable /></S> },
+                    ],
+                  },
                 ],
               },
             ],
           },
-        ],
-      },
 
-      // ── 4. EXAM CONTROLLER ──────────────────────────────────
-      {
-        path: 'exam',
-        children: [
+          // ── 3. TEACHER (a.k.a. Faculty) ─────────────────────────
           {
-            element: <ExamProtectedRoute />,
+            path: 'teacher',
             children: [
               {
-                element: <ExamLayout />,
+                element: <FacultyProtectedRoute />,
                 children: [
-                  { index: true, element: <Navigate to="dashboard" replace /> },
-                  // Doc-required pages
-                  { path: 'dashboard',           element: <S><ExamDashboard /></S> },
-                  { path: 'notices',             element: <S><ExamNotices /></S> },
-                  { path: 'timetables',          element: <S><ExamTimetables /></S> },
-                  { path: 'results',             element: <S><ExamControllerResults /></S> },
-                  { path: 'academic-calendar',   element: <S><ExamAcademicCalendar /></S> },
-                  { path: 'downloads',           element: <S><ExamDownloads /></S> },
-                  // Inherited exam-office workflow pages
-                  { path: 'session-management',  element: <S><ExamSessions /></S> },
-                  { path: 'branch-management',   element: <S><ExamBranches /></S> },
-                  { path: 'course-management',   element: <S><ExamCourses /></S> },
-                  { path: 'subject-upload',      element: <S><ExamSubjectUpload /></S> },
-                  { path: 'student-upload',      element: <S><ExamStudentUpload /></S> },
-                  { path: 'atkt-upload',         element: <S><ExamAtktUpload /></S> },
-                  { path: 'requests',            element: <S><ExamRequests /></S> },
-                  { path: 'marks-request',       element: <S><ExamMarksRequest /></S> },
+                  {
+                    element: <FacultyLayout />,
+                    children: [
+                      { index: true, element: <Navigate to="dashboard" replace /> },
+                      // Doc-required pages
+                      { path: 'dashboard',          element: <S><FacultyDashboard /></S> },
+                      { path: 'profile',            element: <S><TeacherProfile /></S> },
+                      { path: 'publications',       element: <S><TeacherPublications /></S> },
+                      { path: 'research',           element: <S><TeacherResearch /></S> },
+                      { path: 'subjects',           element: <S><TeacherSubjects /></S> },
+                      { path: 'qualifications',     element: <S><TeacherQualifications /></S> },
+                      // Inherited exam-office workflow pages
+                      { path: 'marks-feed',         element: <S><TeacherMarksFeed /></S> },
+                      { path: 'atkt-marks-feed',    element: <S><TeacherAtktFeed /></S> },
+                      { path: 'correction-request', element: <S><TeacherCorrections /></S> },
+                      { path: 'timetable',          element: <S><TeacherTimetable /></S> },
+                      { path: 'leave',              element: <S><TeacherLeaves /></S> },
+                      { path: 'notices',            element: <S><TeacherNotices /></S> },
+                      { path: 'exam-timetable',     element: <S><TeacherExamTimetable /></S> },
+                    ],
+                  },
                 ],
               },
             ],
           },
-        ],
-      },
 
-      // ── 5. PLACEMENT OFFICER ────────────────────────────────
-      {
-        path: 'placement',
-        children: [
+          // ── 4. EXAM CONTROLLER ──────────────────────────────────
           {
-            element: <PlacementProtectedRoute />,
+            path: 'exam',
             children: [
               {
-                element: <PlacementLayout />,
+                element: <ExamProtectedRoute />,
                 children: [
-                  { index: true, element: <Navigate to="dashboard" replace /> },
-                  { path: 'dashboard',          element: <S><PlacementDashboard /></S> },
-                  { path: 'notices',            element: <S><PlacementNotices /></S> },
-                  { path: 'company-visits',     element: <S><PlacementCompanyVisits /></S> },
-                  { path: 'records',            element: <S><PlacementRecords /></S> },
-                  { path: 'training-programs',  element: <S><PlacementTrainingPrograms /></S> },
-                  { path: 'internships',        element: <S><PlacementInternships /></S> },
-                  { path: 'cms',                element: <S><PlacementCms /></S> },
+                  {
+                    element: <ExamLayout />,
+                    children: [
+                      { index: true, element: <Navigate to="dashboard" replace /> },
+                      // Doc-required pages
+                      { path: 'dashboard',           element: <S><ExamDashboard /></S> },
+                      { path: 'notices',             element: <S><ExamNotices /></S> },
+                      { path: 'timetables',          element: <S><ExamTimetables /></S> },
+                      { path: 'results',             element: <S><ExamControllerResults /></S> },
+                      { path: 'academic-calendar',   element: <S><ExamAcademicCalendar /></S> },
+                      { path: 'downloads',           element: <S><ExamDownloads /></S> },
+                      // Inherited exam-office workflow pages
+                      { path: 'session-management',  element: <S><ExamSessions /></S> },
+                      { path: 'branch-management',   element: <S><ExamBranches /></S> },
+                      { path: 'course-management',   element: <S><ExamCourses /></S> },
+                      { path: 'subject-upload',      element: <S><ExamSubjectUpload /></S> },
+                      { path: 'student-upload',      element: <S><ExamStudentUpload /></S> },
+                      { path: 'atkt-upload',         element: <S><ExamAtktUpload /></S> },
+                      { path: 'requests',            element: <S><ExamRequests /></S> },
+                      { path: 'marks-request',       element: <S><ExamMarksRequest /></S> },
+                    ],
+                  },
                 ],
               },
             ],
           },
+
+          // ── 5. PLACEMENT OFFICER ────────────────────────────────
+          {
+            path: 'placement',
+            children: [
+              {
+                element: <PlacementProtectedRoute />,
+                children: [
+                  {
+                    element: <PlacementLayout />,
+                    children: [
+                      { index: true, element: <Navigate to="dashboard" replace /> },
+                      { path: 'dashboard',          element: <S><PlacementDashboard /></S> },
+                      { path: 'notices',            element: <S><PlacementNotices /></S> },
+                      { path: 'company-visits',     element: <S><PlacementCompanyVisits /></S> },
+                      { path: 'records',            element: <S><PlacementRecords /></S> },
+                      { path: 'training-programs',  element: <S><PlacementTrainingPrograms /></S> },
+                      { path: 'internships',        element: <S><PlacementInternships /></S> },
+                      { path: 'cms',                element: <S><PlacementCms /></S> },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+
         ],
       },
 
-    ],
-  },
-
-  // ── BACK-COMPAT REDIRECTS ──────────────────────────────────
-  // Old role-root paths redirect to the canonical /dashboard/{role}/dashboard.
-  { path: '/admin',    element: <Navigate to="/dashboard/central-admin/dashboard" replace /> },
-  { path: '/admin/*',  element: <Navigate to="/dashboard/central-admin/dashboard" replace /> },
-  { path: '/hod',      element: <Navigate to="/dashboard/hod/dashboard" replace /> },
-  { path: '/hod/*',    element: <Navigate to="/dashboard/hod/dashboard" replace /> },
-  { path: '/faculty',  element: <Navigate to="/dashboard/teacher/dashboard" replace /> },
-  { path: '/exam',     element: <Navigate to="/dashboard/exam/dashboard" replace /> },
-  { path: '/exam/*',   element: <Navigate to="/dashboard/exam/dashboard" replace /> },
+      // ── BACK-COMPAT REDIRECTS ──────────────────────────────────
+      // Old role-root paths redirect to the canonical /dashboard/{role}/dashboard.
+      { path: '/admin',    element: <Navigate to="/dashboard/central-admin/dashboard" replace /> },
+      { path: '/admin/*',  element: <Navigate to="/dashboard/central-admin/dashboard" replace /> },
+      { path: '/hod',      element: <Navigate to="/dashboard/hod/dashboard" replace /> },
+      { path: '/hod/*',    element: <Navigate to="/dashboard/hod/dashboard" replace /> },
+      { path: '/faculty',  element: <Navigate to="/dashboard/teacher/dashboard" replace /> },
+      { path: '/exam',     element: <Navigate to="/dashboard/exam/dashboard" replace /> },
+      { path: '/exam/*',   element: <Navigate to="/dashboard/exam/dashboard" replace /> },
+    ]
+  }
 ])
 
 export default router

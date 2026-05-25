@@ -1,19 +1,31 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalModal } from '../../components/layout/PortalLayout'
-import { CORRECTION_REQUESTS, FACULTY_MEMBERS, type CorrectionRequest } from '../../data/mockPortalData'
+import { getCorrectionRequests, getFacultyMembers, type CorrectionRequest, type FacultyMember } from '../../services/examService'
+import { useAdminStore } from '../../store/adminStore'
 import { Search, Eye, ExternalLink, MessageSquare } from 'lucide-react'
 
 const HOD_BRANCH = 'CSE'
 
 const HodCorrections: React.FC = () => {
+  const { user } = useAdminStore()
+  const hodBranch = user?.department_id ? String(user.department_id) : HOD_BRANCH
+  const [correctionRequests, setCorrectionRequests] = useState<CorrectionRequest[]>([])
+  const [facultyMembers, setFacultyMembers] = useState<FacultyMember[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | CorrectionRequest['status']>('all')
   const [viewing, setViewing] = useState<CorrectionRequest | null>(null)
 
+  useEffect(() => {
+    Promise.all([getCorrectionRequests(), getFacultyMembers(hodBranch)]).then(([cr, fm]) => {
+      setCorrectionRequests(cr); setFacultyMembers(fm); setLoading(false)
+    })
+  }, [hodBranch])
+
   const branchCorrections = useMemo(() => {
-    const branchFacultyIds = new Set(FACULTY_MEMBERS.filter(f => f.branch_id === HOD_BRANCH).map(f => f.id))
-    return CORRECTION_REQUESTS.filter(c => branchFacultyIds.has(c.facultyId))
-  }, [])
+    const branchFacultyIds = new Set(facultyMembers.filter(f => f.branch_id === hodBranch).map(f => f.id))
+    return correctionRequests.filter(c => branchFacultyIds.has(c.facultyId))
+  }, [correctionRequests, facultyMembers, hodBranch])
 
   const visible = useMemo(() => branchCorrections.filter(c => {
     if (statusFilter !== 'all' && c.status !== statusFilter) return false
@@ -31,7 +43,7 @@ const HodCorrections: React.FC = () => {
     rejected: branchCorrections.filter(c => c.status === 'rejected').length,
   }
 
-  const facName = (id: string) => FACULTY_MEMBERS.find(f => f.id === id)?.name ?? id
+  const facName = (id: string) => facultyMembers.find(f => f.id === id)?.name ?? id
 
   return (
     <div className="space-y-5">

@@ -25,11 +25,11 @@ const Logo: React.FC = () => {
   return (
     <Link to="/" className="flex items-center gap-3 group focus:outline-none">
       {/* Logo emblem — uses dynamic image from branding service */}
-      <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center bg-brand-burgundy rounded-xl shadow-md border border-brand-gold/30 group-hover:scale-105 transition-transform duration-300">
+      <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center bg-white rounded-full shadow-md border border-[#bfa15f]/40 p-0.5 overflow-hidden group-hover:scale-105 transition-transform duration-300">
         <img
-          src={branding.logoUrl}
+          src={branding.logoUrl ? `${branding.logoUrl}?v=2` : ''}
           alt={branding.logoAlt}
-          className="w-9 h-9 object-contain"
+          className="w-full h-full object-cover rounded-full"
           onError={(e) => {
             // Fallback to SVG emblem if image fails to load
             const target = e.currentTarget as HTMLImageElement
@@ -38,7 +38,7 @@ const Logo: React.FC = () => {
             if (parent && !parent.querySelector('svg')) {
               const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
               svg.setAttribute('viewBox', '0 0 100 100')
-              svg.setAttribute('class', 'w-9 h-9 fill-none stroke-brand-gold')
+              svg.setAttribute('class', 'w-8 h-8 fill-none stroke-brand-gold')
               svg.setAttribute('stroke-width', '4')
               svg.setAttribute('stroke-linecap', 'round')
               svg.setAttribute('stroke-linejoin', 'round')
@@ -47,7 +47,7 @@ const Logo: React.FC = () => {
           }}
         />
         {/* Establishment year badge — dynamic from branding */}
-        <span className="absolute -bottom-1 -right-1 text-[8px] bg-brand-gold text-slate-900 font-bold px-1 rounded shadow">
+        <span className="absolute bottom-0 right-0 text-[7px] bg-[#bfa15f] text-slate-900 font-extrabold px-1 py-0.2 rounded-full border border-white shadow">
           {branding.establishedYear}
         </span>
       </div>

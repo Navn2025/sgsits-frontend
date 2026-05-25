@@ -16,12 +16,16 @@ const PdfViewerModal: React.FC<PdfViewerModalProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(true)
 
+  // Resolve relative backend URLs (e.g., /uploads/...)
+  const backendBase = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace(/\/api$/, '')
+  const resolvedUrl = pdfUrl.startsWith('/') ? `${backendBase}${pdfUrl}` : pdfUrl
+
   // Reset loading state when the URL changes
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true)
     }
-  }, [pdfUrl, isOpen])
+  }, [resolvedUrl, isOpen])
 
   // Prevent background scroll and register Escape key listener
   useEffect(() => {
@@ -65,7 +69,7 @@ const PdfViewerModal: React.FC<PdfViewerModalProps> = ({
           <div className="flex items-center gap-2 shrink-0">
             {/* Direct Open in New Tab (For mobile or alternative rendering) */}
             <a 
-              href={pdfUrl} 
+              href={resolvedUrl} 
               target="_blank" 
               rel="noopener noreferrer" 
               className="p-1.5 hover:bg-white/10 rounded transition-colors text-slate-300 hover:text-white"
@@ -76,7 +80,7 @@ const PdfViewerModal: React.FC<PdfViewerModalProps> = ({
 
             {/* Manual Download Override */}
             <a 
-              href={pdfUrl} 
+              href={resolvedUrl} 
               download 
               className="p-1.5 hover:bg-white/10 rounded transition-colors text-slate-300 hover:text-white"
               title="Download Document"
@@ -111,7 +115,7 @@ const PdfViewerModal: React.FC<PdfViewerModalProps> = ({
 
           {/* PDF iframe */}
           <iframe 
-            src={`${pdfUrl}#toolbar=1`}
+            src={`${resolvedUrl}#toolbar=1`}
             title={title}
             className={`w-full h-full border-none transition-opacity duration-300 ${
               isLoading ? 'opacity-0' : 'opacity-100'
@@ -123,7 +127,7 @@ const PdfViewerModal: React.FC<PdfViewerModalProps> = ({
           <div className="bg-slate-100 border-t border-slate-200 px-4 py-2 flex items-center justify-between text-[11px] text-slate-500 font-medium font-sans shrink-0">
             <span>Trouble viewing? Use the download button at top right.</span>
             <a 
-              href={pdfUrl} 
+              href={resolvedUrl} 
               download
               className="text-[#bfa15f] hover:text-[#a88a4c] font-bold hover:underline"
             >

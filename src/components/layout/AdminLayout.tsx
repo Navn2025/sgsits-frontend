@@ -18,7 +18,8 @@ import {
   Settings,
   LogOut,
   ArrowLeft,
-  UserCheck
+  UserCheck,
+  PanelBottom,
 } from 'lucide-react'
 
 const AdminLayout: React.FC = () => {
@@ -36,7 +37,7 @@ const AdminLayout: React.FC = () => {
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to log out from the admin panel?')) {
       clearAuth()
-      navigate('/admin/login')
+      navigate('/login')
     }
   }
 
@@ -60,6 +61,7 @@ const AdminLayout: React.FC = () => {
     { label: 'Urgent Alerts',      path: '/dashboard/central-admin/alerts',      icon: AlertOctagon },
     { label: 'Faculty Directory',  path: '/dashboard/central-admin/faculty',     icon: UsersRound },
     { label: 'Placement Records',  path: '/dashboard/central-admin/placement',   icon: Briefcase },
+    { label: 'Footer Management',  path: '/dashboard/central-admin/footer',      icon: PanelBottom },
     { label: 'System Settings',    path: '/dashboard/central-admin/settings',    icon: Settings },
   ]
 
@@ -71,9 +73,7 @@ const AdminLayout: React.FC = () => {
           {/* Logo Brand area */}
           <div className="p-5 border-b border-slate-150 flex items-center justify-between shrink-0">
             <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-7 h-7 rounded bg-primary flex items-center justify-center border border-accent/30">
-                <span className="text-white text-[10px] font-bold">SG</span>
-              </div>
+              <img src="/image.png?v=2" alt="SGSITS Logo" className="w-8 h-8 object-contain bg-white rounded-full p-0.5 border border-accent/25" />
               <h1 className="font-display font-extrabold text-sm text-primary tracking-wider">
                 SGSITS CMS
               </h1>

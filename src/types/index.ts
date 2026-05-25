@@ -7,14 +7,21 @@
 
 // ── Auth ──────────────────────────────────────
 export type UserRole =
-  | 'super_admin'           // alias for central_admin in the existing CMS — full institute control
-  | 'central_admin'         // doc terminology — manages users, departments, global content
-  | 'editor'                // CMS sub-role with content CRUD but no settings
-  | 'hod'                   // Head of Department — branch-scoped
-  | 'faculty'               // alias for teacher in code; the doc uses "teacher"
-  | 'teacher'               // doc terminology — own-profile, publications, research, subjects
-  | 'exam_controller'       // exam dept — sessions, timetables, results, calendar
-  | 'placement_officer'     // placement cell — notices, company visits, records, training
+  // ── Backend canonical role names (returned by JWT) ──────────────────────
+  | 'CENTRAL_ADMIN'         // Full institute control — same as super_admin
+  | 'HOD'                   // Head of Department — branch-scoped
+  | 'TEACHER'               // Faculty role — own-profile, publications, subjects
+  | 'EXAM_CONTROLLER'       // Exam dept — sessions, timetables, results, calendar
+  | 'PLACEMENT_OFFICER'     // Placement cell — notices, company visits, records
+  // ── Legacy / alias role names (kept for backwards compatibility) ─────────
+  | 'super_admin'
+  | 'central_admin'
+  | 'editor'
+  | 'hod'
+  | 'faculty'
+  | 'teacher'
+  | 'exam_controller'
+  | 'placement_officer'
   | 'student'               // ERP redirect target only
 
 export interface AuthUser {
@@ -22,6 +29,9 @@ export interface AuthUser {
   name: string
   email: string
   role: UserRole
+  /** Numeric department/branch ID from the backend JWT payload */
+  department_id?: number
+  /** Legacy string alias kept for backwards compatibility */
   department?: string
   employeeId?: string
   avatarUrl?: string
@@ -37,7 +47,7 @@ export interface Notice {
   id: string
   title: string
   description: string
-  category: 'Academic' | 'Examination' | 'Hostel' | 'Placement' | 'General' | 'Fee'
+  category: string
   isNew: boolean
   attachmentUrl?: string
   publishedAt: string   // ISO date string
@@ -213,6 +223,7 @@ export interface BrandingConfig {
   mobileDrawerTitle: string
   mobileDrawerFooter: string
   mobileNavSectionLabel: string
+  preloaderEnabled?: boolean
 }
 
 // ── Navigation: Sidebar & Quick Links ──────────

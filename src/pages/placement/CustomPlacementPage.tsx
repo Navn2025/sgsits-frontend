@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import * as Icons from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
+import { getCustomPage } from '../../services/aboutService'
 
 const CustomPlacementPage: React.FC = () => {
   const { customPath } = useParams<{ customPath: string }>()
@@ -16,9 +16,9 @@ const CustomPlacementPage: React.FC = () => {
     }
 
     setLoading(true)
-    const res = mockStore.getCustomPage(customPath)
-    setData(res)
-    setLoading(false)
+    getCustomPage(customPath)
+      .then(res => { setData(res); setLoading(false) })
+      .catch(() => { setData(null); setLoading(false) })
   }, [customPath])
 
   if (loading) {

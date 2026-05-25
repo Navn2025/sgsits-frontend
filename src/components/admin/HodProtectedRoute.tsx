@@ -11,7 +11,8 @@ const HodProtectedRoute: React.FC = () => {
   }
 
   // Allow HOD; also allow super_admin to inspect the panel.
-  if (user?.role !== 'hod' && user?.role !== 'super_admin') {
+  const roleLower = user?.role?.toLowerCase()
+  if (roleLower !== 'hod' && roleLower !== 'super_admin') {
     return <Navigate to="/login" replace />
   }
 

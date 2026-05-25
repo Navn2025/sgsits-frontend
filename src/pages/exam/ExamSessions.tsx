@@ -1,11 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalModal, Badge, SessionBanner } from '../../components/layout/PortalLayout'
-import { SESSIONS, MONTH_NAMES } from '../../data/mockPortalData'
-import type { Session } from '../../data/mockPortalData'
+import { getSessions, MONTH_NAMES, type Session } from '../../services/examService'
 import { Plus, Trash2, CheckCircle } from 'lucide-react'
 
 const ExamSessions: React.FC = () => {
-  const [sessions, setSessions] = useState<Session[]>(SESSIONS)
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getSessions().then(data => { setSessions(data); setLoading(false) })
+  }, [])
   const [isOpen, setIsOpen] = useState(false)
   const [form, setForm] = useState({ start_month: '7', start_year: '2026', end_month: '12', end_year: '2026' })
   const [saving, setSaving] = useState(false)

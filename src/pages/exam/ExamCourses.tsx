@@ -1,11 +1,19 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalModal, Badge } from '../../components/layout/PortalLayout'
-import { COURSES, BRANCHES, CURRENT_SESSION } from '../../data/mockPortalData'
-import type { Course } from '../../data/mockPortalData'
+import { getCourses, getBranches, getActiveSession, type Course, type Branch, type Session } from '../../services/examService'
 import { Plus, Trash2 } from 'lucide-react'
 
 const ExamCourses: React.FC = () => {
-  const [courses, setCourses] = useState<Course[]>(COURSES)
+  const [courses, setCourses] = useState<Course[]>([])
+  const [branches, setBranches] = useState<Branch[]>([])
+  const [activeSession, setActiveSession] = useState<Session | undefined>(undefined)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([getCourses(), getBranches(), getActiveSession()]).then(([c, b, s]) => {
+      setCourses(c); setBranches(b); setActiveSession(s); setLoading(false)
+    })
+  }, [])
   const [isOpen, setIsOpen] = useState(false)
   const [form, setForm] = useState({ id: '', name: '', branch_id: 'CSE', specialization: '', semesters: '8' })
   const [saving, setSaving] = useState(false)
@@ -29,7 +37,7 @@ const ExamCourses: React.FC = () => {
     <div className="space-y-5">
       <PageHeader
         title="Course Management"
-        subtitle={`Session: ${CURRENT_SESSION.label} · ${courses.length} courses`}
+        subtitle={`Session: ${activeSession?.label ?? '…'} · ${courses.length} courses`}
         action={
           <button onClick={() => setIsOpen(true)}
             className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
@@ -39,7 +47,7 @@ const ExamCourses: React.FC = () => {
       />
 
       <div className="flex flex-wrap items-center gap-2">
-        {['ALL', ...BRANCHES.map(b => b.id)].map(id => (
+        {['ALL', ...branches.map(b => b.id)].map(id => (
           <button
             key={id}
             onClick={() => setFilterBranch(id)}
@@ -107,7 +115,7 @@ const ExamCourses: React.FC = () => {
               <label className="text-xs font-bold text-slate-600 uppercase tracking-wide block mb-1">Branch *</label>
               <select value={form.branch_id} onChange={e => setForm(f => ({ ...f, branch_id: e.target.value }))}
                 className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary">
-                {BRANCHES.map(b => <option key={b.id} value={b.id}>{b.shortName} – {b.name}</option>)}
+                {branches.map(b => <option key={b.id} value={b.id}>{b.shortName} – {b.name}</option>)}
               </select>
             </div>
             <div>

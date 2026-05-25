@@ -1,30 +1,66 @@
 import React, { useState, useEffect } from 'react'
-import { Pencil, Trash2, Plus, X, Calendar, MapPin } from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
-import type { EventItem } from '../../data/mockStore'
+import { Pencil, Trash2, Plus, X, Calendar, MapPin, Image as ImageIcon, Link2, Loader2 } from 'lucide-react'
+import { eventsAPI } from '../../api/index'
+import AttachmentUpload from '../../components/admin/AttachmentUpload'
+import type { AttachmentRecord } from '../../api/index'
+
+// ── Local shape used by the UI form ────────────────────────────────────────
+interface LocalEventItem {
+  id: string
+  title: string
+  description: string
+  venue: string
+  date: string
+  time: string
+  category: string
+  // Cover image — either an uploaded file_id OR an external image URL
+  cover_file_id: number | null
+  cover_url: string
+  cover_attachment_type: 'FILE' | 'EXTERNAL_LINK' | null
+  cover_original_name: string
+  registrationUrl: string
+}
+
+function mapFromApi(e: Record<string, unknown>): LocalEventItem {
+  const rawDate = String(e.start_date ?? e.startDate ?? e.date ?? e.event_date ?? '')
+  const [datePart, timePart] = rawDate.includes('T')
+    ? [rawDate.slice(0, 10), rawDate.slice(11, 16)]
+    : [rawDate.slice(0, 10), '']
+  return {
+    id:                    String(e.id ?? ''),
+    title:                 String(e.title ?? ''),
+    description:           String(e.description ?? ''),
+    venue:                 String(e.venue ?? e.location ?? ''),
+    date:                  datePart || new Date().toISOString().slice(0, 10),
+    time:                  String(e.time ?? timePart ?? '10:00 AM'),
+    category:              String(e.category ?? 'Academic'),
+    cover_file_id:         e.cover_image_file_id != null ? Number(e.cover_image_file_id) : null,
+    cover_url:             String(e.cover_image_url ?? e.image_url ?? e.imageUrl ?? e.image ?? ''),
+    cover_attachment_type: (e.cover_attachment_type as 'FILE' | 'EXTERNAL_LINK') || null,
+    cover_original_name:   String(e.cover_original_name ?? ''),
+    registrationUrl:       String(e.registration_url ?? e.registrationUrl ?? ''),
+  }
+}
 
 const EVENT_CATEGORIES = ['Technical', 'Academic', 'Cultural', 'Social', 'Placement', 'Workshop', 'Sports', 'Other']
 
-const EMPTY: Omit<EventItem, 'id'> = {
-  title: '',
-  description: '',
-  venue: '',
-  date: new Date().toISOString().slice(0, 10),
-  time: '10:00 AM',
-  category: 'Academic',
-  image: '',
+const EMPTY: Omit<LocalEventItem, 'id'> = {
+  title: '', description: '', venue: '',
+  date:  new Date().toISOString().slice(0, 10),
+  time:  '10:00 AM', category: 'Academic',
+  cover_file_id: null, cover_url: '', cover_attachment_type: null, cover_original_name: '',
   registrationUrl: '',
 }
 
 const catColors: Record<string, string> = {
-  Technical: 'bg-[#0b2545]/10 text-[#0b2545]',
-  Academic: 'bg-[#0b2545]/15 text-[#0b2545]',
-  Cultural: 'bg-[#bfa15f]/15 text-[#bfa15f]',
-  Social: 'bg-[#bfa15f]/10 text-[#bfa15f]',
-  Placement: 'bg-[#bfa15f]/20 text-[#bfa15f]',
-  Workshop: 'bg-[#0b2545]/5 text-[#0b2545]',
-  Sports: 'bg-slate-100 text-slate-600',
-  Other: 'bg-slate-100 text-slate-700',
+  Technical:  'bg-[#0b2545]/10 text-[#0b2545]',
+  Academic:   'bg-[#0b2545]/15 text-[#0b2545]',
+  Cultural:   'bg-[#bfa15f]/15 text-[#bfa15f]',
+  Social:     'bg-[#bfa15f]/10 text-[#bfa15f]',
+  Placement:  'bg-[#bfa15f]/20 text-[#bfa15f]',
+  Workshop:   'bg-[#0b2545]/5 text-[#0b2545]',
+  Sports:     'bg-slate-100 text-slate-600',
+  Other:      'bg-slate-100 text-slate-700',
 }
 
 function Toast({ message, onClose }: { message: string; onClose: () => void }) {
@@ -37,40 +73,115 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 }
 
 export default function AdminEvents() {
-  const [events, setEvents] = useState<EventItem[]>([])
-  const [showModal, setShowModal] = useState(false)
-  const [editItem, setEditItem] = useState<EventItem | null>(null)
-  const [form, setForm] = useState<Omit<EventItem, 'id'>>(EMPTY)
-  const [deleteTarget, setDeleteTarget] = useState<EventItem | null>(null)
-  const [toast, setToast] = useState('')
+  const [events, setEvents]             = useState<LocalEventItem[]>([])
+  const [showModal, setShowModal]       = useState(false)
+  const [editItem, setEditItem]         = useState<LocalEventItem | null>(null)
+  const [form, setForm]                 = useState<Omit<LocalEventItem, 'id'>>(EMPTY)
+  const [coverRecord, setCoverRecord]   = useState<AttachmentRecord | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<LocalEventItem | null>(null)
+  const [saving, setSaving]             = useState(false)
+  const [toast, setToast]               = useState('')
 
-  useEffect(() => { setEvents(mockStore.getEvents()) }, [])
+  const load = async () => {
+    try {
+      const items = await eventsAPI.getAll()
+      setEvents(items.map(i => mapFromApi(i as unknown as Record<string, unknown>)))
+    } catch {
+      setEvents([])
+    }
+  }
 
-  const openAdd = () => { setEditItem(null); setForm(EMPTY); setShowModal(true) }
-  const openEdit = (e: EventItem) => {
-    setEditItem(e)
-    setForm({ title: e.title, description: e.description, venue: e.venue, date: e.date, time: e.time, category: e.category, image: e.image ?? '', registrationUrl: e.registrationUrl ?? '' })
+  useEffect(() => { load() }, [])
+
+  const openAdd = () => {
+    setEditItem(null); setForm(EMPTY); setCoverRecord(null); setShowModal(true)
+  }
+
+  const openEdit = (ev: LocalEventItem) => {
+    setEditItem(ev)
+    setForm({ ...ev })
+    setCoverRecord(
+      ev.cover_file_id ? {
+        id: ev.cover_file_id, attachment_type: ev.cover_attachment_type ?? 'FILE',
+        original_name: ev.cover_original_name || 'Cover Image', stored_name: null,
+        file_url: ev.cover_url, external_url: ev.cover_attachment_type === 'EXTERNAL_LINK' ? ev.cover_url : null,
+        thumbnail_url: ev.cover_url, alt_text: null, meta_title: null, meta_description: null,
+        file_type: 'image/jpeg', file_size: null,
+        storage_type: ev.cover_attachment_type === 'EXTERNAL_LINK' ? 'EXTERNAL' : 'LOCAL',
+        uploaded_by: 0, uploader_name: '', created_at: '',
+      } : null
+    )
     setShowModal(true)
   }
-  const closeModal = () => { setShowModal(false); setEditItem(null) }
 
-  const handleSave = (e: React.FormEvent) => {
+  const closeModal = () => { setShowModal(false); setEditItem(null); setCoverRecord(null) }
+
+  const handleCoverAttached = (record: AttachmentRecord) => {
+    setCoverRecord(record)
+    setForm(f => ({
+      ...f,
+      cover_file_id:         record.id,
+      cover_url:             record.file_url,
+      cover_attachment_type: record.attachment_type,
+      cover_original_name:   record.original_name,
+    }))
+  }
+
+  const handleCoverCleared = () => {
+    setCoverRecord(null)
+    setForm(f => ({ ...f, cover_file_id: null, cover_url: '', cover_attachment_type: null, cover_original_name: '' }))
+  }
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (editItem) { mockStore.updateEvent(editItem.id, form); setToast('Event updated!') }
-    else { mockStore.addEvent(form); setToast('Event added!') }
-    setEvents(mockStore.getEvents())
+    setSaving(true)
+    const payload: Record<string, unknown> = {
+      title:            form.title,
+      description:      form.description,
+      venue:            form.venue,
+      start_date:       form.date,
+      event_date:       form.date,
+      time:             form.time,
+      category:         form.category,
+      registration_url: form.registrationUrl || null,
+      status:           'PUBLISHED',
+    }
+    // Pass cover image as file_id (preferred) OR fallback to direct URL
+    if (form.cover_file_id) {
+      payload.cover_image_file_id = form.cover_file_id
+    } else if (form.cover_url) {
+      payload.image_url = form.cover_url
+    }
+
+    try {
+      if (editItem) {
+        await eventsAPI.update(editItem.id, payload as never)
+        setToast('Event updated!')
+      } else {
+        await eventsAPI.create(payload as never)
+        setToast('Event added!')
+      }
+      await load()
+    } catch {
+      setToast('Failed to save event.')
+    }
+    setSaving(false)
     closeModal()
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteTarget) return
-    mockStore.deleteEvent(deleteTarget.id)
-    setEvents(mockStore.getEvents())
+    try {
+      await eventsAPI.delete(deleteTarget.id)
+      setToast('Event deleted.')
+      await load()
+    } catch {
+      setToast('Failed to delete event.')
+    }
     setDeleteTarget(null)
-    setToast('Event deleted.')
   }
 
-  const f = (key: keyof Omit<EventItem, 'id'>, val: string) =>
+  const f = (key: keyof Omit<LocalEventItem, 'id'>, val: string) =>
     setForm(prev => ({ ...prev, [key]: val }))
 
   return (
@@ -78,7 +189,7 @@ export default function AdminEvents() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold text-primary">Events Management</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage upcoming events, workshops and programs</p>
+          <p className="text-sm text-slate-500 mt-0.5">Manage upcoming events, workshops and programs. Upload cover images or use external URLs.</p>
         </div>
         <button onClick={openAdd} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors">
           <Plus size={16} /> Add New Event
@@ -93,6 +204,7 @@ export default function AdminEvents() {
               <th className="text-left px-4 py-3 font-semibold text-slate-600">Venue</th>
               <th className="text-left px-4 py-3 font-semibold text-slate-600">Date & Time</th>
               <th className="text-left px-4 py-3 font-semibold text-slate-600">Category</th>
+              <th className="text-left px-4 py-3 font-semibold text-slate-600">Cover</th>
               <th className="text-center px-4 py-3 font-semibold text-slate-600">Actions</th>
             </tr>
           </thead>
@@ -100,10 +212,7 @@ export default function AdminEvents() {
             {events.map(ev => (
               <tr key={ev.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-4 py-3 max-w-xs">
-                  <div className="flex items-center gap-3">
-                    {ev.image && <img src={ev.image} alt="" className="w-10 h-10 rounded object-cover flex-shrink-0" />}
-                    <p className="font-medium text-slate-800 line-clamp-2">{ev.title}</p>
-                  </div>
+                  <p className="font-medium text-slate-800 line-clamp-2">{ev.title}</p>
                 </td>
                 <td className="px-4 py-3 text-slate-500 text-xs">
                   <div className="flex items-center gap-1"><MapPin size={11} />{ev.venue}</div>
@@ -114,6 +223,13 @@ export default function AdminEvents() {
                 </td>
                 <td className="px-4 py-3">
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${catColors[ev.category] ?? 'bg-slate-100 text-slate-700'}`}>{ev.category}</span>
+                </td>
+                <td className="px-4 py-3">
+                  {ev.cover_url ? (
+                    ev.cover_attachment_type === 'EXTERNAL_LINK' || !ev.cover_file_id
+                      ? <div className="flex items-center gap-1 text-xs text-[#0b2545]"><Link2 size={11} /> Link</div>
+                      : <img src={ev.cover_url} alt="" className="w-10 h-8 rounded object-cover" />
+                  ) : <span className="text-slate-300 text-xs">—</span>}
                 </td>
                 <td className="px-4 py-3 text-center">
                   <div className="inline-flex items-center gap-2">
@@ -128,10 +244,11 @@ export default function AdminEvents() {
         {events.length === 0 && <div className="text-center py-12 text-slate-400">No events found.</div>}
       </div>
 
+      {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
               <h2 className="font-display text-lg font-bold text-primary">{editItem ? 'Edit Event' : 'Add New Event'}</h2>
               <button onClick={closeModal} className="p-1.5 rounded hover:bg-slate-100 text-slate-500"><X size={18} /></button>
             </div>
@@ -159,24 +276,31 @@ export default function AdminEvents() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Category <span className="text-[#bfa15f]">*</span></label>
-                  <select required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.category} onChange={e => f('category', e.target.value)}>
+                  <select required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none" value={form.category} onChange={e => f('category', e.target.value)}>
                     {EVENT_CATEGORIES.map(c => <option key={c}>{c}</option>)}
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Image URL</label>
-                  <input className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.image ?? ''} onChange={e => f('image', e.target.value)} placeholder="https://..." />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Registration URL</label>
-                  <input className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.registrationUrl ?? ''} onChange={e => f('registrationUrl', e.target.value)} placeholder="https://..." />
-                </div>
+
+              {/* Cover Image — dual attachment */}
+              <AttachmentUpload
+                usage="events"
+                label={<span className="flex items-center gap-1"><ImageIcon size={11} /> Cover Image (optional)</span> as unknown as string}
+                onAttached={handleCoverAttached}
+                onClear={handleCoverCleared}
+                initialValue={coverRecord}
+              />
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Registration URL</label>
+                <input className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none" value={form.registrationUrl} onChange={e => f('registrationUrl', e.target.value)} placeholder="https://forms.google.com/..." />
               </div>
+
               <div className="flex gap-3 pt-2 border-t border-slate-100">
                 <button type="button" onClick={closeModal} className="flex-1 py-2 border border-slate-300 text-slate-700 rounded font-semibold text-sm hover:bg-slate-50">Cancel</button>
-                <button type="submit" className="flex-1 py-2 bg-primary text-white rounded font-semibold text-sm hover:bg-primary/90">{editItem ? '✓ Update Event' : '+ Add Event'}</button>
+                <button type="submit" disabled={saving} className="flex-1 py-2 bg-primary text-white rounded font-semibold text-sm hover:bg-primary/90 disabled:opacity-60 flex items-center justify-center gap-2">
+                  {saving ? <><Loader2 size={14} className="animate-spin" /> Saving…</> : editItem ? '✓ Update Event' : '+ Add Event'}
+                </button>
               </div>
             </form>
           </div>

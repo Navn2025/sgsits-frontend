@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { mockStore } from '../../data/mockStore'
+import { getAllNews } from '../../services/newsService'
 import { 
   Calendar, 
   User, 
@@ -27,7 +27,7 @@ const AVATAR_OPTIONS = [
 const NewsDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [newsList] = useState(() => mockStore.getNews())
+  const [newsList, setNewsList] = useState<any[]>([])
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [showShareTooltip, setShowShareTooltip] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
@@ -58,6 +58,9 @@ const NewsDetailPage: React.FC = () => {
   const [commentName, setCommentName] = useState('')
   const [commentText, setCommentText] = useState('')
   const [selectedAvatar, setSelectedAvatar] = useState(AVATAR_OPTIONS[0])
+
+  // Load news list from backend
+  useEffect(() => { getAllNews().then(setNewsList).catch(() => {}) }, [])
 
   // Get active article
   const article = useMemo(() => {

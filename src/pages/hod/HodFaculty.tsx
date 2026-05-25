@@ -1,23 +1,33 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalTable, PortalModal, Badge } from '../../components/layout/PortalLayout'
-import { FACULTY_MEMBERS, SUBJECTS, type FacultyMember, type Subject } from '../../data/mockPortalData'
+import { getFacultyMembers, getSubjects, type FacultyMember, type Subject } from '../../services/examService'
+import { useAdminStore } from '../../store/adminStore'
 import { Search, BookPlus, Mail, Phone, X } from 'lucide-react'
 
 const HOD_BRANCH = 'CSE'
 
 const HodFaculty: React.FC = () => {
-  const [faculty, setFaculty] = useState<FacultyMember[]>(() =>
-    FACULTY_MEMBERS.filter(f => f.branch_id === HOD_BRANCH)
-  )
+  const { user } = useAdminStore()
+  const hodBranch = user?.department_id ? String(user.department_id) : HOD_BRANCH
+  const [faculty, setFaculty] = useState<FacultyMember[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getFacultyMembers(hodBranch).then(fm => { setFaculty(fm); setLoading(false) })
+  }, [hodBranch])
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'on_leave'>('all')
   const [allocating, setAllocating] = useState<FacultyMember | null>(null)
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
   const [toast, setToast] = useState('')
 
+  const [allSubjects, setAllSubjects] = useState<Subject[]>([])
+  useEffect(() => {
+    getSubjects(hodBranch).then(setAllSubjects)
+  }, [hodBranch])
   const branchSubjects = useMemo(
-    () => SUBJECTS.filter(s => s.branch_id === HOD_BRANCH),
-    []
+    () => allSubjects.filter(s => s.branch_id === hodBranch),
+    [allSubjects, hodBranch]
   )
 
   const visible = useMemo(() => {

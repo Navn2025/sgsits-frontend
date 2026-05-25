@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalTable, PortalModal } from '../../components/layout/PortalLayout'
-import { SUBJECTS, CORRECTION_REQUESTS, type CorrectionRequest } from '../../data/mockPortalData'
+import { getSubjects, getCorrectionRequests, type Subject, type CorrectionRequest } from '../../services/examService'
+import { useAdminStore } from '../../store/adminStore'
 import { CURRENT_TEACHER_ID } from '../../data/mockTeacherContent'
 import { Plus, Search, FileText, AlertCircle, CheckCircle2, Clock, Trash2, Eye } from 'lucide-react'
 
@@ -17,9 +18,21 @@ const EMPTY: Omit<CorrectionRequest, 'id' | 'submittedOn' | 'facultyId'> = {
 }
 
 const TeacherCorrections: React.FC = () => {
-  const [requests, setRequests] = useState<CorrectionRequest[]>(
-    CORRECTION_REQUESTS.filter(r => r.facultyId === CURRENT_TEACHER_ID)
-  )
+  const { user } = useAdminStore()
+  const teacherId = user?.employeeId ?? CURRENT_TEACHER_ID
+
+  const [allSubjects, setAllSubjects] = useState<Subject[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([getSubjects(), getCorrectionRequests()]).then(([subs, corrections]) => {
+      setAllSubjects(subs)
+      setRequests(corrections.filter(r => r.facultyId === teacherId))
+      setLoading(false)
+    })
+  }, [teacherId])
+
+  const [requests, setRequests] = useState<CorrectionRequest[]>([])
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | CorrectionRequest['status']>('all')
   const [showForm, setShowForm] = useState(false)
@@ -30,7 +43,7 @@ const TeacherCorrections: React.FC = () => {
   const [toast, setToast] = useState('')
 
   // Fetch subjects taught by the teacher
-  const mineSubjects = useMemo(() => SUBJECTS.filter(s => s.facultyId === CURRENT_TEACHER_ID), [])
+  const mineSubjects = useMemo(() => allSubjects.filter(s => s.facultyId === teacherId), [allSubjects, teacherId])
 
   const visible = useMemo(() => {
     return requests.filter(r => {

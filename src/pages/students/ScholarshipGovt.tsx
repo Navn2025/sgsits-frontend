@@ -1,12 +1,12 @@
 ﻿import React, { useEffect, useState } from 'react'
 import PageSeo from '../../components/global/PageSeo'
-import { mockStore } from '../../data/mockStore'
+import { getScholarshipGovt } from '../../services/studentsService'
 
 const ScholarshipGovt: React.FC = () => {
   const [data, setData] = useState<any>(null)
 
   useEffect(() => {
-    setData(mockStore.getScholarshipGovt())
+    getScholarshipGovt().then(setData)
   }, [])
 
   if (!data) return null

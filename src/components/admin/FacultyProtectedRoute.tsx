@@ -12,10 +12,12 @@ const FacultyProtectedRoute: React.FC = () => {
 
   // Faculty + HOD (HOD is a faculty member who can also use faculty tooling)
   // + super_admin for inspection
+  const roleLower = user?.role?.toLowerCase()
   if (
-    user?.role !== 'faculty' &&
-    user?.role !== 'hod' &&
-    user?.role !== 'super_admin'
+    roleLower !== 'teacher' &&
+    roleLower !== 'faculty' &&
+    roleLower !== 'hod' &&
+    roleLower !== 'super_admin'
   ) {
     return <Navigate to="/login" replace />
   }

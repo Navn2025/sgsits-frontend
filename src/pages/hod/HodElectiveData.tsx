@@ -1,24 +1,35 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalModal } from '../../components/layout/PortalLayout'
-import { ELECTIVE_SUBJECTS, STUDENTS, type ElectiveSubject } from '../../data/mockPortalData'
+import { getElectiveSubjects, getStudents, type ElectiveSubject, type Student } from '../../services/examService'
+import { useAdminStore } from '../../store/adminStore'
 import { UploadCloud, Search, Users, CheckCircle2, Clock, X, FileText, Download } from 'lucide-react'
 
 const HOD_BRANCH = 'CSE'
 
 interface ElectiveEnrolment { enrollment: string; studentName: string; subjectId: string }
 
-// Seed: only CS502 and CS505 (uploaded already) have students mapped
-const seedEnrolments = (): ElectiveEnrolment[] => {
-  const sem7 = STUDENTS.filter(s => s.branch_id === HOD_BRANCH && s.semester === 5)  // mock as "sem 7"
-  return [
-    ...sem7.slice(0, 3).map(s => ({ enrollment: s.enrollment, studentName: s.name, subjectId: 'CS502' })),
-    ...sem7.slice(3, 5).map(s => ({ enrollment: s.enrollment, studentName: s.name, subjectId: 'CS505' })),
-  ]
-}
-
 const HodElectiveData: React.FC = () => {
-  const [electives, setElectives] = useState<ElectiveSubject[]>(ELECTIVE_SUBJECTS)
-  const [enrolments, setEnrolments] = useState<ElectiveEnrolment[]>(seedEnrolments)
+  const { user } = useAdminStore()
+  const hodBranch = user?.department_id ? String(user.department_id) : HOD_BRANCH
+  const [electives, setElectives] = useState<ElectiveSubject[]>([])
+  const [students, setStudents] = useState<Student[]>([])
+  const [loading, setLoading] = useState(true)
+  const [enrolments, setEnrolments] = useState<ElectiveEnrolment[]>([])
+
+  useEffect(() => {
+    Promise.all([getElectiveSubjects(hodBranch), getStudents(hodBranch)]).then(([e, st]) => {
+      setElectives(e)
+      setStudents(st)
+      // seed initial enrolments
+      const sem7 = st.filter(s => s.branch_id === hodBranch && s.semester === 5)
+      const seedData: ElectiveEnrolment[] = [
+        ...sem7.slice(0, 3).map(s => ({ enrollment: s.enrollment_no, studentName: s.student_name, subjectId: e[0]?.id ?? 'CS502' })),
+        ...sem7.slice(3, 5).map(s => ({ enrollment: s.enrollment_no, studentName: s.student_name, subjectId: e[1]?.id ?? 'CS505' })),
+      ]
+      setEnrolments(seedData)
+      setLoading(false)
+    })
+  }, [hodBranch])
   const [search, setSearch] = useState('')
   const [uploadTarget, setUploadTarget] = useState<ElectiveSubject | null>(null)
   const [viewing, setViewing] = useState<ElectiveSubject | null>(null)
@@ -47,8 +58,8 @@ const HodElectiveData: React.FC = () => {
   const openUpload = (e: ElectiveSubject) => {
     setUploadTarget(e)
     // Mock CSV preview: 5–8 random students from the branch
-    const pool = STUDENTS.filter(s => s.branch_id === HOD_BRANCH).slice(0, 6 + Math.floor(Math.random() * 3))
-    setCsvPreview(pool.map(s => ({ enrollment: s.enrollment, studentName: s.name, subjectId: e.id })))
+    const pool = students.filter(s => s.branch_id === hodBranch).slice(0, 6 + Math.floor(Math.random() * 3))
+    setCsvPreview(pool.map(s => ({ enrollment: s.enrollment_no, studentName: s.student_name, subjectId: e.id })))
   }
 
   const confirmUpload = () => {

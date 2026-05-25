@@ -2,13 +2,13 @@
 import PageSeo from '../../components/global/PageSeo'
 import { Link } from 'react-router-dom';
 import * as Icons from 'lucide-react';
-import { mockStore } from '../../data/mockStore';
+import { getPhDAdmission } from '../../services/adminContentService';
 
 export default function PhDAdmission() {
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    setData(mockStore.getPhDAdmission());
+    getPhDAdmission().then(setData);
   }, []);
 
   if (!data) {

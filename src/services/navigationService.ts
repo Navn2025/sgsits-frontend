@@ -1,21 +1,18 @@
 /**
- * Navigation Service — Sidebar links, section banners, quick links
+ * Navigation Service — wired to GS-Website backend
  *
- * ╔══════════════════════════════════════════════════════════════╗
- * ║  MOCK MODE                                                  ║
- * ║  Replace with: apiClient.get('/navigation/sidebar')         ║
- * ╚══════════════════════════════════════════════════════════════╝
+ * Backend: GET  /api/v1/navigation  — fetch nav tree
+ *          PUT  /api/v1/navigation  — replace nav tree (admin only)
  *
- * This service is the single source of truth for ALL navigation
- * structures that are NOT the main navbar (which uses navService):
+ * Section banners and sidebar links are stored in CMS sections:
+ *   GET/PUT /api/v1/settings/cms/navigation.sidebar
+ *   GET/PUT /api/v1/settings/cms/navigation.banners
  *
- *  - Sidebar navigation links per section
- *  - Section banner (title, subtitle, icon) per section
- *  - Top-bar quick links (Students / Faculty / Alumni / Contact)
- *
- * Admin panel can manage all of these without code changes.
+ * Falls back to mock data when backend unreachable.
  */
 
+import apiClient from '../api/client'
+import { getCmsSection, saveCmsSection } from './settingsService'
 import {
   mockSidebarLinks,
   mockSectionBanners,
@@ -24,76 +21,91 @@ import {
   type SectionBanner,
 } from '../mock/sidebar/sidebarData'
 import { mockUiLabels } from '../mock/uilabels/uiLabelsData'
-import { mockStore } from '../data/mockStore'
 
 // ─── Sidebar Links ────────────────────────────────────────────────────────────
 
-/**
- * GET /api/navigation/sidebar/:section
- * Returns sidebar links for a given section key.
- */
-export const getSidebarLinks = async (section: string): Promise<SidebarLink[]> => {
-  return mockStore.getSidebarLinks(section)
-}
-
-/**
- * GET /api/navigation/sidebar
- * Returns all sidebar links for all sections.
- */
 export const getAllSidebarLinks = async (): Promise<Record<string, SidebarLink[]>> => {
-  return mockStore.getAllSidebarLinks()
+  const data = await getCmsSection<Record<string, SidebarLink[]>>(
+    'navigation.sidebar',
+    mockSidebarLinks
+  )
+  return data && typeof data === 'object' ? data : mockSidebarLinks
 }
 
-/**
- * PUT /api/navigation/sidebar/:section
- */
+export const getSidebarLinks = async (section: string): Promise<SidebarLink[]> => {
+  const all = await getAllSidebarLinks()
+  return all[section] ?? mockSidebarLinks[section] ?? []
+}
+
 export const saveSidebarLinks = async (section: string, links: SidebarLink[]): Promise<void> => {
-  mockStore.saveSidebarLinks(section, links)
+  const all = await getAllSidebarLinks()
+  await saveCmsSection('navigation.sidebar', { ...all, [section]: links })
 }
 
-/**
- * PUT /api/navigation/sidebar
- */
 export const saveAllSidebarLinks = async (data: Record<string, SidebarLink[]>): Promise<void> => {
-  mockStore.saveAllSidebarLinks(data)
+  await saveCmsSection('navigation.sidebar', data)
 }
 
 // ─── Section Banners ──────────────────────────────────────────────────────────
 
-/**
- * GET /api/navigation/section-banner/:section
- */
-export const getSectionBanner = async (section: string): Promise<SectionBanner> => {
-  return mockStore.getSectionBanner(section)
-}
-
-/**
- * GET /api/navigation/section-banners
- */
 export const getAllSectionBanners = async (): Promise<Record<string, SectionBanner>> => {
-  return mockStore.getAllSectionBanners()
+  const data = await getCmsSection<Record<string, SectionBanner>>(
+    'navigation.banners',
+    mockSectionBanners
+  )
+  return data && typeof data === 'object' ? data : mockSectionBanners
 }
 
-/**
- * PUT /api/navigation/section-banner/:section
- */
+export const getSectionBanner = async (section: string): Promise<SectionBanner> => {
+  const all = await getAllSectionBanners()
+  return all[section] ?? mockSectionBanners[section] ?? mockDefaultSectionBanner
+}
+
 export const saveSectionBanner = async (section: string, banner: SectionBanner): Promise<void> => {
-  mockStore.saveSectionBanner(section, banner)
+  const all = await getAllSectionBanners()
+  await saveCmsSection('navigation.banners', { ...all, [section]: banner })
+}
+
+// ─── Main Navigation Tree ────────────────────────────────────────────────────
+
+export interface NavItem {
+  id?: number | string
+  label: string
+  url?: string
+  children?: NavItem[]
+  is_external?: boolean
+  display_order?: number
+}
+
+export const getNavTree = async (): Promise<NavItem[]> => {
+  try {
+    const res = await apiClient.get('/v1/navigation')
+    const data = res.data?.data
+    return Array.isArray(data) ? data : []
+  } catch {
+    return []
+  }
+}
+
+export const saveNavTree = async (items: NavItem[]): Promise<void> => {
+  await apiClient.put('/v1/navigation', { items })
 }
 
 // ─── Quick Links ──────────────────────────────────────────────────────────────
 
-/**
- * GET /api/navigation/quick-links
- * Returns top-bar quick links (Students/Faculty/Alumni/Contact or custom)
- */
 export const getQuickLinks = async (): Promise<{ label: string; to: string }[]> => {
-  const labels = mockStore.getUiLabels()
-  return labels.topBarQuickLinks
+  try {
+    const data = await getCmsSection<{ topBarQuickLinks?: { label: string; to: string }[] }>(
+      'navigation.quick_links',
+      { topBarQuickLinks: mockUiLabels.topBarQuickLinks }
+    )
+    return data?.topBarQuickLinks ?? mockUiLabels.topBarQuickLinks
+  } catch {
+    return mockUiLabels.topBarQuickLinks
+  }
 }
 
-// ─── Synchronous Defaults (no-flash initial render) ──────────────────────────
-
+// ─── Sync defaults ────────────────────────────────────────────────────────────
 export const sidebarLinksDefaults: Record<string, SidebarLink[]> = mockSidebarLinks
 export const sectionBannersDefaults: Record<string, SectionBanner> = mockSectionBanners
 export const defaultSectionBanner: SectionBanner = mockDefaultSectionBanner
@@ -109,6 +121,8 @@ export const navigationService = {
   getSectionBanner,
   getAllSectionBanners,
   saveSectionBanner,
+  getNavTree,
+  saveNavTree,
   getQuickLinks,
 }
 

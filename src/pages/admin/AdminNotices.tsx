@@ -1,24 +1,61 @@
 import React, { useState, useEffect } from 'react'
-import { Pencil, Trash2, Plus, X, Star } from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
-import type { Notice } from '../../data/mockStore'
+import { Pencil, Trash2, Plus, X, Star, FileText, Link2, ExternalLink } from 'lucide-react'
+import apiClient from '../../api/client'
+import AttachmentUpload from '../../components/admin/AttachmentUpload'
+import type { AttachmentRecord } from '../../api/index'
 
-const CATEGORIES: Notice['category'][] = ['academic', 'administrative', 'exam', 'tender', 'general']
+// ── Local shape used by the UI form ────────────────────────────────────────
+interface LocalNotice {
+  id: string
+  title: string
+  category: string
+  date: string
+  highlight: boolean
+  file_id: number | null
+  // denormalised for display only:
+  file_url: string
+  attachment_type: 'FILE' | 'EXTERNAL_LINK' | null
+  original_name: string
+}
 
-const EMPTY: Omit<Notice, 'id'> = {
-  title: '',
-  category: 'general',
-  date: new Date().toISOString().slice(0, 10),
-  highlight: false,
-  fileUrl: '',
+function mapFromApi(n: Record<string, unknown>): LocalNotice {
+  return {
+    id:              String(n.id ?? ''),
+    title:           String(n.title ?? ''),
+    category:        String(n.notice_type ?? n.category ?? 'GENERAL').toLowerCase(),
+    date:            String(n.publish_date ?? n.published_at ?? '').slice(0, 10) ||
+                     new Date().toISOString().slice(0, 10),
+    highlight:       n.status === 'PUBLISHED',
+    file_id:         n.file_id != null ? Number(n.file_id) : null,
+    file_url:        String(n.file_url ?? n.attachment_url ?? ''),
+    attachment_type: (n.attachment_type as 'FILE' | 'EXTERNAL_LINK') || null,
+    original_name:   String(n.original_name ?? n.file_name ?? ''),
+  }
+}
+
+const NOTICE_CATEGORIES = [
+  { value: 'GENERAL',    label: 'General' },
+  { value: 'DEPARTMENT', label: 'Department' },
+  { value: 'EXAM',       label: 'Exam' },
+  { value: 'PLACEMENT',  label: 'Placement' },
+]
+
+const EMPTY: Omit<LocalNotice, 'id'> = {
+  title:           '',
+  category:        'GENERAL',
+  date:            new Date().toISOString().slice(0, 10),
+  highlight:       false,
+  file_id:         null,
+  file_url:        '',
+  attachment_type: null,
+  original_name:   '',
 }
 
 const catColor: Record<string, string> = {
-  academic: 'bg-[#0b2545]/10 text-[#0b2545]',
-  administrative: 'bg-[#0b2545]/15 text-[#0b2545]',
-  exam: 'bg-[#bfa15f]/15 text-[#bfa15f]',
-  tender: 'bg-[#bfa15f]/20 text-[#bfa15f]',
-  general: 'bg-slate-100 text-slate-700',
+  general:    'bg-slate-100 text-slate-700',
+  department: 'bg-[#0b2545]/10 text-[#0b2545]',
+  exam:       'bg-[#bfa15f]/15 text-[#bfa15f]',
+  placement:  'bg-[#bfa15f]/20 text-[#bfa15f]',
 }
 
 function Toast({ message, onClose }: { message: string; onClose: () => void }) {
@@ -35,44 +72,134 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 }
 
 export default function AdminNotices() {
-  const [notices, setNotices] = useState<Notice[]>([])
-  const [showModal, setShowModal] = useState(false)
-  const [editItem, setEditItem] = useState<Notice | null>(null)
-  const [form, setForm] = useState<Omit<Notice, 'id'>>(EMPTY)
-  const [deleteTarget, setDeleteTarget] = useState<Notice | null>(null)
-  const [toast, setToast] = useState('')
+  const [notices, setNotices]         = useState<LocalNotice[]>([])
+  const [showModal, setShowModal]     = useState(false)
+  const [editItem, setEditItem]       = useState<LocalNotice | null>(null)
+  const [form, setForm]               = useState<Omit<LocalNotice, 'id'>>(EMPTY)
+  const [deleteTarget, setDeleteTarget] = useState<LocalNotice | null>(null)
+  const [toast, setToast]             = useState('')
+  const [saving, setSaving]           = useState(false)
+  // Track the AttachmentRecord so we can pass it back to the component in edit mode
+  const [attachmentRecord, setAttachmentRecord] = useState<AttachmentRecord | null>(null)
 
-  useEffect(() => { setNotices(mockStore.getNotices()) }, [])
+  const load = async () => {
+    try {
+      const res = await apiClient.get('/v1/notices', { params: { pageSize: 100 } })
+      const items: unknown[] = res.data?.data?.notices ?? res.data?.data ?? []
+      setNotices(Array.isArray(items) ? items.map(i => mapFromApi(i as Record<string, unknown>)) : [])
+    } catch {
+      setNotices([])
+    }
+  }
+
+  useEffect(() => { load() }, [])
 
   const showToast = (msg: string) => setToast(msg)
 
-  const openAdd = () => { setEditItem(null); setForm(EMPTY); setShowModal(true) }
-  const openEdit = (n: Notice) => { setEditItem(n); setForm({ title: n.title, category: n.category, date: n.date, highlight: n.highlight, fileUrl: n.fileUrl ?? '' }); setShowModal(true) }
-  const closeModal = () => { setShowModal(false); setEditItem(null) }
+  const openAdd = () => {
+    setEditItem(null)
+    setForm(EMPTY)
+    setAttachmentRecord(null)
+    setShowModal(true)
+  }
 
-  const handleSave = (e: React.FormEvent) => {
+  const openEdit = (n: LocalNotice) => {
+    setEditItem(n)
+    setForm({
+      title:           n.title,
+      category:        n.category.toUpperCase(),
+      date:            n.date,
+      highlight:       n.highlight,
+      file_id:         n.file_id,
+      file_url:        n.file_url,
+      attachment_type: n.attachment_type,
+      original_name:   n.original_name,
+    })
+    // Reconstruct a minimal AttachmentRecord for the upload component to show current state
+    setAttachmentRecord(
+      n.file_id
+        ? {
+            id:              n.file_id,
+            attachment_type: n.attachment_type ?? 'FILE',
+            original_name:   n.original_name || 'Attached File',
+            stored_name:     null,
+            file_url:        n.file_url,
+            external_url:    n.attachment_type === 'EXTERNAL_LINK' ? n.file_url : null,
+            thumbnail_url:   null,
+            alt_text:        null,
+            meta_title:      null,
+            meta_description: null,
+            file_type:       null,
+            file_size:       null,
+            storage_type:    n.attachment_type === 'EXTERNAL_LINK' ? 'EXTERNAL' : 'LOCAL',
+            uploaded_by:     0,
+            uploader_name:   '',
+            created_at:      '',
+          }
+        : null
+    )
+    setShowModal(true)
+  }
+
+  const closeModal = () => { setShowModal(false); setEditItem(null); setAttachmentRecord(null) }
+
+  const handleAttached = (record: AttachmentRecord) => {
+    setAttachmentRecord(record)
+    setForm(f => ({
+      ...f,
+      file_id:         record.id,
+      file_url:        record.file_url,
+      attachment_type: record.attachment_type,
+      original_name:   record.original_name,
+    }))
+  }
+
+  const handleAttachmentCleared = () => {
+    setAttachmentRecord(null)
+    setForm(f => ({ ...f, file_id: null, file_url: '', attachment_type: null, original_name: '' }))
+  }
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (editItem) {
-      mockStore.updateNotice(editItem.id, form)
-      setNotices(mockStore.getNotices())
-      showToast('Notice updated successfully!')
-    } else {
-      mockStore.addNotice(form)
-      setNotices(mockStore.getNotices())
-      showToast('Notice added successfully!')
+    setSaving(true)
+    const payload: Record<string, unknown> = {
+      title:        form.title,
+      description:  form.title,
+      notice_type:  form.category.toUpperCase(),
+      status:       form.highlight ? 'PUBLISHED' : 'DRAFT',
+      publish_date: form.date,
     }
+    if (form.file_id) payload.file_id = form.file_id
+
+    try {
+      if (editItem) {
+        await apiClient.put(`/v1/notices/${editItem.id}`, payload)
+        showToast('Notice updated successfully!')
+      } else {
+        await apiClient.post('/v1/notices', payload)
+        showToast('Notice added successfully!')
+      }
+      await load()
+    } catch {
+      showToast('Failed to save notice. Please try again.')
+    }
+    setSaving(false)
     closeModal()
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteTarget) return
-    mockStore.deleteNotice(deleteTarget.id)
-    setNotices(mockStore.getNotices())
+    try {
+      await apiClient.delete(`/v1/notices/${deleteTarget.id}`)
+      showToast('Notice deleted.')
+      await load()
+    } catch {
+      showToast('Failed to delete notice.')
+    }
     setDeleteTarget(null)
-    showToast('Notice deleted.')
   }
 
-  const f = (key: keyof Omit<Notice, 'id'>, val: unknown) =>
+  const f = (key: keyof Omit<LocalNotice, 'id'>, val: unknown) =>
     setForm(prev => ({ ...prev, [key]: val }))
 
   return (
@@ -81,7 +208,7 @@ export default function AdminNotices() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold text-primary">Notices Management</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Add, edit and manage official notices and circulars</p>
+          <p className="text-sm text-slate-500 mt-0.5">Add, edit and manage official notices. Attach uploaded files or external links.</p>
         </div>
         <button onClick={openAdd} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors">
           <Plus size={16} /> Add New Notice
@@ -95,8 +222,9 @@ export default function AdminNotices() {
             <tr>
               <th className="text-left px-4 py-3 font-semibold text-slate-600">Title</th>
               <th className="text-left px-4 py-3 font-semibold text-slate-600">Category</th>
+              <th className="text-left px-4 py-3 font-semibold text-slate-600">Attachment</th>
               <th className="text-left px-4 py-3 font-semibold text-slate-600">Date</th>
-              <th className="text-center px-4 py-3 font-semibold text-slate-600">Highlight</th>
+              <th className="text-center px-4 py-3 font-semibold text-slate-600">Published</th>
               <th className="text-center px-4 py-3 font-semibold text-slate-600">Actions</th>
             </tr>
           </thead>
@@ -105,12 +233,30 @@ export default function AdminNotices() {
               <tr key={n.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-4 py-3 max-w-xs">
                   <p className="font-medium text-slate-800 line-clamp-2">{n.title}</p>
-                  {n.fileUrl && <a href={n.fileUrl} className="text-xs text-[#0b2545] hover:underline mt-0.5 block">View File</a>}
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${catColor[n.category]}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${catColor[n.category] ?? 'bg-slate-100 text-slate-700'}`}>
                     {n.category}
                   </span>
+                </td>
+                <td className="px-4 py-3">
+                  {n.file_id ? (
+                    <div className="flex items-center gap-1.5">
+                      {n.attachment_type === 'EXTERNAL_LINK'
+                        ? <Link2 size={12} className="text-[#0b2545]" />
+                        : <FileText size={12} className="text-[#bfa15f]" />
+                      }
+                      {n.file_url
+                        ? <a href={n.file_url} target="_blank" rel="noopener noreferrer" className="text-xs text-[#0b2545] hover:underline flex items-center gap-0.5 truncate max-w-[140px]">
+                            {n.original_name || (n.attachment_type === 'EXTERNAL_LINK' ? 'Link' : 'File')}
+                            <ExternalLink size={10} />
+                          </a>
+                        : <span className="text-xs text-slate-400">Attached</span>
+                      }
+                    </div>
+                  ) : (
+                    <span className="text-xs text-slate-300">—</span>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">{n.date}</td>
                 <td className="px-4 py-3 text-center">
@@ -138,40 +284,95 @@ export default function AdminNotices() {
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-              <h2 className="font-display text-lg font-bold text-primary">{editItem ? 'Edit Notice' : 'Add New Notice'}</h2>
-              <button onClick={closeModal} className="p-1.5 rounded hover:bg-slate-100 text-slate-500"><X size={18} /></button>
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
+              <h2 className="font-display text-lg font-bold text-primary">
+                {editItem ? 'Edit Notice' : 'Add New Notice'}
+              </h2>
+              <button onClick={closeModal} className="p-1.5 rounded hover:bg-slate-100 text-slate-500">
+                <X size={18} />
+              </button>
             </div>
             <form onSubmit={handleSave} className="p-6 space-y-4">
+              {/* Title */}
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Title <span className="text-[#bfa15f]">*</span></label>
-                <input required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.title} onChange={e => f('title', e.target.value)} placeholder="Notice title" />
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  Title <span className="text-[#bfa15f]">*</span>
+                </label>
+                <input
+                  required
+                  className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  value={form.title}
+                  onChange={e => f('title', e.target.value)}
+                  placeholder="Notice title"
+                />
               </div>
+
+              {/* Category + Date */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Category <span className="text-[#bfa15f]">*</span></label>
-                  <select className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.category} onChange={e => f('category', e.target.value as Notice['category'])}>
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    Category <span className="text-[#bfa15f]">*</span>
+                  </label>
+                  <select
+                    className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    value={form.category}
+                    onChange={e => f('category', e.target.value)}
+                  >
+                    {NOTICE_CATEGORIES.map(c => (
+                      <option key={c.value} value={c.value}>{c.label}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Date <span className="text-[#bfa15f]">*</span></label>
-                  <input type="date" required className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.date} onChange={e => f('date', e.target.value)} />
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    Publish Date <span className="text-[#bfa15f]">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    value={form.date}
+                    onChange={e => f('date', e.target.value)}
+                  />
                 </div>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">File URL <span className="text-slate-400">(optional)</span></label>
-                <input type="url" className="border border-slate-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" value={form.fileUrl ?? ''} onChange={e => f('fileUrl', e.target.value)} placeholder="https://sgsits.ac.in/notices/file.pdf" />
-              </div>
+
+              {/* Attachment — dual upload component */}
+              <AttachmentUpload
+                usage="notices"
+                label="Attachment (optional)"
+                onAttached={handleAttached}
+                onClear={handleAttachmentCleared}
+                initialValue={attachmentRecord}
+              />
+
+              {/* Published toggle */}
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={form.highlight} onChange={e => f('highlight', e.target.checked)} className="w-4 h-4 accent-[#bfa15f]" />
-                <span className="text-sm font-medium text-slate-700">Mark as Highlighted</span>
+                <input
+                  type="checkbox"
+                  checked={form.highlight}
+                  onChange={e => f('highlight', e.target.checked)}
+                  className="w-4 h-4 accent-[#bfa15f]"
+                />
+                <span className="text-sm font-medium text-slate-700">Mark as Published</span>
               </label>
+
+              {/* Buttons */}
               <div className="flex gap-3 pt-2 border-t border-slate-100">
-                <button type="button" onClick={closeModal} className="flex-1 py-2 border border-slate-300 text-slate-700 rounded font-semibold text-sm hover:bg-slate-50">Cancel</button>
-                <button type="submit" className="flex-1 py-2 bg-primary text-white rounded font-semibold text-sm hover:bg-primary/90">
-                  {editItem ? '✓ Update Notice' : '+ Add Notice'}
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="flex-1 py-2 border border-slate-300 text-slate-700 rounded font-semibold text-sm hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 py-2 bg-primary text-white rounded font-semibold text-sm hover:bg-primary/90 disabled:opacity-60"
+                >
+                  {saving ? 'Saving…' : editItem ? '✓ Update Notice' : '+ Add Notice'}
                 </button>
               </div>
             </form>
@@ -189,8 +390,18 @@ export default function AdminNotices() {
             <h3 className="font-bold text-slate-800 text-lg mb-1">Delete Notice?</h3>
             <p className="text-slate-500 text-sm mb-5 line-clamp-2">"{deleteTarget.title}"</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteTarget(null)} className="flex-1 py-2 border border-slate-300 text-slate-700 rounded font-semibold text-sm hover:bg-slate-50">Cancel</button>
-              <button onClick={handleDelete} className="flex-1 py-2 bg-[#0b2545] text-white rounded font-semibold text-sm hover:bg-[#0b2545]/90">Delete</button>
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 py-2 border border-slate-300 text-slate-700 rounded font-semibold text-sm hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 py-2 bg-[#0b2545] text-white rounded font-semibold text-sm hover:bg-[#0b2545]/90"
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>

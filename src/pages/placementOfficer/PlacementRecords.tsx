@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { PageHeader, PortalCard, Badge } from '../../components/layout/PortalLayout'
-import { BRANCHES } from '../../data/mockPortalData'
+import { getBranches, type Branch } from '../../services/examService'
 import { Plus, Search, FileSpreadsheet, Download, Trash2, X, Upload } from 'lucide-react'
 
 // Simple local Toast component
@@ -45,6 +45,11 @@ const MOCK_RECORDS: PlacementRecord[] = [
 ]
 
 const PlacementRecords: React.FC = () => {
+  const [branches, setBranches] = useState<Branch[]>([])
+  useEffect(() => {
+    getBranches().then(setBranches)
+  }, [])
+
   const [records, setRecords] = useState<PlacementRecord[]>(MOCK_RECORDS)
   const [search, setSearch] = useState('')
   const [selectedBranch, setSelectedBranch] = useState('')
@@ -236,7 +241,7 @@ const PlacementRecords: React.FC = () => {
                     className="w-full border border-slate-200 rounded px-2.5 py-1.5 text-xs bg-white focus:outline-none"
                   >
                     <option value="">Branch</option>
-                    {BRANCHES.map(b => (
+                    {branches.map(b => (
                       <option key={b.id} value={b.id}>{b.shortName}</option>
                     ))}
                   </select>
@@ -322,7 +327,7 @@ const PlacementRecords: React.FC = () => {
               className="text-xs border border-slate-100 bg-slate-50 rounded-lg px-3 py-1.5"
             >
               <option value="">All Branches</option>
-              {BRANCHES.map(b => (
+              {branches.map(b => (
                 <option key={b.id} value={b.id}>{b.name}</option>
               ))}
             </select>

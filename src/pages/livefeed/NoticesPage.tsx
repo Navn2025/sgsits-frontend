@@ -1,6 +1,6 @@
-﻿import React, { useState, useMemo } from 'react'
+﻿import React, { useState, useMemo, useEffect } from 'react'
 import PageSeo from '../../components/global/PageSeo'
-import { mockStore } from '../../data/mockStore'
+import { getNotices } from '../../services/noticesService'
 import { Search, FileText, ChevronLeft, ChevronRight, Tag, Eye } from 'lucide-react'
 import PdfViewerModal from '../../components/global/PdfViewerModal'
 
@@ -26,7 +26,8 @@ const categoryColors: Record<string, string> = {
 const ITEMS_PER_PAGE = 10
 
 const NoticesPage: React.FC = () => {
-  const [notices] = useState(() => mockStore.getNotices())
+  const [notices, setNotices] = useState<any[]>([])
+  useEffect(() => { getNotices().then(setNotices).catch(() => setNotices([])) }, [])
   const [activeTab, setActiveTab] = useState<CategoryFilter>('all')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)

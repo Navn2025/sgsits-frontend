@@ -1,11 +1,12 @@
-﻿import React, { useState, useMemo } from 'react'
+﻿import React, { useState, useMemo, useEffect } from 'react'
 import PageSeo from '../../components/global/PageSeo'
 import { Link } from 'react-router-dom'
-import { mockStore } from '../../data/mockStore'
+import { getAllNews } from '../../services/newsService'
 import { Calendar, User, ArrowRight, Search } from 'lucide-react'
 
 const NewsPage: React.FC = () => {
-  const [news] = useState(() => mockStore.getNews())
+  const [news, setNews] = useState<any[]>([])
+  useEffect(() => { getAllNews().then(setNews).catch(() => setNews([])) }, [])
   const [activeCategory, setActiveCategory] = useState('All')
   const [search, setSearch] = useState('')
 

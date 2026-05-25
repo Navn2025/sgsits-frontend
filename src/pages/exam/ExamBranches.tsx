@@ -1,11 +1,18 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalModal } from '../../components/layout/PortalLayout'
-import { BRANCHES, CURRENT_SESSION } from '../../data/mockPortalData'
-import type { Branch } from '../../data/mockPortalData'
+import { getBranches, getActiveSession, type Branch, type Session } from '../../services/examService'
 import { Plus, Trash2, Users } from 'lucide-react'
 
 const ExamBranches: React.FC = () => {
-  const [branches, setBranches] = useState<Branch[]>(BRANCHES)
+  const [branches, setBranches] = useState<Branch[]>([])
+  const [activeSession, setActiveSession] = useState<Session | undefined>(undefined)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([getBranches(), getActiveSession()]).then(([b, s]) => {
+      setBranches(b); setActiveSession(s); setLoading(false)
+    })
+  }, [])
   const [isOpen, setIsOpen] = useState(false)
   const [form, setForm] = useState({ id: '', name: '', shortName: '', hodName: '', facultyCount: '0' })
   const [saving, setSaving] = useState(false)
@@ -42,7 +49,7 @@ const ExamBranches: React.FC = () => {
     <div className="space-y-5">
       <PageHeader
         title="Branch Management"
-        subtitle={`Session: ${CURRENT_SESSION.label} · ${branches.length} branches configured`}
+        subtitle={`Session: ${activeSession?.label ?? '…'} · ${branches.length} branches configured`}
         action={
           <button
             onClick={() => setIsOpen(true)}

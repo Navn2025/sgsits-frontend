@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as Icons from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
+import * as placementService from '../../services/placementService'
+import { getCustomPages } from '../../services/aboutService'
 
 // Simple local Toast component for saving notifications
 interface ToastProps {
@@ -54,42 +55,51 @@ const PlacementCms: React.FC = () => {
   })
 
   // Hydrate all data on mount
-  const refreshAll = () => {
-    setCellInfo(mockStore.getTNPCellInfo())
-    setTeam(mockStore.getTNPTeam())
-    setProcess(mockStore.getPlacementProcess())
-    setTrainings(mockStore.getTrainingPrograms())
-    setPartners(mockStore.getRecruitingPartners())
-    setRecords(mockStore.getPlacement())
-    setDeptStats(mockStore.getDeptPlacement())
-    setCompanies(mockStore.getLeadingCompanies())
-    setContacts(mockStore.getPlacementContacts())
-    setOffice(mockStore.getPlacementOfficeInfo())
-    
-    // Filter custom pages to only include 'placement' parent menu pages
-    const pages = mockStore.getCustomPages()
-    setCustomPages(pages.filter((p: any) => p.menu === 'placement'))
+  const refreshAll = async () => {
+    const [ci, team, proc, train, part, recs, depts, cos, cts, off, pages] = await Promise.allSettled([
+      placementService.getTNPCellInfo(),
+      placementService.getTNPTeam(),
+      placementService.getPlacementProcess(),
+      placementService.getTrainingPrograms(),
+      placementService.getRecruitingPartners(),
+      placementService.getPlacementRecords(),
+      placementService.getDeptPlacement(),
+      placementService.getLeadingCompanies(),
+      placementService.getPlacementContacts(),
+      placementService.getPlacementOfficeInfo(),
+      getCustomPages(),
+    ])
+    const val = <T,>(r: PromiseSettledResult<T>, fb: T) => r.status === 'fulfilled' ? r.value : fb
+    setCellInfo(val(ci, null))
+    setTeam(val(team, []))
+    setProcess(val(proc, []))
+    setTrainings(val(train, []))
+    setPartners(val(part, []))
+    setRecords(val(recs, []))
+    setDeptStats(val(depts, []))
+    setCompanies(val(cos, []))
+    setContacts(val(cts, []))
+    setOffice(val(off, null))
+    const allPages = val(pages, []) as any[]
+    setCustomPages(allPages.filter((p: any) => p.menu === 'placement'))
   }
 
   useEffect(() => {
     refreshAll()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Helper trigger to save values reactively
-  const triggerSave = (storeKey: string, payload: any, msg: string) => {
-    if (storeKey === 'cell_info') mockStore.saveTNPCellInfo(payload)
-    else if (storeKey === 'team') mockStore.saveTNPTeam(payload)
-    else if (storeKey === 'process') mockStore.savePlacementProcess(payload)
-    else if (storeKey === 'training') mockStore.saveTrainingPrograms(payload)
-    else if (storeKey === 'partners') mockStore.saveRecruitingPartners(payload)
-    else if (storeKey === 'records') mockStore.savePlacement(payload)
-    else if (storeKey === 'dept_stats') mockStore.saveDeptPlacement(payload)
-    else if (storeKey === 'companies') mockStore.saveLeadingCompanies(payload)
-    else if (storeKey === 'contacts') mockStore.savePlacementContacts(payload)
-    else if (storeKey === 'office') mockStore.savePlacementOfficeInfo(payload)
+  const triggerSave = async (storeKey: string, payload: any, msg: string) => {
+    if (storeKey === 'cell_info') await placementService.saveTNPCellInfo(payload)
+    else if (storeKey === 'team') await placementService.saveTNPTeam(payload)
+    else if (storeKey === 'process') await placementService.savePlacementProcess(payload)
+    else if (storeKey === 'contacts') await placementService.savePlacementContacts(payload)
+    else if (storeKey === 'office') await placementService.savePlacementOfficeInfo(payload)
+    // read-only fallbacks (no save endpoints for training/partners/records in CMS)
 
     setToast(msg)
-    refreshAll()
+    await refreshAll()
   }
 
   return (

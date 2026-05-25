@@ -1,11 +1,11 @@
 ﻿import React, { useEffect, useState } from 'react'
 import PageSeo from '../../components/global/PageSeo'
 import { CheckCircle2, Phone, Mail } from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
+import { getBoysHostel } from '../../services/facilitiesService'
 
 const BoysHostel: React.FC = () => {
   const [data, setData] = useState<any>(null)
-  useEffect(() => { setData(mockStore.getBoysHostel()) }, [])
+  useEffect(() => { getBoysHostel().then(setData) }, [])
   if (!data) return null
 
   return (

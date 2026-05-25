@@ -1,16 +1,24 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { PageHeader, PortalCard, Badge } from '../../components/layout/PortalLayout'
-import { SUBJECTS, BRANCHES, CURRENT_SESSION } from '../../data/mockPortalData'
-import type { Subject } from '../../data/mockPortalData'
+import { getSubjects, getBranches, getActiveSession, type Subject, type Branch, type Session } from '../../services/examService'
 import { Upload, Download, FileText } from 'lucide-react'
 
 const ExamSubjectUpload: React.FC = () => {
-  const [subjects] = useState<Subject[]>(SUBJECTS)
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [branches, setBranches] = useState<Branch[]>([])
+  const [activeSession, setActiveSession] = useState<Session | undefined>(undefined)
+  const [loading, setLoading] = useState(true)
   const [filterBranch, setFilterBranch] = useState('ALL')
   const [filterSem, setFilterSem] = useState('ALL')
   const [uploading, setUploading] = useState(false)
   const [uploaded, setUploaded] = useState(false)
   const [file, setFile] = useState<File | null>(null)
+
+  useEffect(() => {
+    Promise.all([getSubjects(), getBranches(), getActiveSession()]).then(([s, b, ses]) => {
+      setSubjects(s); setBranches(b); setActiveSession(ses); setLoading(false)
+    })
+  }, [])
 
   const filtered = subjects.filter(s =>
     (filterBranch === 'ALL' || s.branch_id === filterBranch) &&
@@ -33,7 +41,7 @@ const ExamSubjectUpload: React.FC = () => {
     <div className="space-y-5">
       <PageHeader
         title="Upload Subject Data"
-        subtitle={`Session: ${CURRENT_SESSION.label} · Upload subject master data via CSV`}
+        subtitle={`Session: ${activeSession?.label ?? '…'} · Upload subject master data via CSV`}
       />
 
       {/* Upload Box */}
@@ -83,7 +91,7 @@ const ExamSubjectUpload: React.FC = () => {
             <select value={filterBranch} onChange={e => setFilterBranch(e.target.value)}
               className="border border-slate-200 rounded px-3 py-1.5 text-xs focus:outline-none focus:border-primary">
               <option value="ALL">All Branches</option>
-              {BRANCHES.map(b => <option key={b.id} value={b.id}>{b.shortName}</option>)}
+              {branches.map(b => <option key={b.id} value={b.id}>{b.shortName}</option>)}
             </select>
             <select value={filterSem} onChange={e => setFilterSem(e.target.value)}
               className="border border-slate-200 rounded px-3 py-1.5 text-xs focus:outline-none focus:border-primary">

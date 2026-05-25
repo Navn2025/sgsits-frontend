@@ -3,6 +3,7 @@ import PageSeo from '../components/global/PageSeo'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAdminStore } from '../store/adminStore'
 import { authAPI } from '../api'
+import apiClient from '../api/client'
 
 /* ── Canvas Captcha ──────────────────────────────────────── */
 function generateCaptchaText(): string {
@@ -65,6 +66,12 @@ const Login: React.FC = () => {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
+  // Forgot-password flow
+  const [forgotMode, setForgotMode] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotStatus, setForgotStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
+  const [forgotMsg, setForgotMsg] = useState('')
+
   const refreshCaptcha = useCallback(() => {
     setCaptchaText(generateCaptchaText())
     setCaptchaInput('')
@@ -76,7 +83,26 @@ const Login: React.FC = () => {
     setUsername('')
     setPassword('')
     setCaptchaInput('')
+    setForgotMode(false)
+    setForgotStatus('idle')
     refreshCaptcha()
+  }
+
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!forgotEmail.trim()) return
+    setForgotStatus('loading')
+    setForgotMsg('')
+    try {
+      const res = await apiClient.post('/v1/auth/forgot-password', { email: forgotEmail.trim().toLowerCase() })
+      const msg: string = res.data?.message ?? 'If that email exists, a reset link has been sent.'
+      setForgotMsg(msg)
+      setForgotStatus('sent')
+    } catch (err: unknown) {
+      const apiMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      setForgotMsg(apiMsg || 'Something went wrong. Please try again.')
+      setForgotStatus('error')
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,37 +120,42 @@ const Login: React.FC = () => {
     setIsLoading(true)
 
     try {
-      if (loginType === 'admin') {
-        const res = await authAPI.adminLogin(username, password)
-        setAuth(res.token, res.user)
-        navigate('/dashboard/central-admin/dashboard', { replace: true })
-
-      } else if (loginType === 'faculty') {
-        const res = await authAPI.facultyLogin(username, password)
-        setAuth(res.token, res.user)
-        navigate('/dashboard/teacher/dashboard', { replace: true })
-
-      } else if (loginType === 'hod') {
-        const res = await authAPI.hodLogin(username, password)
-        setAuth(res.token, res.user)
-        navigate('/dashboard/hod/dashboard', { replace: true })
-
-      } else if (loginType === 'exam') {
-        const res = await authAPI.examLogin(username, password)
-        setAuth(res.token, res.user)
-        navigate('/dashboard/exam/dashboard', { replace: true })
-
-      } else if (loginType === 'placement') {
-        const res = await authAPI.placementLogin(username, password)
-        setAuth(res.token, res.user)
-        navigate('/dashboard/placement/dashboard', { replace: true })
-
-      } else {
+      if (loginType === 'student') {
         // Student login — redirect to ERP portal (external)
         window.open('https://erp.sgsits.ac.in', '_blank')
+        return
       }
+
+      // All staff roles use a SINGLE backend endpoint POST /api/v1/auth/login
+      // The backend returns the role and the frontend redirects accordingly.
+      const loginFn =
+        loginType === 'admin'     ? authAPI.adminLogin     :
+        loginType === 'faculty'   ? authAPI.facultyLogin   :
+        loginType === 'hod'       ? authAPI.hodLogin       :
+        loginType === 'exam'      ? authAPI.examLogin      :
+                                    authAPI.placementLogin
+
+      const res = await loginFn(username, password) as typeof res & { redirectTo?: string }
+      setAuth(res.token, res.user)
+
+      // Role-based redirect — backend-driven
+      const role = res.user?.role ?? ''
+      const ROLE_ROUTES: Record<string, string> = {
+        CENTRAL_ADMIN:     '/dashboard/central-admin/dashboard',
+        EXAM_CONTROLLER:   '/dashboard/exam/dashboard',
+        PLACEMENT_OFFICER: '/dashboard/placement/dashboard',
+        HOD:               '/dashboard/hod/dashboard',
+        TEACHER:           '/dashboard/teacher/dashboard',
+      }
+      const dest = (res as { redirectTo?: string }).redirectTo
+        ?? ROLE_ROUTES[role]
+        ?? '/dashboard/central-admin/dashboard'
+
+      navigate(dest, { replace: true })
+
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Login failed. Please check your credentials.'
+      const axiosMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      const msg = axiosMsg || (err instanceof Error ? err.message : 'Login failed. Please check your credentials.')
       setError(msg)
       refreshCaptcha()
     } finally {
@@ -142,12 +173,12 @@ const Login: React.FC = () => {
   ]
 
   const placeholders: Record<LoginTab, { username: string; hint: string; fieldLabel: string }> = {
-    student:   { username: 'Enrollment Number (e.g. 0801CS211001)', hint: 'Use your enrollment number and ERP password',           fieldLabel: 'Enrollment Number' },
-    hod:       { username: 'Employee ID (e.g. SGS-CE-HOD)',         hint: 'Use your HOD employee ID and institute password',       fieldLabel: 'Employee ID' },
-    faculty:   { username: 'Employee ID (e.g. SGS-CE-001)',         hint: 'Use your teacher employee ID and institute password',   fieldLabel: 'Employee ID' },
-    admin:     { username: 'Admin Email (e.g. admin@sgsits.ac.in)', hint: 'Use your official email and admin password',            fieldLabel: 'Email Address' },
-    exam:      { username: 'Exam Cell ID (e.g. SGS-EXAM-001)',      hint: 'Use your Exam Department ID and institute password',    fieldLabel: 'Exam Cell ID' },
-    placement: { username: 'T&P Cell ID (e.g. SGS-TNP-001)',        hint: 'Use your Placement Cell ID and institute password',     fieldLabel: 'T&P Cell ID' },
+    student:   { username: 'Enrollment Number (e.g. 0801CS211001)', hint: 'Use your enrollment number and ERP password',                          fieldLabel: 'Enrollment Number' },
+    hod:       { username: 'Email (e.g. hod.ce@sgsits.ac.in)',      hint: 'Use your official institute email and password',                       fieldLabel: 'Email Address' },
+    faculty:   { username: 'Email (e.g. faculty@sgsits.ac.in)',      hint: 'Use your official institute email and password',                       fieldLabel: 'Email Address' },
+    admin:     { username: 'Email (e.g. admin@sgsits.ac.in)',        hint: 'Use your official admin email and password',                           fieldLabel: 'Email Address' },
+    exam:      { username: 'Email (e.g. exam@sgsits.ac.in)',         hint: 'Use your official Exam Department email and password',                 fieldLabel: 'Email Address' },
+    placement: { username: 'Email (e.g. tnp@sgsits.ac.in)',          hint: 'Use your official T&P Cell email and password',                       fieldLabel: 'Email Address' },
   }
 
   const resolvedBgImage = `${import.meta.env.BASE_URL?.replace(/\/$/, '') ?? ''}/assets/media__1776272596244.png`
@@ -248,7 +279,13 @@ const Login: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">Password</label>
-                    <button type="button" className="text-[11px] text-primary hover:underline">Forgot Password?</button>
+                    <button
+                      type="button"
+                      onClick={() => { setForgotMode(true); setForgotStatus('idle'); setForgotEmail(''); setForgotMsg('') }}
+                      className="text-[11px] text-primary hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
                   </div>
                   <div className="relative">
                     <input
@@ -316,14 +353,55 @@ const Login: React.FC = () => {
                 </p>
               )}
 
-              {/* Admin direct link */}
-              {loginType !== 'admin' && (
-                <p className="text-center text-[11px] text-slate-400 mt-4">
-                  Are you an admin?{' '}
-                  <Link to="/admin/login" className="text-primary underline">Go to Admin Panel</Link>
-                </p>
-              )}
             </div>
+
+            {/* ── Forgot Password inline panel ─────────────────────── */}
+            {forgotMode && (
+              <div className="border-t border-slate-100 px-7 sm:px-9 py-6 bg-slate-50">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-sm font-bold text-slate-700">Reset Your Password</h2>
+                  <button
+                    type="button"
+                    onClick={() => setForgotMode(false)}
+                    className="text-slate-400 hover:text-slate-600 text-sm leading-none"
+                    aria-label="Close"
+                  >✕</button>
+                </div>
+
+                {forgotStatus === 'sent' ? (
+                  <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded px-4 py-3">
+                    {forgotMsg}
+                  </div>
+                ) : (
+                  <form onSubmit={handleForgotSubmit} className="space-y-3" noValidate>
+                    <p className="text-[11px] text-slate-500">
+                      Enter your official institute email. If it exists in our system, a reset link will be sent.
+                    </p>
+                    {forgotStatus === 'error' && (
+                      <div className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2">
+                        {forgotMsg}
+                      </div>
+                    )}
+                    <input
+                      type="email"
+                      value={forgotEmail}
+                      onChange={e => setForgotEmail(e.target.value)}
+                      placeholder="your.email@sgsits.ac.in"
+                      required
+                      disabled={forgotStatus === 'loading'}
+                      className="w-full border border-gray-300 rounded px-4 py-2 text-sm focus:outline-none placeholder-gray-400 bg-white focus:border-primary disabled:opacity-60"
+                    />
+                    <button
+                      type="submit"
+                      disabled={forgotStatus === 'loading' || !forgotEmail.trim()}
+                      className="w-full py-2.5 rounded text-white font-semibold text-sm bg-primary hover:opacity-95 disabled:opacity-50 transition-all"
+                    >
+                      {forgotStatus === 'loading' ? 'Sending…' : 'Send Reset Link'}
+                    </button>
+                  </form>
+                )}
+              </div>
+            )}
           </div>
 
           <p className="text-center text-white/60 text-xs mt-5">

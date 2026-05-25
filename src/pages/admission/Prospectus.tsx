@@ -2,13 +2,13 @@
 import PageSeo from '../../components/global/PageSeo'
 import { Link } from 'react-router-dom';
 import * as Icons from 'lucide-react';
-import { mockStore } from '../../data/mockStore';
+import { getProspectus } from '../../services/adminContentService';
 
 export default function Prospectus() {
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    setData(mockStore.getProspectus());
+    getProspectus().then(setData);
   }, []);
 
   if (!data) {

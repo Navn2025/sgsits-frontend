@@ -1,56 +1,37 @@
 /**
  * SEO Service — Per-page dynamic meta tags
  *
- * ╔══════════════════════════════════════════════════════════╗
- * ║  MOCK MODE                                              ║
- * ║  Replace with: apiClient.get('/seo/:pageKey')           ║
- * ╚══════════════════════════════════════════════════════════╝
- *
- * Admin panel can set per-page:
- *  - HTML <title>
- *  - Meta description
- *  - Open Graph title, description, image
- *  - Canonical URL
- *  - Twitter card type
- *  - Keywords
+ * Backend: GET/PUT /api/v1/settings/cms/seo
+ * Falls back to mock defaults when backend unreachable.
  */
 
+import { getCmsSection, saveCmsSection } from './settingsService'
 import { mockSeoData, mockDefaultSeoMeta, type SeoMeta } from '../mock/seo/seoData'
-import { mockStore } from '../data/mockStore'
 
-/**
- * GET /api/seo/:pageKey
- * Returns SEO metadata for a specific page.
- * Falls back to default if not configured.
- */
-export const getPageSeo = async (pageKey: string): Promise<SeoMeta> => {
-  return mockStore.getPageSeo(pageKey)
-}
+const KEY = 'seo'
 
-/**
- * GET /api/seo
- * Returns all page SEO configurations.
- */
 export const getAllPageSeo = async (): Promise<Record<string, SeoMeta>> => {
-  return mockStore.getAllPageSeo()
+  const data = await getCmsSection<Record<string, SeoMeta>>(KEY, mockSeoData)
+  return (data && typeof data === 'object' && !Array.isArray(data)) ? data : mockSeoData
 }
 
-/**
- * PUT /api/seo/:pageKey
- */
-export const savePageSeo = async (pageKey: string, seo: SeoMeta): Promise<void> => {
-  mockStore.savePageSeo(pageKey, seo)
+export const getPageSeo = async (pageKey: string): Promise<SeoMeta> => {
+  const all = await getAllPageSeo()
+  return all[pageKey] ?? mockDefaultSeoMeta
 }
 
-/**
- * PUT /api/seo
- */
 export const saveAllPageSeo = async (data: Record<string, SeoMeta>): Promise<void> => {
-  mockStore.saveAllPageSeo(data)
+  await saveCmsSection(KEY, data)
 }
 
-/** Synchronous default SEO for immediate rendering */
-export const defaultSeoMeta: SeoMeta = mockDefaultSeoMeta
+export const savePageSeo = async (pageKey: string, seo: SeoMeta): Promise<void> => {
+  const all = await getAllPageSeo()
+  all[pageKey] = seo
+  await saveCmsSection(KEY, all)
+}
+
+/** Synchronous defaults — no-flash initial render */
+export const defaultSeoMeta: SeoMeta              = mockDefaultSeoMeta
 export const allSeoDefaults: Record<string, SeoMeta> = mockSeoData
 
 export type { SeoMeta }

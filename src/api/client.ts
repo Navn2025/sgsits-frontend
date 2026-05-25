@@ -42,10 +42,10 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && window.location.pathname !== '/login') {
       // Clear auth and redirect to login
       localStorage.removeItem('sgsits-admin-auth')
-      window.location.href = '/admin/login'
+      window.location.href = '/login'
     }
     return Promise.reject(error)
   }

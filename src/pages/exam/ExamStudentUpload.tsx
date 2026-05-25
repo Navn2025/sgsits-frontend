@@ -1,9 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { PageHeader, PortalCard, Badge } from '../../components/layout/PortalLayout'
-import { STUDENTS, BRANCHES, CURRENT_SESSION } from '../../data/mockPortalData'
+import { getStudents, getBranches, getActiveSession, type Student, type Branch, type Session } from '../../services/examService'
 import { Upload, Download, FileText } from 'lucide-react'
 
 const ExamStudentUpload: React.FC = () => {
+  const [students, setStudents] = useState<Student[]>([])
+  const [branches, setBranches] = useState<Branch[]>([])
+  const [activeSession, setActiveSession] = useState<Session | undefined>(undefined)
+  const [loading, setLoading] = useState(true)
   const [filterBranch, setFilterBranch] = useState('ALL')
   const [filterSem, setFilterSem] = useState('ALL')
   const [search, setSearch] = useState('')
@@ -11,10 +15,16 @@ const ExamStudentUpload: React.FC = () => {
   const [uploaded, setUploaded] = useState(false)
   const [file, setFile] = useState<File | null>(null)
 
-  const filtered = STUDENTS.filter(s =>
+  useEffect(() => {
+    Promise.all([getStudents(), getBranches(), getActiveSession()]).then(([st, b, s]) => {
+      setStudents(st); setBranches(b); setActiveSession(s); setLoading(false)
+    })
+  }, [])
+
+  const filtered = students.filter(s =>
     (filterBranch === 'ALL' || s.branch_id === filterBranch) &&
     (filterSem === 'ALL' || s.semester === +filterSem) &&
-    (s.name.toLowerCase().includes(search.toLowerCase()) || s.enrollment.includes(search))
+    (s.student_name.toLowerCase().includes(search.toLowerCase()) || s.enrollment_no.includes(search))
   )
 
   const handleUpload = async () => {
@@ -27,22 +37,22 @@ const ExamStudentUpload: React.FC = () => {
     setFile(null)
   }
 
-  const semesters = Array.from(new Set(STUDENTS.map(s => s.semester))).sort()
+  const semesters = Array.from(new Set(students.map(s => s.semester))).sort()
 
   return (
     <div className="space-y-5">
       <PageHeader
         title="Student Data Upload"
-        subtitle={`Session: ${CURRENT_SESSION.label} · Upload student enrollment data via CSV`}
+        subtitle={`Session: ${activeSession?.label ?? '…'} · Upload student enrollment data via CSV`}
       />
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: 'Total Students', value: STUDENTS.length, icon: '👥' },
-          { label: 'CSE Branch', value: STUDENTS.filter(s => s.branch_id === 'CSE').length, icon: '💻' },
-          { label: 'IT Branch', value: STUDENTS.filter(s => s.branch_id === 'IT').length, icon: '🌐' },
-          { label: 'With ATKT', value: STUDENTS.filter(s => s.hasATKT).length, icon: '⚠️' },
+          { label: 'Total Students', value: students.length, icon: '👥' },
+          { label: 'CSE Branch', value: students.filter(s => s.branch_id === 'CSE').length, icon: '💻' },
+          { label: 'IT Branch', value: students.filter(s => s.branch_id === 'IT').length, icon: '🌐' },
+          { label: 'With ATKT', value: students.filter(s => s.hasATKT).length, icon: '⚠️' },
         ].map(stat => (
           <PortalCard key={stat.label} className="text-center !p-4">
             <p className="text-2xl mb-1">{stat.icon}</p>
@@ -90,7 +100,7 @@ const ExamStudentUpload: React.FC = () => {
             <select value={filterBranch} onChange={e => setFilterBranch(e.target.value)}
               className="border border-slate-200 rounded px-3 py-1.5 text-xs focus:outline-none focus:border-primary">
               <option value="ALL">All Branches</option>
-              {BRANCHES.map(b => <option key={b.id} value={b.id}>{b.shortName}</option>)}
+              {branches.map(b => <option key={b.id} value={b.id}>{b.shortName}</option>)}
             </select>
             <select value={filterSem} onChange={e => setFilterSem(e.target.value)}
               className="border border-slate-200 rounded px-3 py-1.5 text-xs focus:outline-none focus:border-primary">
@@ -111,13 +121,13 @@ const ExamStudentUpload: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filtered.map(s => (
-                <tr key={s.enrollment} className="hover:bg-slate-50/60">
-                  <td className="px-4 py-2.5"><span className="font-mono text-xs font-bold text-slate-700">{s.enrollment}</span></td>
-                  <td className="px-4 py-2.5 font-medium text-slate-800">{s.name}</td>
+                <tr key={s.enrollment_no} className="hover:bg-slate-50/60">
+                  <td className="px-4 py-2.5"><span className="font-mono text-xs font-bold text-slate-700">{s.enrollment_no}</span></td>
+                  <td className="px-4 py-2.5 font-medium text-slate-800">{s.student_name}</td>
                   <td className="px-4 py-2.5"><Badge label={s.branch_id} variant="info" /></td>
                   <td className="px-4 py-2.5 text-xs text-slate-600">Sem {s.semester}</td>
-                  <td className="px-4 py-2.5 text-xs text-slate-600">Section {s.section}</td>
-                  <td className="px-4 py-2.5 text-xs text-slate-500">{s.email}</td>
+                  <td className="px-4 py-2.5 text-xs text-slate-600">Section {s.section ?? '—'}</td>
+                  <td className="px-4 py-2.5 text-xs text-slate-500">—</td>
                   <td className="px-4 py-2.5"><Badge label={s.hasATKT ? 'Yes' : 'No'} variant={s.hasATKT ? 'warning' : 'default'} /></td>
                 </tr>
               ))}

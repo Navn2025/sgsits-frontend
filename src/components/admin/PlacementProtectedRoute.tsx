@@ -10,10 +10,11 @@ const PlacementProtectedRoute: React.FC = () => {
     return <Navigate to="/login" replace />
   }
 
+  const roleLower = user?.role?.toLowerCase()
   if (
-    user?.role !== 'placement_officer' &&
-    user?.role !== 'super_admin' &&
-    user?.role !== 'central_admin'
+    roleLower !== 'placement_officer' &&
+    roleLower !== 'super_admin' &&
+    roleLower !== 'central_admin'
   ) {
     return <Navigate to="/login" replace />
   }

@@ -1,19 +1,27 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalModal } from '../../components/layout/PortalLayout'
-import { REGISTRATION_REQUESTS, type RegistrationRequest } from '../../data/mockPortalData'
+import { getRegistrationRequests, type RegistrationRequest } from '../../services/examService'
+import { useAdminStore } from '../../store/adminStore'
 import { Search, Check, X, UserPlus, Mail, Phone, BookOpen, Briefcase } from 'lucide-react'
 
 const HOD_BRANCH = 'CSE'
 
 const HodRegistration: React.FC = () => {
-  const [requests, setRequests] = useState<RegistrationRequest[]>(REGISTRATION_REQUESTS)
+  const { user } = useAdminStore()
+  const hodBranch = user?.department_id ? String(user.department_id) : HOD_BRANCH
+  const [requests, setRequests] = useState<RegistrationRequest[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getRegistrationRequests(hodBranch).then(r => { setRequests(r); setLoading(false) })
+  }, [hodBranch])
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | RegistrationRequest['status']>('all')
   const [reviewing, setReviewing] = useState<RegistrationRequest | null>(null)
   const [remark, setRemark] = useState('')
   const [toast, setToast] = useState('')
 
-  const branchReqs = useMemo(() => requests.filter(r => r.branch_id === HOD_BRANCH), [requests])
+  const branchReqs = useMemo(() => requests.filter(r => r.branch_id === hodBranch), [requests, hodBranch])
   const visible = useMemo(() => branchReqs.filter(r => {
     if (statusFilter !== 'all' && r.status !== statusFilter) return false
     if (search.trim()) {

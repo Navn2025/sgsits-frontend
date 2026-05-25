@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalModal } from '../../components/layout/PortalLayout'
 import { HOD_LABS, type HodLab } from '../../data/mockHodContent'
-import { FACULTY_MEMBERS } from '../../data/mockPortalData'
+import { getFacultyMembers, type FacultyMember } from '../../services/examService'
+import { useAdminStore } from '../../store/adminStore'
 import { Plus, Pencil, Trash2, Search, FlaskConical, X, Send, Archive, User, MapPin, Users as UsersIcon } from 'lucide-react'
 
 const STATUSES: HodLab['status'][] = ['draft', 'published', 'archived']
@@ -13,6 +14,8 @@ const EMPTY: Omit<HodLab, 'id'> = {
 }
 
 const HodLabs: React.FC = () => {
+  const { user } = useAdminStore()
+  const hodBranch = user?.department_id ? String(user.department_id) : HOD_BRANCH
   const [labs, setLabs] = useState<HodLab[]>(HOD_LABS)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | HodLab['status']>('all')
@@ -24,7 +27,11 @@ const HodLabs: React.FC = () => {
   const [viewing, setViewing] = useState<HodLab | null>(null)
   const [toast, setToast] = useState('')
 
-  const inchargeOptions = useMemo(() => FACULTY_MEMBERS.filter(f => f.branch_id === HOD_BRANCH), [])
+  const [facultyList, setFacultyList] = useState<FacultyMember[]>([])
+  useEffect(() => {
+    getFacultyMembers(hodBranch).then(setFacultyList)
+  }, [hodBranch])
+  const inchargeOptions = useMemo(() => facultyList.filter(f => f.branch_id === hodBranch), [facultyList, hodBranch])
 
   const visible = useMemo(() => labs.filter(l => {
     if (statusFilter !== 'all' && l.status !== statusFilter) return false

@@ -1,7 +1,7 @@
 ﻿import React, { useEffect, useState } from 'react'
 import PageSeo from '../../components/global/PageSeo'
 import { Cpu, Wifi, Clock, Database, Terminal } from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
+import { getComputerCenter } from '../../services/facilitiesService'
 
 const keySpecs = [
   {
@@ -23,7 +23,7 @@ const keySpecs = [
 
 const ComputerCenter: React.FC = () => {
   const [data, setData] = useState<any>(null)
-  useEffect(() => { setData(mockStore.getComputerCenter()) }, [])
+  useEffect(() => { getComputerCenter().then(setData) }, [])
   if (!data) return null
 
   return (

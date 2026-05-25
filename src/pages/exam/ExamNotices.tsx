@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { PageHeader, PortalCard, PortalModal, Badge } from '../../components/layout/PortalLayout'
-import { mockStore } from '../../data/mockStore'
-import type { Notice } from '../../data/mockStore'
-import { Plus, Search, Edit2, Trash2, Globe, X } from 'lucide-react'
+
+import apiClient from '../../api/client'
+import AttachmentUpload from '../../components/admin/AttachmentUpload'
+import type { AttachmentRecord } from '../../api/index'
+import { Plus, Search, Edit2, Trash2, Globe, Link2, X } from 'lucide-react'
 
 // Simple local Toast component
 interface ToastProps {
@@ -35,12 +37,26 @@ const ExamNotices: React.FC = () => {
   // Form State
   const [title, setTitle] = useState('')
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
+  const [fileId, setFileId] = useState<number | null>(null)
   const [fileUrl, setFileUrl] = useState('')
+  const [attachmentRecord, setAttachmentRecord] = useState<AttachmentRecord | null>(null)
   const [highlight, setHighlight] = useState(false)
 
   const loadNotices = () => {
-    // Exam controller focuses on 'exam' category notices
-    setNotices(mockStore.getNotices().filter(n => n.category === 'exam'))
+    // Exam controller focuses on EXAM type notices
+    apiClient.get('/v1/notices', { params: { notice_type: 'EXAM', pageSize: 100 } })
+      .then(res => {
+        const list = res.data?.data?.notices ?? res.data?.data ?? []
+        setNotices(list.map((n: any) => ({
+          id:       String(n.id),
+          title:    n.title,
+          category: 'exam',
+          date:     n.publish_date || n.created_at || '',
+          fileUrl:  n.file_url,
+          highlight: false,
+        })))
+      })
+      .catch(() => setNotices([]))
   }
 
   useEffect(() => {
@@ -51,16 +67,30 @@ const ExamNotices: React.FC = () => {
     setEditNotice(null)
     setTitle('')
     setDate(new Date().toISOString().slice(0, 10))
+    setFileId(null)
     setFileUrl('')
+    setAttachmentRecord(null)
     setHighlight(false)
     setShowModal(true)
   }
 
-  const handleOpenEdit = (notice: Notice) => {
+  const handleOpenEdit = (notice: any) => {
     setEditNotice(notice)
     setTitle(notice.title)
     setDate(notice.date)
+    setFileId(notice.file_id ?? null)
     setFileUrl(notice.fileUrl || '')
+    setAttachmentRecord(
+      notice.file_id ? {
+        id: notice.file_id, attachment_type: notice.attachment_type ?? 'FILE',
+        original_name: notice.original_name || 'Attachment', stored_name: null,
+        file_url: notice.fileUrl || '', external_url: notice.attachment_type === 'EXTERNAL_LINK' ? notice.fileUrl : null,
+        thumbnail_url: null, alt_text: null, meta_title: null, meta_description: null,
+        file_type: null, file_size: null,
+        storage_type: notice.attachment_type === 'EXTERNAL_LINK' ? 'EXTERNAL' : 'LOCAL',
+        uploaded_by: 0, uploader_name: '', created_at: '',
+      } : null
+    )
     setHighlight(notice.highlight)
     setShowModal(true)
   }
@@ -69,23 +99,19 @@ const ExamNotices: React.FC = () => {
     e.preventDefault()
     if (!title) return
 
+    const payload: Record<string, unknown> = {
+      title,
+      notice_type: 'EXAM',
+      publish_date: date,
+      status: 'PUBLISHED',
+    }
+    if (fileId) payload.file_id = fileId
+
     if (editNotice) {
-      mockStore.updateNotice(editNotice.id, {
-        title,
-        category: 'exam',
-        date,
-        fileUrl: fileUrl || undefined,
-        highlight,
-      })
+      apiClient.put(`/v1/notices/${editNotice.id}`, payload)
       setToast('Notice updated successfully.')
     } else {
-      mockStore.addNotice({
-        title,
-        category: 'exam',
-        date,
-        fileUrl: fileUrl || undefined,
-        highlight,
-      })
+      apiClient.post('/v1/notices', payload)
       setToast('Notice published successfully.')
     }
     loadNotices()
@@ -94,7 +120,7 @@ const ExamNotices: React.FC = () => {
 
   const handleDelete = (id: string) => {
     if (confirm('Are you sure you want to delete this notice?')) {
-      mockStore.deleteNotice(id)
+      apiClient.delete(`/v1/notices/${id}`).then(() => loadNotices())
       setToast('Notice deleted successfully.')
       loadNotices()
     }
@@ -167,8 +193,11 @@ const ExamNotices: React.FC = () => {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                         >
-                          <Globe size={12} />
-                          <span>View PDF</span>
+                          {notice.attachment_type === 'EXTERNAL_LINK'
+                            ? <Link2 size={12} />
+                            : <Globe size={12} />
+                          }
+                          <span>{notice.attachment_type === 'EXTERNAL_LINK' ? 'Link' : 'View PDF'}</span>
                         </a>
                       ) : (
                         <span className="text-slate-300 text-xs">—</span>
@@ -254,18 +283,21 @@ const ExamNotices: React.FC = () => {
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">
-              File Attachment URL (Optional)
-            </label>
-            <input
-              type="url"
-              value={fileUrl}
-              onChange={e => setFileUrl(e.target.value)}
-              placeholder="https://example.com/notices/timetable.pdf"
-              className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
-            />
-          </div>
+          <AttachmentUpload
+            usage="exam"
+            label="File Attachment (optional)"
+            onAttached={(record) => {
+              setAttachmentRecord(record)
+              setFileId(record.id)
+              setFileUrl(record.file_url)
+            }}
+            onClear={() => {
+              setAttachmentRecord(null)
+              setFileId(null)
+              setFileUrl('')
+            }}
+            initialValue={attachmentRecord}
+          />
 
           <label className="flex items-center gap-2 cursor-pointer pt-1">
             <input

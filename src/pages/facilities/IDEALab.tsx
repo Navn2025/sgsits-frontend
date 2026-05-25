@@ -1,11 +1,11 @@
 ﻿import React, { useEffect, useState } from 'react'
 import PageSeo from '../../components/global/PageSeo'
 import { Zap, CheckCircle2, Phone, Mail, ExternalLink } from 'lucide-react'
-import { mockStore } from '../../data/mockStore'
+import { getIDEALab } from '../../services/facilitiesService'
 
 const IDEALab: React.FC = () => {
   const [data, setData] = useState<any>(null)
-  useEffect(() => { setData(mockStore.getIDEALab()) }, [])
+  useEffect(() => { getIDEALab().then(setData) }, [])
   if (!data) return null
 
   return (
